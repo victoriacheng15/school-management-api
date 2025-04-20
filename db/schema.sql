@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS students (
     coop BOOLEAN,
     is_international BOOLEAN,
     program_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
     FOREIGN KEY (program_id) REFERENCES programs(id)
 );
 
@@ -26,20 +29,30 @@ CREATE TABLE IF NOT EXISTS instructors (
     employment TEXT CHECK(employment IN ('full-time', 'part-time', 'adjunct')),
     status TEXT CHECK(status IN ('active', 'inactive')),
     department_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 -- Creating departments table
 CREATE TABLE IF NOT EXISTS departments (
     id INTEGER PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0  -- Added is_archived column
 );
 
 -- Creating programs table
 CREATE TABLE IF NOT EXISTS programs (
     id INTEGER PRIMARY KEY,
     name TEXT,
+    type TEXT CHECK(type IN ('bachelor', 'diploma', 'certificate')),
     department_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
@@ -50,6 +63,9 @@ CREATE TABLE IF NOT EXISTS courses (
     code TEXT UNIQUE,
     term_id INTEGER,
     department_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
     FOREIGN KEY (term_id) REFERENCES terms(id),
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
@@ -59,34 +75,44 @@ CREATE TABLE IF NOT EXISTS terms (
     id INTEGER PRIMARY KEY,
     name TEXT,
     start_date DATE,
-    end_date DATE
+    end_date DATE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Creating enrollments table (many-to-many between students and courses)
+-- Creating enrollments table
 CREATE TABLE IF NOT EXISTS enrollments (
     id INTEGER PRIMARY KEY,
     student_id INTEGER,
     course_id INTEGER,
     grade TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
--- Creating assignments table (many-to-many between instructors and courses)
+-- Creating assignments table
 CREATE TABLE IF NOT EXISTS assignments (
     id INTEGER PRIMARY KEY,
     instructor_id INTEGER,
     course_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
     FOREIGN KEY (instructor_id) REFERENCES instructors(id),
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
--- Creating course_schedule table (optional, depending on need)
+-- Creating course_schedule table
 CREATE TABLE IF NOT EXISTS course_schedule (
     id INTEGER PRIMARY KEY,
     course_id INTEGER,
     day TEXT,
     time TEXT,
     room TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );

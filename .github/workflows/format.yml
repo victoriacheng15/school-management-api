@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          make init
+          make install
 
       - name: Run ruff
         run: |

@@ -4,16 +4,17 @@ import logging
 
 
 logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO, 
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
     handlers=[
         logging.StreamHandler()
         # Optionally, you can log to a file by adding a file handler
         # logging.FileHandler('db_init.log')  # Uncomment to log to a file
-    ]
+    ],
 )
 
 logger = logging.getLogger(__name__)
+
 
 def check_db_exists(db_path):
     """
@@ -27,11 +28,12 @@ def check_db_exists(db_path):
     """
     return os.path.exists(db_path)
 
+
 def read_schema_file():
     """
     Attempts to read the 'schema.sql' file from the 'db' directory.
-    
-    If the file is found, it returns the contents as a string. 
+
+    If the file is found, it returns the contents as a string.
     If the file is not found, it logs an error and returns None.
 
     Returns:
@@ -50,8 +52,8 @@ def read_schema_file():
 
 def init_db():
     """
-    Initializes the SQLite database by creating the database file and 
-    executing the schema defined in the 'schema.sql' file. 
+    Initializes the SQLite database by creating the database file and
+    executing the schema defined in the 'schema.sql' file.
 
     Steps:
     1. Checks if the database file already exists in the 'db' directory.
@@ -64,7 +66,7 @@ def init_db():
 
     Returns:
         None
-    
+
     Raises:
         sqlite3.Error: If an error occurs while initializing the SQLite database.
     """

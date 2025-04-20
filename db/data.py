@@ -3,9 +3,9 @@ from datetime import datetime
 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 departments = [
-  (1, "Computer Science", now, now),
-  (2, "Cybersecurity", now, now),
-  (3, "Software Engineering", now, now),
+    (1, "Computer Science", now, now),
+    (2, "Cybersecurity", now, now),
+    (3, "Software Engineering", now, now),
 ]
 
 

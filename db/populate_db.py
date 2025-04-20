@@ -1,6 +1,16 @@
 import sqlite3
 import os
-from data import departments, programs, instructors, terms, courses, students, enrollments, assignments, course_schedule
+from data import (
+    departments,
+    programs,
+    instructors,
+    terms,
+    courses,
+    students,
+    enrollments,
+    assignments,
+    course_schedule,
+)
 
 
 def populate_db():
@@ -21,7 +31,7 @@ def populate_db():
     )
 
     # Insert instructors
-    
+
     cursor.executemany(
         "INSERT INTO instructors (id, first_name, last_name, email, address, province, employment, status, department_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
         instructors,
@@ -42,7 +52,7 @@ def populate_db():
     )
 
     # Insert students
-    
+
     cursor.executemany(
         "INSERT INTO students (id, first_name, last_name, email, address, province_state, country, address_type, status, coop, is_international, program_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
         students,

@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 db_path = os.path.join("db", "school.db")
 schema_path = os.path.join("db", "schema.sql")
 
+
 def check_db_exists():
     """Check if the database file exists."""
     exists = os.path.exists(db_path)

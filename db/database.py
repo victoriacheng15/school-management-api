@@ -13,6 +13,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 class Database:
     def __init__(self, db_name):
         """
@@ -69,11 +70,12 @@ class Database:
             self.cursor.execute(query, params)
             logger.info(f"Executed query: {query}")
             if query.strip().lower().startswith("select"):
-                return self.cursor.fetchall() 
-            self.conn.commit() 
+                return self.cursor.fetchall()
+            self.conn.commit()
         except sqlite3.Error as e:
             logger.error(f"Error executing query: {e}")
             return None
+
     def execute_many(self, query, param_list):
         """
         Execute a query with multiple sets of parameters (bulk insert).

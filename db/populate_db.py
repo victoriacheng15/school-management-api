@@ -34,7 +34,7 @@ def populate_db():
     # Insert departments
     db.execute_many(
         "INSERT INTO departments (id, name, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?);",
-        departments, 
+        departments,
     )
 
     # Insert programs

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS students (
     last_name TEXT,
     email TEXT UNIQUE,
     address TEXT,
-    province_state TEXT,
+    province TEXT,
     country TEXT,
     address_type TEXT CHECK(address_type IN ('local', 'permanent')),
     status TEXT CHECK(status IN ('active', 'inactive')),
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS students (
     program_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0,
     FOREIGN KEY (program_id) REFERENCES programs(id)
 );
 
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS instructors (
     department_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0,
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS departments (
     name TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0
 );
 
 -- Creating programs table
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS programs (
     department_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0,
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS courses (
     department_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0,
     FOREIGN KEY (term_id) REFERENCES terms(id),
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS assignments (
     course_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0,
     FOREIGN KEY (instructor_id) REFERENCES instructors(id),
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );
@@ -113,6 +113,6 @@ CREATE TABLE IF NOT EXISTS course_schedule (
     room TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_archived INTEGER DEFAULT 0,  -- Added is_archived column
+    is_archived INTEGER DEFAULT 0, 
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );

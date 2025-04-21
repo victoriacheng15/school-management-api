@@ -1,6 +1,7 @@
-import sqlite3
 import os
 import logging
+import sqlite3
+from database import Database
 
 
 logging.basicConfig(
@@ -15,35 +16,25 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+db_path = os.path.join("db", "school.db")
+schema_path = os.path.join("db", "schema.sql")
 
-def check_db_exists(db_path):
-    """
-    Checks if the SQLite database file exists in the 'db' directory.
 
-    Args:
-        db_path (str): Path to the database file.
-
-    Returns:
-        bool: True if the database file exists, False otherwise.
-    """
-    return os.path.exists(db_path)
+def check_db_exists():
+    """Check if the database file exists."""
+    exists = os.path.exists(db_path)
+    if exists:
+        logger.info(f"Database {db_path} exists.")
+    else:
+        logger.warning(f"Database {db_path} does not exist.")
+    return exists
 
 
 def read_schema_file():
-    """
-    Attempts to read the 'schema.sql' file from the 'db' directory.
-
-    If the file is found, it returns the contents as a string.
-    If the file is not found, it logs an error and returns None.
-
-    Returns:
-        str: The contents of the schema file, or None if the file is not found.
-    """
-    schema_path = os.path.join("db", "schema.sql")
-
+    """Read the schema file containing SQL commands to initialize the database."""
     try:
-        with open(schema_path, "r") as schema_file:
-            schema_sql = schema_file.read()
+        with open(schema_path, "r") as file:
+            schema_sql = file.read()
         return schema_sql
     except FileNotFoundError:
         logger.error(f"Schema file {schema_path} not found.")
@@ -70,10 +61,8 @@ def init_db():
     Raises:
         sqlite3.Error: If an error occurs while initializing the SQLite database.
     """
-    db_path = os.path.join("db", "school.db")
-
     # If the database already exists, log the message and skip initialization
-    if check_db_exists(db_path):
+    if check_db_exists():
         logger.info(f"Database {db_path} already exists. Skipping initialization.")
         return
 
@@ -84,13 +73,10 @@ def init_db():
         return
 
     try:
-        connection = sqlite3.connect(db_path)
-        cursor = connection.cursor()
-
-        cursor.executescript(schema_sql)
-
-        connection.commit()
-        connection.close()
+        db = Database(db_path)
+        db.connect()
+        db.execute_script(schema_sql)
+        db.close()
 
         logger.info(f"Database {db_path} initialized successfully.")
     except sqlite3.Error as e:

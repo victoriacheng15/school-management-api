@@ -1,5 +1,6 @@
-import sqlite3
 import os
+import logging
+from database import Database
 from data import (
     departments,
     programs,
@@ -12,75 +13,79 @@ from data import (
     course_schedule,
 )
 
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    handlers=[
+        logging.StreamHandler()
+        # Optionally, you can log to a file by adding a file handler
+        # logging.FileHandler('db_init.log')  # Uncomment to log to a file
+    ],
+)
+
+logger = logging.getLogger(__name__)
+
 
 def populate_db():
     db_path = os.path.join("db", "school.db")
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    db = Database(db_path)
+    db.connect()
 
     # Insert departments
-    cursor.executemany(
-        "INSERT INTO departments (id, name, created_at, updated_at) VALUES (?, ?, ?, ?);",
+    db.execute_many(
+        "INSERT INTO departments (id, name, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?);",
         departments,
     )
 
     # Insert programs
-    cursor.executemany(
-        "INSERT INTO programs (id, name, type, department_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?);",
+    db.execute_many(
+        "INSERT INTO programs (id, name, type, department_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?);",
         programs,
     )
 
     # Insert instructors
-
-    cursor.executemany(
-        "INSERT INTO instructors (id, first_name, last_name, email, address, province, employment, status, department_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+    db.execute_many(
+        "INSERT INTO instructors (id, first_name, last_name, email, address, province, employment, status, department_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
         instructors,
     )
 
     # Insert terms
-
-    cursor.executemany(
+    db.execute_many(
         "INSERT INTO terms (id, name, start_date, end_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?);",
         terms,
     )
 
     # Insert courses
-
-    cursor.executemany(
-        "INSERT INTO courses (id, title, code, term_id, department_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?);",
+    db.execute_many(
+        "INSERT INTO courses (id, title, code, term_id, department_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
         courses,
     )
 
     # Insert students
-
-    cursor.executemany(
-        "INSERT INTO students (id, first_name, last_name, email, address, province_state, country, address_type, status, coop, is_international, program_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+    db.execute_many(
+        "INSERT INTO students (id, first_name, last_name, email, address, province, country, address_type, status, coop, is_international, program_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
         students,
     )
 
     # Insert enrollments
-
-    cursor.executemany(
+    db.execute_many(
         "INSERT INTO enrollments (id, student_id, course_id, grade, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?);",
         enrollments,
     )
 
     # Insert assignments
-
-    cursor.executemany(
-        "INSERT INTO assignments (id, instructor_id, course_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?);",
+    db.execute_many(
+        "INSERT INTO assignments (id, instructor_id, course_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?);",
         assignments,
     )
 
-    # Insert course schedule
-
-    cursor.executemany(
-        "INSERT INTO course_schedule (id, course_id, day, time, room, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?);",
+    # Insert course schedules
+    db.execute_many(
+        "INSERT INTO course_schedule (id, course_id, day, time, room, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
         course_schedule,
     )
 
-    conn.commit()
-    conn.close()
+    db.close()
 
 
 if __name__ == "__main__":

@@ -3,17 +3,16 @@ from datetime import datetime
 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 departments = [
-    (1, "Computer Science", now, now),
-    (2, "Cybersecurity", now, now),
-    (3, "Software Engineering", now, now),
+    (1, "Computer Science", now, now, 0),
+    (2, "Cybersecurity", now, now, 0),
+    (3, "Software Engineering", now, now, 0),
 ]
 
-
 programs = [
-    (1, "Computer Science", "bachelor", 1, now, now),
-    (2, "Cybersecurity", "diploma", 2, now, now),
-    (3, "Cloud Security", "certificate", 2, now, now),
-    (4, "Software Development", "bachelor", 3, now, now),
+    (1, "Computer Science", "bachelor", 1, now, now, 0),
+    (2, "Cybersecurity", "diploma", 2, now, now, 0),
+    (3, "Cloud Security", "certificate", 2, now, now, 0),
+    (4, "Software Development", "bachelor", 3, now, now, 0),
 ]
 
 instructors = [
@@ -29,6 +28,7 @@ instructors = [
         1,
         now,
         now,
+        0,
     ),
     (
         2,
@@ -42,6 +42,7 @@ instructors = [
         2,
         now,
         now,
+        0,
     ),
     (
         3,
@@ -55,6 +56,7 @@ instructors = [
         1,
         now,
         now,
+        0,
     ),
     (
         4,
@@ -68,6 +70,7 @@ instructors = [
         1,
         now,
         now,
+        0,
     ),
     (
         5,
@@ -81,6 +84,7 @@ instructors = [
         3,
         now,
         now,
+        0,
     ),
 ]
 
@@ -90,11 +94,11 @@ terms = [
 ]
 
 courses = [
-    (1, "Introduction to Programming", "CS101", 1, 1, now, now),
-    (2, "Network Security Basics", "CY201", 1, 2, now, now),
-    (3, "Advanced Algorithms", "CS301", 2, 1, now, now),
-    (4, "Cloud Infrastructure", "CL101", 2, 2, now, now),
-    (5, "Software Design Principles", "SE202", 2, 3, now, now),
+    (1, "Introduction to Programming", "CS101", 1, 1, now, now, 0),
+    (2, "Network Security Basics", "CY201", 1, 2, now, now, 0),
+    (3, "Advanced Algorithms", "CS301", 2, 1, now, now, 0),
+    (4, "Cloud Infrastructure", "CL101", 2, 2, now, now, 0),
+    (5, "Software Design Principles", "SE202", 2, 3, now, now, 0),
 ]
 
 students = [
@@ -113,6 +117,7 @@ students = [
         1,
         now,
         now,
+        0,
     ),
     (
         2,
@@ -129,6 +134,7 @@ students = [
         1,
         now,
         now,
+        0,
     ),
     (
         3,
@@ -145,6 +151,7 @@ students = [
         2,
         now,
         now,
+        0,
     ),
     (
         4,
@@ -161,6 +168,7 @@ students = [
         3,
         now,
         now,
+        0,
     ),
     (
         5,
@@ -177,6 +185,7 @@ students = [
         1,
         now,
         now,
+        0,
     ),
     (
         6,
@@ -193,6 +202,7 @@ students = [
         4,
         now,
         now,
+        0,
     ),
     (
         7,
@@ -209,6 +219,7 @@ students = [
         2,
         now,
         now,
+        0,
     ),
     (
         8,
@@ -225,6 +236,7 @@ students = [
         3,
         now,
         now,
+        0,
     ),
     (
         9,
@@ -241,6 +253,7 @@ students = [
         4,
         now,
         now,
+        0,
     ),
     (
         10,
@@ -257,6 +270,7 @@ students = [
         1,
         now,
         now,
+        0,
     ),
 ]
 
@@ -274,17 +288,17 @@ enrollments = [
 ]
 
 assignments = [
-    (1, 1, 1, now, now),  # Ada teaches CS101
-    (2, 2, 2, now, now),  # Alan teaches CY201
-    (3, 3, 3, now, now),  # Grace teaches CS301
-    (4, 4, 4, now, now),  # Donald teaches CL101
-    (5, 5, 5, now, now),  # Barbara teaches SE202
+    (1, 1, 1, now, now, 0),  # Ada teaches CS101
+    (2, 2, 2, now, now, 0),  # Alan teaches CY201
+    (3, 3, 3, now, now, 0),  # Grace teaches CS301
+    (4, 4, 4, now, now, 0),  # Donald teaches CL101
+    (5, 5, 5, now, now, 0),  # Barbara teaches SE202
 ]
 
 course_schedule = [
-    (1, 1, "Monday", "10:00 AM", "Room 101", now, now),
-    (2, 2, "Tuesday", "2:00 PM", "Room 102", now, now),
-    (3, 3, "Wednesday", "1:00 PM", "Room 103", now, now),
-    (4, 4, "Thursday", "3:00 PM", "Room 104", now, now),
-    (5, 5, "Friday", "11:00 AM", "Room 105", now, now),
+    (1, 1, "Monday", "10:00 AM", "Room 101", now, now, 0),
+    (2, 2, "Tuesday", "2:00 PM", "Room 102", now, now, 0),
+    (3, 3, "Wednesday", "1:00 PM", "Room 103", now, now, 0),
+    (4, 4, "Thursday", "3:00 PM", "Room 104", now, now, 0),
+    (5, 5, "Friday", "11:00 AM", "Room 105", now, now, 0),
 ]

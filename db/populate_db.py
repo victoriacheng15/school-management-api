@@ -27,8 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def populate_db():
-    db_path = os.path.join("db", "school.db")
-    db = Database(db_path)
+    db = Database()
     db.connect()
 
     # Insert departments

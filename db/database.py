@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+import os
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -15,14 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
-    def __init__(self, db_name):
+    def __init__(self):
         """
         Initialize the Database class with the given database name.
 
         Args:
             db_name (str): The name (or path) of the SQLite database file.
         """
-        self.db_name = db_name
+        self.db_name = os.path.join("db", "school.db")
         self.conn = None
         self.cursor = None
 
@@ -71,10 +72,11 @@ class Database:
             logger.info(f"Executed query: {query}")
             if query.strip().lower().startswith("select"):
                 return self.cursor.fetchall()
-            self.conn.commit()
         except sqlite3.Error as e:
             logger.error(f"Error executing query: {e}")
             return None
+        finally:
+            self.close()
 
     def execute_many(self, query, param_list):
         """
@@ -88,9 +90,10 @@ class Database:
         try:
             self.cursor.executemany(query, param_list)
             logger.info(f"Executed many: {query}")
-            self.conn.commit()
         except sqlite3.Error as e:
             logger.error(f"Error executing many: {e}")
+        finally:
+            self.close()
 
     def execute_script(self, script):
         """
@@ -103,6 +106,7 @@ class Database:
         try:
             self.cursor.executescript(script)
             logger.info(f"Executed script with multiple SQL commands.")
-            self.conn.commit()
         except sqlite3.Error as e:
             logger.error(f"Error executing script: {e}")
+        finally:
+            self.close()

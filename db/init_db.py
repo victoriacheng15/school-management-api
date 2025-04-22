@@ -16,21 +16,10 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-db_path = os.path.join("db", "school.db")
-schema_path = os.path.join("db", "schema.sql")
+DEFAULT_DB_PATH = os.path.join("db", "school.db")
+DEFAULT_SCHEMA_PATH = os.path.join("db", "schema.sql")
 
-
-def check_db_exists():
-    """Check if the database file exists."""
-    exists = os.path.exists(db_path)
-    if exists:
-        logger.info(f"Database {db_path} exists.")
-    else:
-        logger.warning(f"Database {db_path} does not exist.")
-    return exists
-
-
-def read_schema_file():
+def read_schema_file(schema_path=DEFAULT_SCHEMA_PATH):
     """Read the schema file containing SQL commands to initialize the database."""
     try:
         with open(schema_path, "r") as file:
@@ -41,7 +30,7 @@ def read_schema_file():
         return None
 
 
-def init_db():
+def init_db(db_path=DEFAULT_DB_PATH, schema_path=DEFAULT_SCHEMA_PATH):
     """
     Initializes the SQLite database by creating the database file and
     executing the schema defined in the 'schema.sql' file.
@@ -62,18 +51,18 @@ def init_db():
         sqlite3.Error: If an error occurs while initializing the SQLite database.
     """
     # If the database already exists, log the message and skip initialization
-    if check_db_exists():
-        logger.info(f"Database {db_path} already exists. Skipping initialization.")
+    if os.path.exists(DEFAULT_DB_PATH):
+        logger.info(f"Database {DEFAULT_DB_PATH} already exists. Skipping initialization.")
         return
 
     # Read the schema from the schema.sql file
-    schema_sql = read_schema_file()
+    schema_sql = read_schema_file(schema_path)
     if schema_sql is None:
         logger.error("Initialization aborted due to missing schema file.")
         return
 
     try:
-        db = Database(db_path)
+        db = Database()
         db.connect()
         db.execute_script(schema_sql)
         db.close()

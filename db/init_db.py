@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_DB_PATH = os.path.join("db", "school.db")
 DEFAULT_SCHEMA_PATH = os.path.join("db", "schema.sql")
 
+
 def read_schema_file(schema_path=DEFAULT_SCHEMA_PATH):
     """Read the schema file containing SQL commands to initialize the database."""
     try:
@@ -52,7 +53,9 @@ def init_db(db_path=DEFAULT_DB_PATH, schema_path=DEFAULT_SCHEMA_PATH):
     """
     # If the database already exists, log the message and skip initialization
     if os.path.exists(DEFAULT_DB_PATH):
-        logger.info(f"Database {DEFAULT_DB_PATH} already exists. Skipping initialization.")
+        logger.info(
+            f"Database {DEFAULT_DB_PATH} already exists. Skipping initialization."
+        )
         return
 
     # Read the schema from the schema.sql file

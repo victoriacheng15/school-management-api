@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+import os
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -15,14 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
-    def __init__(self, db_name):
+    def __init__(self):
         """
         Initialize the Database class with the given database name.
 
         Args:
             db_name (str): The name (or path) of the SQLite database file.
         """
-        self.db_name = db_name
+        self.db_name = os.path.join("db", "school.db")
         self.conn = None
         self.cursor = None
 

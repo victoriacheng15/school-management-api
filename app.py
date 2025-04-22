@@ -12,18 +12,20 @@ app.config["DEBUG"] = app.config["ENV"] == "development"
 
 db = Database()
 
+
 @app.route("/")
 def index():
     return "Hello, the Flask API is running!"
 
+
 @app.route("/students", methods=["GET"])
 def get_all_students():
     query = "SELECT * FROM students WHERE status = 'active';"
-    results = db.execute_query(query)  
-    
+    results = db.execute_query(query)
+
     if results is None:
         return jsonify({"error": "Failed to fetch students"}), 500
-    
+
     students = []
     for student in results:
         student_dict = {
@@ -41,7 +43,7 @@ def get_all_students():
             "program_id": student[11],
             "created_at": student[12],
             "updated_at": student[13],
-            "is_archived": student[14]
+            "is_archived": student[14],
         }
         students.append(student_dict)
     return jsonify(students), 200

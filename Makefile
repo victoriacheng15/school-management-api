@@ -16,7 +16,8 @@ format:
 	ruff format app.py db/
 
 docker-run:
-	docker build -t school-flask-api . && docker run -d --name school-flask-api-container -p 5000:5000 school-flask-api
+	docker build -t school-flask-api .
+	docker run -d --name school-flask-api-container -p 5000:5000 school-flask-api
 
 docker-clean:
 	docker stop school-flask-api-container || true

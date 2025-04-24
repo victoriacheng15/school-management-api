@@ -92,8 +92,6 @@ class Database:
             logger.info(f"Executed many: {query}")
         except sqlite3.Error as e:
             logger.error(f"Error executing many: {e}")
-        finally:
-            self.close()
 
     def execute_script(self, script):
         """

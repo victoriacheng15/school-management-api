@@ -9,8 +9,9 @@ app = Flask(__name__)
 app.config["ENV"] = os.getenv("FLASK_ENV", "production")
 app.config["DEBUG"] = app.config["ENV"] == "development"
 
-from routes.home_route import home_bp 
+from routes.home_route import home_bp
 from routes.student_route import student_bp
+
 app.register_blueprint(home_bp)
 app.register_blueprint(student_bp)
 

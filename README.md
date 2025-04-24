@@ -42,3 +42,22 @@ While building the database schema for this project, I also learned how real-wor
 - Sources I referenced:
   - [Data archiving best practice](https://success.outsystems.com/documentation/outsystems_developer_cloud/building_apps/data_management/best_practices_for_data_management/data_archiving_best_practice)
   - [Efficient Data Management: Overcoming the Challenges of Large Tables with an Archival Strategy](https://opensource-db.com/efficient-data-management-overcoming-the-challenges-of-large-tables-with-an-archival-strategy)
+  
+### Database Connection
+
+While building the database layer for this project, I explored how to manage SQLite connections in a clean and safe way.
+
+- Why close the database connection after each operation?
+  - Prevents database locks and memory issues, especially in SQLite.
+  - Ensures connections aren’t left open accidentally.
+  - Each API call is independent, so there’s no need to keep the connection open.
+- How I applied it:
+  - Updated the Database class to call self.close() in a finally block after every execute_query, execute_many, and execute_script call.
+  - This guarantees the connection is closed, even if an error happens during execution.
+- What I learned:
+  - For SQLite, it’s generally better to open and close the connection for each operation to avoid issues and keep things simple.
+  - In larger SQL databases (like PostgreSQL or MySQL), keeping a persistent connection (e.g., using connection pooling) is more common for performance.
+    - sources:
+      - [PostgreSQL Connection Pooling](https://www.compilenrun.com/docs/database/postgresql/postgresql-best-practices/postgresql-connection-pooling/?utm_source=chatgpt.com)
+      - [Why Connection Pooling Is Essential for PostgreSQL Database Optimisation](https://caw.tech/why-connection-pooling-is-essential-for-postgresql-database-optimisation/)
+  - Since this is a small app using SQLite, closing the connection after each use is a good, safe choice.

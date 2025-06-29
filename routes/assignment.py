@@ -1,0 +1,13 @@
+from flask import Blueprint, jsonify
+from models.assignment import get_all_active_assignments
+from utils.converters import assignment_row_to_dict
+
+assignment_bp = Blueprint("assignment", __name__)
+
+@assignment_bp.route("/assignments", methods=["GET"])
+def get_all_assignments():
+    results = get_all_active_assignments()
+    if results is None:
+        return jsonify({"error": "Failed to fetch assignments"}), 500
+    assignments = [assignment_row_to_dict(row) for row in results]
+    return jsonify(assignments), 200

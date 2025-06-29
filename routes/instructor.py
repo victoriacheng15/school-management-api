@@ -5,7 +5,7 @@ from utils.converters import instructor_row_to_dict
 instructor_bp = Blueprint("instructor", __name__)
 
 @instructor_bp.route("/instructors", methods=["GET"])
-def get_all_instructors():
+def handle_get_all_instructors():
     results = get_all_active_instructors()
     if results is None:
         return jsonify({"error": "Failed to fetch instructors"}), 500

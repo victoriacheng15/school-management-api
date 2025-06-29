@@ -32,6 +32,5 @@ app.register_blueprint(student_bp)
 app.register_blueprint(term_bp)
 
 
-
 if __name__ == "__main__":
     app.run(debug=app.config["DEBUG"], host="0.0.0.0", port=5000)

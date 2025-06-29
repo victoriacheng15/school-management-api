@@ -5,7 +5,7 @@ from utils.converters import assignment_row_to_dict
 assignment_bp = Blueprint("assignment", __name__)
 
 @assignment_bp.route("/assignments", methods=["GET"])
-def get_all_assignments():
+def handle_get_all_assignments():
     results = get_all_active_assignments()
     if results is None:
         return jsonify({"error": "Failed to fetch assignments"}), 500

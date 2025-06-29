@@ -5,7 +5,7 @@ from utils.converters import term_row_to_dict
 term_bp = Blueprint("term", __name__)
 
 @term_bp.route("/terms", methods=["GET"])
-def get_all_terms():
+def handle_get_all_terms():
     results = get_all_terms()
     if results is None:
         return jsonify({"error": "Failed to fetch terms"}), 500

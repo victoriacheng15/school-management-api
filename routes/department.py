@@ -5,7 +5,7 @@ from utils.converters import department_row_to_dict
 department_bp = Blueprint("department", __name__)
 
 @department_bp.route("/departments", methods=["GET"])
-def get_all_departments():
+def handle_get_all_departments():
     results = get_all_active_departments()
     if results is None:
         return jsonify({"error": "Failed to fetch departments"}), 500

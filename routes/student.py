@@ -5,7 +5,7 @@ from utils.converters import student_row_to_dict
 student_bp = Blueprint("student", __name__)
 
 @student_bp.route("/students", methods=["GET"])
-def get_all_students():
+def handle_get_all_students():
     results = get_all_active_students()
 
     if results is None:

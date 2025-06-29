@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from models.student_model import get_all_active_students
+from models.student import get_all_active_students
 from utils.converters import student_row_to_dict
 
 student_bp = Blueprint("student", __name__)

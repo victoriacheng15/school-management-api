@@ -22,4 +22,6 @@ def insert_student(student_data):
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
     cursor = db.execute_query(query, student_data)
-    return cursor.lastrowid
+    if cursor:
+        return cursor.lastrowid
+    return None

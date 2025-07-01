@@ -32,4 +32,4 @@ def handle_insert_student():
     except KeyError as e:
         return jsonify({"error": f"Missing required field: {str(e)}"}), 400
     except Exception as e:
-        return jsonify({"error": f"Failed to insert student: {str(e)}"}), 500
+        return jsonify({"error": f"An internal error occurred while inserting the student."}), 500

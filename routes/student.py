@@ -27,7 +27,7 @@ def handle_insert_student():
 
         if student is None:
             return jsonify({"error": "Failed to insert student"}), 500
-        return jsonify({"message": "Student inserted successfully", "data": student}), 201
+        return jsonify({"message": "Student inserted successfully", "data": student_row_to_dict(student)}), 201
 
     except KeyError as e:
         return jsonify({"error": f"Missing required field: {str(e)}"}), 400

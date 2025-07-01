@@ -33,7 +33,7 @@ class Database:
 
         This method opens a connection to the SQLite database and creates a cursor object.
         """
-        if not self.conn:
+        if self.conn is None:
             try:
                 self.conn = sqlite3.connect(self.db_name)
                 self.cursor = self.conn.cursor()
@@ -54,6 +54,9 @@ class Database:
                 logger.info(f"Connection to {self.db_name} closed.")
             except sqlite3.Error as e:
                 logger.error(f"Error closing the connection: {e}")
+            finally:
+                self.conn = None
+                self.cursor = None
 
     def execute_query(self, query, params=()):
         """
@@ -64,14 +67,18 @@ class Database:
             params (tuple): The parameters to pass to the query (optional).
 
         Returns:
-            list: A list of results if the query returns data.
+            list: A list of results if the query returns data, or the cursor for non-SELECT queries.
         """
         self.connect()
         try:
             self.cursor.execute(query, params)
             logger.info(f"Executed query: {query}")
             if query.strip().lower().startswith("select"):
-                return self.cursor.fetchall()
+                result = self.cursor.fetchall()
+                return result
+            else:
+                self.conn.commit()
+                return self.cursor
         except sqlite3.Error as e:
             logger.error(f"Error executing query: {e}")
             return None

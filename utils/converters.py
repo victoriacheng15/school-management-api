@@ -5,23 +5,33 @@ def student_row_to_dict(row):
         "last_name": row[2],
         "email": row[3],
         "address": row[4],
-        "province": row[5],
-        "country": row[6],
-        "address_type": row[7],
-        "status": row[8],
-        "coop": row[9],
-        "is_international": row[10],
-        "program_id": row[11],
-        "created_at": row[12],
-        "updated_at": row[13],
-        "is_archived": row[14],
+        "city": row[5],
+        "province": row[6],
+        "country": row[7],
+        "address_type": row[8],
+        "status": row[9],
+        "coop": row[10],
+        "is_international": row[11],
+        "program_id": row[12],
+        "created_at": row[13],
+        "updated_at": row[14],
+        "is_archived": row[15],
     }
 
 def student_dict_to_row(data):
     return (
-        data["first_name"], data["last_name"], data["email"], data["address"],
-        data["province"], data["country"], data["address_type"], data["status"],
-        data["coop"], data["is_international"], data["program_id"]
+        data["first_name"],
+        data["last_name"],
+        data["email"],
+        data.get("address", None),
+        data.get("city", None),
+        data.get("province", None),
+        data.get("country", None),
+        data.get("address_type", "local"), 
+        data.get("status", "active"),
+        data.get("coop", 0),
+        data["is_international"],
+        data.get("program_id", None),
     )
 
 def instructor_row_to_dict(row):

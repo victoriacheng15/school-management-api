@@ -62,7 +62,7 @@ def populate_db():
 
     # Insert students
     db.execute_many(
-        "INSERT INTO students (id, first_name, last_name, email, address, province, country, address_type, status, coop, is_international, program_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+        "INSERT INTO students (id, first_name, last_name, email, address, city, province, country, address_type, status, coop, is_international, program_id, created_at, updated_at, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
         students,
     )
 

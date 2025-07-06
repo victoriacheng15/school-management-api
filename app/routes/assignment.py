@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify
-from models.assignment import get_all_active_assignments
-from utils.converters import assignment_row_to_dict
+from app.models.assignment import get_all_active_assignments
+from app.utils.converters import assignment_row_to_dict
 
 assignment_bp = Blueprint("assignment", __name__)
+
 
 @assignment_bp.route("/assignments", methods=["GET"])
 def handle_get_all_assignments():

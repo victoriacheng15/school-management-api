@@ -1,10 +1,13 @@
 import pytest
-from app import app
+from app import create_app
+
 
 @pytest.fixture
 def client():
+    app = create_app()
     with app.test_client() as client:
         yield client
+
 
 @pytest.fixture
 def single_student_data():
@@ -22,6 +25,7 @@ def single_student_data():
         "is_international": False,
         "program_id": 1,
     }
+
 
 @pytest.fixture
 def bulk_students_data(single_student_data):
@@ -43,9 +47,16 @@ def bulk_students_data(single_student_data):
         },
     ]
 
+
 @pytest.fixture
 def make_student_row():
-    def _make(data: dict, id=1, created_at="2025-07-01 00:00:00", updated_at="2025-07-01 00:00:00", is_archived=0):
+    def _make(
+        data: dict,
+        id=1,
+        created_at="2025-07-01 00:00:00",
+        updated_at="2025-07-01 00:00:00",
+        is_archived=0,
+    ):
         return (
             id,
             data["first_name"],
@@ -64,4 +75,5 @@ def make_student_row():
             updated_at,
             is_archived,
         )
+
     return _make

@@ -18,6 +18,7 @@ def student_row_to_dict(row):
         "is_archived": row[15],
     }
 
+
 def student_dict_to_row(data):
     return (
         data["first_name"],
@@ -27,12 +28,13 @@ def student_dict_to_row(data):
         data.get("city", None),
         data.get("province", None),
         data.get("country", None),
-        data.get("address_type", "local"), 
+        data.get("address_type", "local"),
         data.get("status", "active"),
         data.get("coop", 0),
         data["is_international"],
         data.get("program_id", None),
     )
+
 
 def instructor_row_to_dict(row):
     return {
@@ -50,11 +52,19 @@ def instructor_row_to_dict(row):
         "is_archived": row[11],
     }
 
+
 def instructor_dict_to_row(data):
     return (
-        data["first_name"], data["last_name"], data["email"], data["address"],
-        data["province"], data["employment"], data["status"], data["department_id"]
+        data["first_name"],
+        data["last_name"],
+        data["email"],
+        data["address"],
+        data["province"],
+        data["employment"],
+        data["status"],
+        data["department_id"],
     )
+
 
 def department_row_to_dict(row):
     return {
@@ -65,8 +75,10 @@ def department_row_to_dict(row):
         "is_archived": row[4],
     }
 
+
 def department_dict_to_row(data):
     return (data["name"],)
+
 
 def program_row_to_dict(row):
     return {
@@ -79,8 +91,10 @@ def program_row_to_dict(row):
         "is_archived": row[6],
     }
 
+
 def program_dict_to_row(data):
     return (data["name"], data["type"], data["department_id"])
+
 
 def course_row_to_dict(row):
     return {
@@ -94,8 +108,10 @@ def course_row_to_dict(row):
         "is_archived": row[7],
     }
 
+
 def course_dict_to_row(data):
     return (data["title"], data["code"], data["term_id"], data["department_id"])
+
 
 def enrollment_row_to_dict(row):
     return {
@@ -107,8 +123,10 @@ def enrollment_row_to_dict(row):
         "updated_at": row[5],
     }
 
+
 def enrollment_dict_to_row(data):
     return (data["student_id"], data["course_id"], data["grade"])
+
 
 def assignment_row_to_dict(row):
     return {
@@ -120,8 +138,10 @@ def assignment_row_to_dict(row):
         "is_archived": row[5],
     }
 
+
 def assignment_dict_to_row(data):
     return (data["instructor_id"], data["course_id"])
+
 
 def term_row_to_dict(row):
     return {
@@ -133,8 +153,10 @@ def term_row_to_dict(row):
         "updated_at": row[5],
     }
 
+
 def term_dict_to_row(data):
     return (data["name"], data["start_date"], data["end_date"])
+
 
 def course_schedule_row_to_dict(row):
     return {
@@ -147,6 +169,7 @@ def course_schedule_row_to_dict(row):
         "updated_at": row[6],
         "is_archived": row[7],
     }
+
 
 def course_schedule_dict_to_row(data):
     return (data["course_id"], data["day"], data["time"], data["room"])

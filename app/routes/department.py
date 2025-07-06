@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify
-from models.department import get_all_active_departments
-from utils.converters import department_row_to_dict
+from app.models.department import get_all_active_departments
+from app.utils.converters import department_row_to_dict
 
 department_bp = Blueprint("department", __name__)
+
 
 @department_bp.route("/departments", methods=["GET"])
 def handle_get_all_departments():

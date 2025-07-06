@@ -4,6 +4,7 @@ from app.utils.converters import enrollment_row_to_dict
 
 enrollment_bp = Blueprint("enrollment", __name__)
 
+
 @enrollment_bp.route("/enrollments", methods=["GET"])
 def handle_get_all_enrollments():
     results = get_all_enrollments()

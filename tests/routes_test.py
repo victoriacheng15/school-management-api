@@ -12,6 +12,7 @@ routes_to_test = [
     "/course_schedule",
 ]
 
+
 @pytest.mark.parametrize("route", routes_to_test)
 def test_routes_return_200(client, route):
     response = client.get(route)

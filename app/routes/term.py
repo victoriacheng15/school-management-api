@@ -4,6 +4,7 @@ from app.utils.converters import term_row_to_dict
 
 term_bp = Blueprint("term", __name__)
 
+
 @term_bp.route("/terms", methods=["GET"])
 def handle_get_all_terms():
     results = get_all_terms()

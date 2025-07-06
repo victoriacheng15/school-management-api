@@ -4,6 +4,7 @@ from app.utils.converters import instructor_row_to_dict
 
 instructor_bp = Blueprint("instructor", __name__)
 
+
 @instructor_bp.route("/instructors", methods=["GET"])
 def handle_get_all_instructors():
     results = get_all_active_instructors()

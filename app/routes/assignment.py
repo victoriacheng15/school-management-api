@@ -4,6 +4,7 @@ from app.utils.converters import assignment_row_to_dict
 
 assignment_bp = Blueprint("assignment", __name__)
 
+
 @assignment_bp.route("/assignments", methods=["GET"])
 def handle_get_all_assignments():
     results = get_all_active_assignments()

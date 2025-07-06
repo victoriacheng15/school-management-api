@@ -4,6 +4,7 @@ from app.utils.converters import course_row_to_dict
 
 course_bp = Blueprint("course", __name__)
 
+
 @course_bp.route("/courses", methods=["GET"])
 def handle_get_all_courses():
     results = get_all_active_courses()

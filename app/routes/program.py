@@ -4,6 +4,7 @@ from app.utils.converters import program_row_to_dict
 
 program_bp = Blueprint("program", __name__)
 
+
 @program_bp.route("/programs", methods=["GET"])
 def handle_get_all_programs():
     results = get_all_active_programs()

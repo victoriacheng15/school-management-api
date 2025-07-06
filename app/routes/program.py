@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from models.program import get_all_active_programs
-from utils.converters import program_row_to_dict
+from app.models.program import get_all_active_programs
+from app.utils.converters import program_row_to_dict
 
 program_bp = Blueprint("program", __name__)
 

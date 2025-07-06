@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from models.enrollment import get_all_enrollments
-from utils.converters import enrollment_row_to_dict
+from app.models.enrollment import get_all_enrollments
+from app.utils.converters import enrollment_row_to_dict
 
 enrollment_bp = Blueprint("enrollment", __name__)
 

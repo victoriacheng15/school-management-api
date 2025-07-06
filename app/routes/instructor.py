@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from models.instructor import get_all_active_instructors
-from utils.converters import instructor_row_to_dict
+from app.models.instructor import get_all_active_instructors
+from app.utils.converters import instructor_row_to_dict
 
 instructor_bp = Blueprint("instructor", __name__)
 

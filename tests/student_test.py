@@ -6,8 +6,8 @@ from unittest.mock import patch
 def test_insert_student(client, is_bulk, single_student_data, bulk_students_data, make_student_row):
     payload = bulk_students_data if is_bulk else single_student_data
 
-    with patch("routes.student.insert_student") as mock_insert_student, \
-         patch("routes.student.get_student_by_id") as mock_get_student_by_id:
+    with patch("app.routes.student.insert_student") as mock_insert_student, \
+         patch("app.routes.student.get_student_by_id") as mock_get_student_by_id:
 
         if is_bulk:
             mock_insert_student.side_effect = [1, 2]
@@ -59,7 +59,7 @@ def test_get_student_by_id(client, single_student_data, make_student_row):
         "is_archived": 0,
     })
 
-    with patch("routes.student.get_student_by_id") as mock_get_student_by_id:
+    with patch("app.routes.student.get_student_by_id") as mock_get_student_by_id:
         mock_get_student_by_id.return_value = mock_student_row
 
         response = client.get("/students/1")
@@ -68,7 +68,7 @@ def test_get_student_by_id(client, single_student_data, make_student_row):
         assert response_data == expected_data
 
 def test_get_student_by_id_not_found(client):
-    with patch("routes.student.get_student_by_id") as mock_get_student_by_id:
+    with patch("app.routes.student.get_student_by_id") as mock_get_student_by_id:
         mock_get_student_by_id.return_value = None
 
         response = client.get("/students/999")

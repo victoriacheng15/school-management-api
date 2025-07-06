@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from models.term import get_all_terms
-from utils.converters import term_row_to_dict
+from app.models.term import get_all_terms
+from app.utils.converters import term_row_to_dict
 
 term_bp = Blueprint("term", __name__)
 

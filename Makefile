@@ -6,14 +6,11 @@ freeze:
 install:
 	pip install -r requirements.txt
 
-init_db:
-	python3 db/init_db.py
-
-populate_db:
-	python3 db/populate_db.py
+setup-db:
+	python3 db/init_db.py && python3 db/populate_db.py
 
 format:
-	ruff format app.py db/
+	ruff format run.py db/ tests/ app/
 
 docker-run:
 	docker build -t school-flask-api .

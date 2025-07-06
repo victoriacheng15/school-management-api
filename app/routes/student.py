@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
-from app.models.student import (
+from app.models import (
     get_all_active_students,
     insert_student,
     get_student_by_id,
 )
-from app.utils.converters import student_row_to_dict, student_dict_to_row
+from app.utils import student_row_to_dict, student_dict_to_row
 
 student_bp = Blueprint("student", __name__)
 

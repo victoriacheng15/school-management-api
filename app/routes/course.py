@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from app.models.course import get_all_active_courses
-from app.utils.converters import course_row_to_dict
+from app.models import get_all_active_courses
+from app.utils import course_row_to_dict
 
 course_bp = Blueprint("course", __name__)
 

@@ -12,4 +12,4 @@ sleep 5
 
 # Start the Flask application using Gunicorn
 echo "Starting Flask application..."
-exec gunicorn --bind 0.0.0.0:5000 app:app
+exec gunicorn --bind 0.0.0.0:5000 run:app

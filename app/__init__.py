@@ -12,16 +12,16 @@ def create_app():
     app.config["DEBUG"] = app.config["ENV"] == "development"
 
     # Import and register blueprints
-    from app.routes.home import home_bp
-    from app.routes.assignment import assignment_bp
-    from app.routes.course import course_bp
-    from app.routes.course_schedule import course_schedule_bp
-    from app.routes.department import department_bp
-    from app.routes.enrollment import enrollment_bp
-    from app.routes.instructor import instructor_bp
-    from app.routes.program import program_bp
-    from app.routes.student import student_bp
-    from app.routes.term import term_bp
+    from app.routes import home_bp
+    from app.routes import assignment_bp
+    from app.routes import course_bp
+    from app.routes import course_schedule_bp
+    from app.routes import department_bp
+    from app.routes import enrollment_bp
+    from app.routes import instructor_bp
+    from app.routes import program_bp
+    from app.routes import student_bp
+    from app.routes import term_bp
 
     blueprints = [
         home_bp,

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from app.models.department import get_all_active_departments
-from app.utils.converters import department_row_to_dict
+from app.models import get_all_active_departments
+from app.utils import department_row_to_dict
 
 department_bp = Blueprint("department", __name__)
 

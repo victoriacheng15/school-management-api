@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from app.models.assignment import get_all_active_assignments
-from app.utils.converters import assignment_row_to_dict
+from app.models import get_all_active_assignments
+from app.utils import assignment_row_to_dict
 
 assignment_bp = Blueprint("assignment", __name__)
 

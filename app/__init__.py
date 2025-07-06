@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def create_app():
     app = Flask(__name__)
 
@@ -23,15 +22,19 @@ def create_app():
     from app.routes.student import student_bp
     from app.routes.term import term_bp
 
-    app.register_blueprint(home_bp)
-    app.register_blueprint(assignment_bp)
-    app.register_blueprint(course_bp)
-    app.register_blueprint(course_schedule_bp)
-    app.register_blueprint(department_bp)
-    app.register_blueprint(enrollment_bp)
-    app.register_blueprint(instructor_bp)
-    app.register_blueprint(program_bp)
-    app.register_blueprint(student_bp)
-    app.register_blueprint(term_bp)
+    blueprints = [
+        home_bp,
+        assignment_bp,
+        course_bp,
+        course_schedule_bp,
+        department_bp,
+        enrollment_bp,
+        instructor_bp,
+        program_bp,
+        student_bp,
+        term_bp,
+    ]
+    for blueprint in blueprints:
+        app.register_blueprint(blueprint)
 
     return app

@@ -16,20 +16,48 @@ def handle_get_all_students():
         return jsonify(students), 200
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+    
+@student_bp.route("/students/<int:student_id>", methods=["GET"])
+def handle_get_student_by_id(student_id):
+    try:
+        student = get_student_by_id(student_id)
+        if student is None:
+            return jsonify({"error": "Student not found"}), 404
+        return jsonify(student_row_to_dict(student)), 200
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 @student_bp.route("/students", methods=["POST"])
 def handle_insert_student():
     try:
         data = request.get_json()
-        row = student_dict_to_row(data)
-        inserted_id = insert_student(row)
-        student = get_student_by_id(inserted_id)
+        # Always work with a list for simplicity
+        students = data if isinstance(data, list) else [data]
+        inserted_students = []
 
-        if student is None:
-            return jsonify({"error": "Failed to insert student"}), 500
-        return jsonify({"message": "Student inserted successfully", "data": student_row_to_dict(student)}), 201
+        for item in students:
+            row = student_dict_to_row(item)
+            inserted_id = insert_student(row)
+            student = get_student_by_id(inserted_id)
+            if student:
+                inserted_students.append(student_row_to_dict(student))
+
+        if not inserted_students:
+            return jsonify({"error": "Failed to insert student(s)"}), 500
+
+        # Return single object if only one inserted, else list
+        if len(inserted_students) == 1:
+            return jsonify({
+                "message": "Student inserted successfully",
+                "data": inserted_students[0]
+            }), 201
+        else:
+            return jsonify({
+                "message": f"{len(inserted_students)} students inserted successfully",
+                "data": inserted_students
+            }), 201
 
     except KeyError as e:
         return jsonify({"error": f"Missing required field: {str(e)}"}), 400
     except Exception as e:
-        return jsonify({"error": f"An internal error occurred while inserting the student."}), 500
+        return jsonify({"error": f"An internal error occurred while inserting the student(s)."}), 500

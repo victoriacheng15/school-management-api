@@ -31,14 +31,14 @@ A Flask-based backend API for managing school records including students, course
 
 ## API Routes and Supported Operations
 
-| Route             | Read (GET) | Add (POST) | Update (PUT/PATCH) | Archive (PATCH) |
-|-------------------|------------|------------|--------------------|-----------------|
-| `/assignments`    | ✔          | ✘          | ✘                  | ✘               |
-| `/course_schedule`| ✔          | ✘          | ✘                  | ✘               |
-| `/courses`        | ✔          | ✘          | ✘                  | ✘               |
-| `/departments`    | ✔          | ✘          | ✘                  | ✘               |
-| `/enrollments`    | ✔          | ✘          | ✘                  | ✘               |
-| `/instructors`    | ✔          | ✘          | ✘                  | ✘               |
-| `/programs`       | ✔          | ✘          | ✘                  | ✘               |
-| `/students`       | ✔          | ✘          | ✘                  | ✘               |
-| `/terms`          | ✔          | ✘          | ✘                  | ✘               |
+| Route             | Read All (GET) | Read One (GET by ID) | Add (POST) | Update (PUT/PATCH) | Archive (PATCH) |
+|-------------------|----------------|----------------------|------------|--------------------|-----------------|
+| `/assignments`    | ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/course_schedule`| ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/courses`        | ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/departments`    | ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/enrollments`    | ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/instructors`    | ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/programs`       | ✔              | ✘                   | ✘         | ✘                  | ✘               |
+| `/students`       | ✔              | ✔                   | ✘         | ✘                  | ✘               |
+| `/terms`          | ✔              | ✘                   | ✘         | ✘                  | ✘               |

@@ -2,9 +2,11 @@ from db.database import Database
 
 db = Database()
 
+
 def get_all_active_students():
     query = "SELECT * FROM students WHERE status = 'active';"
     return db.execute_query(query)
+
 
 def get_student_by_id(student_id):
     query = "SELECT * FROM students WHERE id = ?;"
@@ -12,6 +14,7 @@ def get_student_by_id(student_id):
     if result and len(result) > 0:
         return result[0]
     return None
+
 
 def insert_student(student_data):
     query = """

@@ -1,4 +1,4 @@
-.PHONY: freeze install init_db populate_db format docker-build docker-run docker-clean
+.PHONY: freeze install setup-db format test coverage docker-build docker-run docker-clean
 
 freeze:
 	pip freeze > requirements.txt
@@ -11,6 +11,12 @@ setup-db:
 
 format:
 	ruff format run.py db/ tests/ app/
+
+test:
+	pytest --maxfail=1 -q
+
+coverage:
+	pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -q
 
 docker-run:
 	docker build -t school-flask-api .

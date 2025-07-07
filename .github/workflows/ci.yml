@@ -1,0 +1,87 @@
+name: Format, Test & Coverage
+
+on:
+  pull_request:
+    branches: [main]
+    paths: [run.py, db/**, app/**, tests/**]
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies and run ruff
+        run: |
+          make install
+          sleep 1
+          make format
+
+      - name: Commit and push changes
+        run: | 
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          else
+            git commit -m "ci: auto-format code with Ruff"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
+  test:
+    runs-on: ubuntu-latest
+    needs: format
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies and run tests
+        run: |
+          make install
+          sleep 1
+          make test
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies and run coverage
+        run: |
+          make install
+          sleep 1
+          make coverage > coverage_output.txt
+
+      - name: Post comment on PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SUMMARY=$(grep -E "TOTAL.*[0-9]+%" coverage_output.txt | awk '{ print "Coverage: " $NF }')
+          gh pr comment ${{ github.event.pull_request.number }} --body "$SUMMARY"

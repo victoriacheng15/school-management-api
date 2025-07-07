@@ -80,7 +80,10 @@ def test_read_student_by_id(client, single_student_data, make_student_row):
         response = client.get("/students/1")
         assert response.status_code == 200
         response_data = json.loads(response.data)
-        assert response_data == expected_data
+        assert response_data == {
+            "message": "Student fetched successfully",
+            "data": expected_data,
+        }
 
 
 def test_read_student_by_id_not_found(client):

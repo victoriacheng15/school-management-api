@@ -96,9 +96,14 @@ class Database:
         self.connect()
         try:
             self.cursor.executemany(query, param_list)
+            self.conn.commit()
             logger.info(f"Executed many: {query}")
+            return self.cursor
         except sqlite3.Error as e:
             logger.error(f"Error executing many: {e}")
+            return None
+        finally:
+            self.close()
 
     def execute_script(self, script):
         """

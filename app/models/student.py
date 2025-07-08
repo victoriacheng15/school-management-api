@@ -16,6 +16,14 @@ def read_student_by_id(student_id):
     return None
 
 
+def read_students_by_ids(student_ids):
+    if not student_ids:
+        return []
+    placeholders = ",".join("?" for _ in student_ids)
+    query = f"SELECT * FROM students WHERE id IN ({placeholders});"
+    return db.execute_query(query, student_ids)
+
+
 def create_student(student_data):
     query = """
     INSERT INTO students (
@@ -29,6 +37,7 @@ def create_student(student_data):
         return cursor.lastrowid
     return None
 
+
 def update_student(student_id, student_data):
     query = """
     UPDATE students
@@ -39,6 +48,7 @@ def update_student(student_id, student_data):
     values = student_data + (student_id,)
     cursor = db.execute_query(query, values)
     return cursor.rowcount if cursor else 0
+
 
 def archive_student(student_id):
     query = """

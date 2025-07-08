@@ -4,6 +4,7 @@ from app.models import (
     read_student_by_id,
     update_student,
     archive_student,
+    read_students_by_ids,
 )
 from app.utils import (
     student_row_to_dict,
@@ -29,28 +30,40 @@ def get_student_by_id(student_id: int):
 
 def create_students(data):
     students = normalize_to_list(data)
-    results, error = handle_bulk_process(
-        items=students,
-        process_func=create_student,
-        success_func=read_student_by_id,
-        dict_to_row_func=student_dict_to_row,
-        row_to_dict_func=student_row_to_dict
-    )
-    return results, error
+    
+    # Bulk create students
+    created_ids = []
+    for student_data in students:
+        row = student_dict_to_row(student_data)
+        student_id = create_student(row)
+        if student_id:
+            created_ids.append(student_id)
+    
+    if not created_ids:
+        return [], None
+
+    # Fetch all created students in a single query
+    created_students_rows = read_students_by_ids(created_ids)
+    return [student_row_to_dict(row) for row in created_students_rows], None
 
 
 def update_students(data):
     students = normalize_to_list(data)
-    results, error = handle_bulk_process(
-        items=students,
-        process_func=update_student,
-        success_func=read_student_by_id,
-        id_key="id",
-        missing_id_msg="Missing 'id' field in student update data",
-        dict_to_row_func=student_dict_to_row,
-        row_to_dict_func=student_row_to_dict
-    )
-    return results, error
+    
+    updated_ids = []
+    for student_data in students:
+        student_id = student_data.get("id")
+        if not student_id:
+            continue
+        row = student_dict_to_row(student_data)
+        if update_student(student_id, row):
+            updated_ids.append(student_id)
+
+    if not updated_ids:
+        return [], None
+
+    updated_students_rows = read_students_by_ids(updated_ids)
+    return [student_row_to_dict(row) for row in updated_students_rows], None
 
 
 def archive_students(ids):

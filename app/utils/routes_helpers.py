@@ -1,7 +1,9 @@
 from flask import jsonify
 
+
 def normalize_to_list(data):
     return data if isinstance(data, list) else [data]
+
 
 def handle_bulk_process(
     items,
@@ -56,7 +58,10 @@ def handle_bulk_process(
 
     return success_results, None
 
-def build_bulk_response(success_list, success_msg_single, success_msg_bulk, success_code=200, created=False):
+
+def build_bulk_response(
+    success_list, success_msg_single, success_msg_bulk, success_code=200, created=False
+):
     if len(success_list) == 1:
         msg = success_msg_single
         data = success_list[0]
@@ -64,7 +69,4 @@ def build_bulk_response(success_list, success_msg_single, success_msg_bulk, succ
         msg = success_msg_bulk.format(len(success_list))
         data = success_list
 
-    return jsonify({
-        "message": msg,
-        "data": data
-    }), 201 if created else success_code
+    return jsonify({"message": msg, "data": data}), 201 if created else success_code

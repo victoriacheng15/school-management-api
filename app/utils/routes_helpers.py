@@ -1,5 +1,6 @@
 from flask import jsonify
 
+
 def normalize_to_list(data):
     return data if isinstance(data, list) else [data]
 
@@ -67,11 +68,13 @@ def build_bulk_response(
     else:
         msg = success_msg_bulk.format(len(success_list))
         data = success_list
- 
+
     return {"message": msg, "data": data}, 201 if created else success_code
+
 
 def api_response(data, message="Success", status_code=200):
     return jsonify({"message": message, "data": data}), status_code
+
 
 def api_response_error(message="An error occurred", status_code=500):
     return jsonify({"error": message}), status_code

@@ -75,9 +75,7 @@ def handle_update_students():
     except KeyError as e:
         return api_response_error(f"Missing required field: {str(e)}", 400)
     except Exception as e:
-        return api_response_error(
-            f"Internal error while updating students: {str(e)}"
-        )
+        return api_response_error(f"Internal error while updating students: {str(e)}")
 
 
 @student_bp.route("/students", methods=["PATCH"])
@@ -91,10 +89,8 @@ def handle_archive_students():
         return api_response(
             archived_ids,
             message=f"{len(archived_ids)} student(s) archived successfully",
-            status_code=200
+            status_code=200,
         )
 
     except Exception as e:
-        return api_response_error(
-            f"Internal error while archiving students: {str(e)}"
-        )
+        return api_response_error(f"Internal error while archiving students: {str(e)}")

@@ -19,10 +19,18 @@ def test_normalize_to_list_list_item():
 @pytest.fixture
 def mock_funcs():
     return {
-        "process_func": MagicMock(return_value=1),  # Simulate successful DB operation returning an ID
-        "success_func": MagicMock(return_value={"id": 1, "name": "Test"}),  # Simulate fetching full data
-        "dict_to_row_func": MagicMock(side_effect=lambda x: (x["name"],)),  # Simulate dict to row conversion
-        "row_to_dict_func": MagicMock(side_effect=lambda x: {"id": x, "name": "Test"}),  # Simulate row to dict conversion
+        "process_func": MagicMock(
+            return_value=1
+        ),  # Simulate successful DB operation returning an ID
+        "success_func": MagicMock(
+            return_value={"id": 1, "name": "Test"}
+        ),  # Simulate fetching full data
+        "dict_to_row_func": MagicMock(
+            side_effect=lambda x: (x["name"],)
+        ),  # Simulate dict to row conversion
+        "row_to_dict_func": MagicMock(
+            side_effect=lambda x: {"id": x, "name": "Test"}
+        ),  # Simulate row to dict conversion
     }
 
 

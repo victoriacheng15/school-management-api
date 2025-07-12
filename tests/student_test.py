@@ -47,7 +47,24 @@ def mock_db_archive():
 
 def test_get_all_active_students(mock_db_read_all):
     mock_db_read_all.return_value = [
-        (1, "John", "Doe", "a@a.com", "123 Main St", "Anytown", "ON", "Canada", "local", "active", 0, 0, 1, "2024-01-01", "2024-01-01", 0)
+        (
+            1,
+            "John",
+            "Doe",
+            "a@a.com",
+            "123 Main St",
+            "Anytown",
+            "ON",
+            "Canada",
+            "local",
+            "active",
+            0,
+            0,
+            1,
+            "2024-01-01",
+            "2024-01-01",
+            0,
+        )
     ]
     students = get_all_active_students()
     assert len(students) == 1
@@ -56,7 +73,24 @@ def test_get_all_active_students(mock_db_read_all):
 
 
 def test_get_student_by_id(mock_db_read_one):
-    mock_db_read_one.return_value = (1, "John", "Doe", "a@a.com", "123 Main St", "Anytown", "ON", "Canada", "local", "active", 0, 0, 1, "2024-01-01", "2024-01-01", 0)
+    mock_db_read_one.return_value = (
+        1,
+        "John",
+        "Doe",
+        "a@a.com",
+        "123 Main St",
+        "Anytown",
+        "ON",
+        "Canada",
+        "local",
+        "active",
+        0,
+        0,
+        1,
+        "2024-01-01",
+        "2024-01-01",
+        0,
+    )
     student = get_student_by_id(1)
     assert student["first_name"] == "John"
     mock_db_read_one.assert_called_once_with(1)
@@ -64,13 +98,57 @@ def test_get_student_by_id(mock_db_read_one):
 
 def test_create_students(mock_db_create, mock_db_read_many):
     student_data = [
-        {"first_name": "John", "last_name": "Doe", "email": "johndoe@example.com", "is_international": False},
-        {"first_name": "Jane", "last_name": "Doe", "email": "janedoe@example.com", "is_international": True},
+        {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "johndoe@example.com",
+            "is_international": False,
+        },
+        {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "janedoe@example.com",
+            "is_international": True,
+        },
     ]
     mock_db_create.side_effect = [1, 2]
     mock_db_read_many.return_value = [
-        (1, "John", "Doe", "johndoe@example.com", None, None, None, None, "local", "active", 0, False, None, "2024-07-12", "2024-07-12", 0),
-        (2, "Jane", "Doe", "janedoe@example.com", None, None, None, None, "local", "active", 0, True, None, "2024-07-12", "2024-07-12", 0),
+        (
+            1,
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            None,
+            None,
+            None,
+            None,
+            "local",
+            "active",
+            0,
+            False,
+            None,
+            "2024-07-12",
+            "2024-07-12",
+            0,
+        ),
+        (
+            2,
+            "Jane",
+            "Doe",
+            "janedoe@example.com",
+            None,
+            None,
+            None,
+            None,
+            "local",
+            "active",
+            0,
+            True,
+            None,
+            "2024-07-12",
+            "2024-07-12",
+            0,
+        ),
     ]
 
     created_students, error = create_students(student_data)
@@ -83,11 +161,34 @@ def test_create_students(mock_db_create, mock_db_read_many):
 
 def test_update_students(mock_db_update, mock_db_read_many):
     student_data = [
-        {"id": 1, "first_name": "John", "last_name": "Doe", "email": "johndoe@example.com", "is_international": False},
+        {
+            "id": 1,
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "johndoe@example.com",
+            "is_international": False,
+        },
     ]
     mock_db_update.return_value = 1
     mock_db_read_many.return_value = [
-        (1, "John", "Doe", "johndoe@example.com", None, None, None, None, "local", "active", 0, False, None, "2024-07-12", "2024-07-12", 0),
+        (
+            1,
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            None,
+            None,
+            None,
+            None,
+            "local",
+            "active",
+            0,
+            False,
+            None,
+            "2024-07-12",
+            "2024-07-12",
+            0,
+        ),
     ]
 
     updated_students, error = update_students(student_data)

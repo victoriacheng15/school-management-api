@@ -30,7 +30,7 @@ def get_student_by_id(student_id: int):
 
 def create_students(data):
     students = normalize_to_list(data)
-    
+
     # Bulk create students
     created_ids = []
     for student_data in students:
@@ -38,7 +38,7 @@ def create_students(data):
         student_id = create_student(row)
         if student_id:
             created_ids.append(student_id)
-    
+
     if not created_ids:
         return [], None
 
@@ -49,7 +49,7 @@ def create_students(data):
 
 def update_students(data):
     students = normalize_to_list(data)
-    
+
     updated_ids = []
     for student_data in students:
         student_id = student_data.get("id")

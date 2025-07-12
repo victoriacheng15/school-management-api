@@ -1,6 +1,5 @@
 from flask import jsonify
 
-
 def normalize_to_list(data):
     return data if isinstance(data, list) else [data]
 
@@ -35,7 +34,7 @@ def handle_bulk_process(
         if id_key:
             item_id = item.get(id_key)
             if not item_id:
-                return None, (jsonify({"error": missing_id_msg}), 400)
+                return None, {"error": missing_id_msg}, 400
 
             row = dict_to_row_func(item) if dict_to_row_func else item
             result = process_func(item_id, row)
@@ -54,9 +53,9 @@ def handle_bulk_process(
             success_results.append(item if id_key is None else item_id)
 
     if not success_results:
-        return None, (jsonify({"error": "No records processed"}), 404)
+        return None, {"error": "No records processed"}, 404
 
-    return success_results, None
+    return success_results, None, None
 
 
 def build_bulk_response(
@@ -68,5 +67,11 @@ def build_bulk_response(
     else:
         msg = success_msg_bulk.format(len(success_list))
         data = success_list
+ 
+    return {"message": msg, "data": data}, 201 if created else success_code
 
-    return jsonify({"message": msg, "data": data}), 201 if created else success_code
+def api_response(data, message="Success", status_code=200):
+    return jsonify({"message": message, "data": data}), status_code
+
+def api_response_error(message="An error occurred", status_code=500):
+    return jsonify({"error": message}), status_code

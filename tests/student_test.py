@@ -21,6 +21,7 @@ from app.services import (
 # Fixtures
 # =======================
 
+
 def make_student_row():
     today = date.today().isoformat()
     return (
@@ -42,6 +43,7 @@ def make_student_row():
         0,
     )
 
+
 def make_student_dict():
     return {
         "first_name": "John",
@@ -50,13 +52,16 @@ def make_student_dict():
         "is_international": False,
     }
 
+
 @pytest.fixture
 def valid_student_row():
     return make_student_row()
 
+
 @pytest.fixture
 def valid_student_rows():
     return [make_student_row() for _ in range(2)]
+
 
 @pytest.fixture
 def valid_student_create_data():
@@ -70,11 +75,13 @@ def valid_student_create_data():
         },
     ]
 
+
 @pytest.fixture
 def valid_student_update_data():
     data = make_student_dict()
     data["id"] = 1
     return [data]
+
 
 @pytest.fixture
 def student_missing_id(valid_student_update_data):
@@ -83,13 +90,16 @@ def student_missing_id(valid_student_update_data):
         d.pop("id", None)
     return data
 
+
 @pytest.fixture
 def valid_student_ids():
     return [1, 2]
 
+
 # =======================
-# DB Mock Fixtures (keep as is)
+# DB Mock Fixtures
 # =======================
+
 
 @pytest.fixture
 def mock_db_read_all():
@@ -131,6 +141,7 @@ def mock_db_archive():
 # Service Tests
 # =======================
 
+
 class TestStudentReadService:
     def test_get_all_active_students(self, mock_db_read_all, valid_student_row):
         mock_db_read_all.return_value = [valid_student_row]
@@ -158,7 +169,11 @@ class TestStudentReadService:
 
 class TestStudentCreateService:
     def test_create_students(
-        self, mock_db_create, mock_db_read_many, valid_student_create_data, valid_student_rows
+        self,
+        mock_db_create,
+        mock_db_read_many,
+        valid_student_create_data,
+        valid_student_rows,
     ):
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_student_rows
@@ -183,7 +198,11 @@ class TestStudentCreateService:
 
 class TestStudentUpdateService:
     def test_update_students(
-        self, mock_db_update, mock_db_read_many, valid_student_update_data, valid_student_row
+        self,
+        mock_db_update,
+        mock_db_read_many,
+        valid_student_update_data,
+        valid_student_row,
     ):
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_student_row]
@@ -240,6 +259,7 @@ class TestStudentArchiveService:
 # Model Tests
 # =======================
 
+
 class TestStudentModel:
     @patch("app.models.student.db.execute_query")
     def test_read_all_active_students(self, mock_execute):
@@ -255,7 +275,9 @@ class TestStudentModel:
         mock_execute.return_value = [("student_1",)]
         result = read_student_by_id(1)
         assert result == ("student_1",)
-        mock_execute.assert_called_once_with("SELECT * FROM students WHERE id = ?;", (1,))
+        mock_execute.assert_called_once_with(
+            "SELECT * FROM students WHERE id = ?;", (1,)
+        )
 
     @patch("app.models.student.db.execute_query")
     def test_read_student_by_id_not_found(self, mock_execute):
@@ -332,6 +354,7 @@ class TestStudentModel:
 # =======================
 # Route Tests
 # =======================
+
 
 class TestStudentReadRoute:
     @patch("app.routes.student.get_all_active_students")
@@ -446,6 +469,7 @@ class TestStudentCreateRoute:
         assert response.status_code == 500
         assert "internal error" in data["error"].lower()
 
+
 class TestStudentUpdateRoute:
     @patch("app.routes.student.update_students")
     def test_handle_update_students_success(
@@ -511,7 +535,8 @@ class TestStudentArchiveRoute:
 
         assert response.status_code == 200
         assert (
-            f"{len(valid_student_ids)} student(s) archived successfully" in data["message"]
+            f"{len(valid_student_ids)} student(s) archived successfully"
+            in data["message"]
         )
         assert isinstance(data["data"], list)
 

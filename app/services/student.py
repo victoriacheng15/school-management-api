@@ -69,32 +69,46 @@ def update_students(data):
     updated_ids = []
     errors = []
 
-    for student_data in students:
-        student_data = {
-            k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()
+    for incoming_data in students:
+        incoming_data = {
+            k: (v.strip() if isinstance(v, str) else v)
+            for k, v in incoming_data.items()
         }
 
-        student_id = student_data.get("id")
+        student_id = incoming_data.get("id")
         if not student_id:
             errors.append(
-                {"student": student_data, "error": "Missing student ID for update"}
+                {"student": incoming_data, "error": "Missing student ID for update"}
             )
             continue
 
+        existing_data = get_student_by_id(student_id)
+        if not existing_data:
+            errors.append(
+                {
+                    "student": incoming_data,
+                    "error": f"Student ID {student_id} not found",
+                }
+            )
+            continue
+
+        # Merge the incoming fields into the full existing object
+        full_data = {**existing_data, **incoming_data}
+
         try:
-            row = student_dict_to_row(student_data)
+            row = student_dict_to_row(full_data)
             success = update_student(student_id, row)
             if success:
                 updated_ids.append(student_id)
             else:
                 errors.append(
                     {
-                        "student": student_data,
-                        "error": f"Student ID {student_id} not found or not updated",
+                        "student": incoming_data,
+                        "error": f"Student ID {student_id} not updated (maybe archived?)",
                     }
                 )
         except (ValueError, RuntimeError) as e:
-            errors.append({"student": student_data, "error": str(e)})
+            errors.append({"student": incoming_data, "error": str(e)})
 
     if not updated_ids:
         return [], {"error": "No students were updated", "details": errors}, 400

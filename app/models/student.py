@@ -58,7 +58,7 @@ def update_student(student_id, student_data):
 def archive_student(student_id):
     query = """
     UPDATE students
-    SET is_archived = 1, updated_at = CURRENT_TIMESTAMP
+    SET is_archived = 1, status = 'inactive', updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND is_archived = 0;
     """
     cursor = db.execute_query(query, (student_id,))

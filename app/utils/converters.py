@@ -24,13 +24,15 @@ def student_dict_to_row(data):
         data.get("first_name", None),
         data.get("last_name", None),
         data.get("email", None),
-        data.get("address", None),
-        data.get("city", None),
-        data.get("province", None),
-        data.get("country", None),
+        data.get("address"),
+        data.get("city"),
+        data.get("province"),
+        data.get("country"),
         data.get("address_type", "local"),
-        data.get("is_international", False),
-        data.get("program_id", None),
+        data.get("status", "active"),
+        int(bool(data.get("coop", 0))),
+        int(bool(data.get("is_international", 0))),
+        data.get("program_id"),
     )
 
 

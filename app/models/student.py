@@ -35,14 +35,12 @@ def create_student(student_data):
     query = """
     INSERT INTO students (
         first_name, last_name, email, address, city, province, country,
-        address_type, is_international, program_id
+        address_type, status, coop, is_international, program_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
     cursor = db.execute_query(query, student_data)
-    if cursor:
-        return cursor.lastrowid
-    return None
+    return cursor.lastrowid if cursor else None
 
 
 def update_student(student_id, student_data):

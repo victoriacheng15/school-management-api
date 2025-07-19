@@ -9,7 +9,6 @@ from app.models import (
 from app.utils import (
     student_row_to_dict,
     student_dict_to_row,
-    handle_bulk_process,
     normalize_to_list,
 )
 
@@ -30,38 +29,95 @@ def get_student_by_id(student_id: int):
 
 def create_students(data):
     students = normalize_to_list(data)
-
     created_ids = []
+    errors = []
+
     for student_data in students:
-        row = student_dict_to_row(student_data)
-        student_id = create_student(row)
-        if student_id:
-            created_ids.append(student_id)
+        student_data = {k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()}
+
+        try:
+            row = student_dict_to_row(student_data)
+            student_id = create_student(row)
+            if student_id:
+                created_ids.append(student_id)
+            else:
+                errors.append({
+                    "student": student_data,
+                    "error": "Failed to insert student (unknown DB error)"
+                })
+        except (ValueError, RuntimeError) as e:
+            errors.append({
+                "student": student_data,
+                "error": str(e)
+            })
 
     if not created_ids:
-        return [], None
+        return [], {
+            "error": "No students were created",
+            "details": errors
+        }, 400
 
     created_students_rows = read_students_by_ids(created_ids)
-    return [student_row_to_dict(row) for row in created_students_rows], None
+    created_students = [student_row_to_dict(row) for row in created_students_rows]
+
+    if errors:
+        return {
+            "created": created_students,
+            "errors": errors
+        }, None, 201
+
+    return created_students, None, 201
+
 
 
 def update_students(data):
     students = normalize_to_list(data)
-
     updated_ids = []
+    errors = []
+
     for student_data in students:
+        student_data = {k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()}
+
         student_id = student_data.get("id")
         if not student_id:
+            errors.append({
+                "student": student_data,
+                "error": "Missing student ID for update"
+            })
             continue
-        row = student_dict_to_row(student_data)
-        if update_student(student_id, row):
-            updated_ids.append(student_id)
+
+        try:
+            row = student_dict_to_row(student_data)
+            success = update_student(student_id, row)
+            if success:
+                updated_ids.append(student_id)
+            else:
+                errors.append({
+                    "student": student_data,
+                    "error": f"Student ID {student_id} not found or not updated"
+                })
+        except (ValueError, RuntimeError) as e:
+            errors.append({
+                "student": student_data,
+                "error": str(e)
+            })
 
     if not updated_ids:
-        return [], None
+        return [], {
+            "error": "No students were updated",
+            "details": errors
+        }, 400
 
     updated_students_rows = read_students_by_ids(updated_ids)
-    return [student_row_to_dict(row) for row in updated_students_rows], None
+    updated_students = [student_row_to_dict(row) for row in updated_students_rows]
+
+    if errors:
+        return {
+            "updated": updated_students,
+            "errors": errors
+        }, None, 200
+
+    return updated_students, None, 200
 
 
 def archive_students(ids):

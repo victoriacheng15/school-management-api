@@ -101,4 +101,3 @@ def handle_archive_students():
         return api_response_error(str(ve), 400)
     except Exception as e:
         return api_response_error(f"Internal error while archiving students: {str(e)}")
-

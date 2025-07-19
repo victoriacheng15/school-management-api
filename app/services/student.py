@@ -33,7 +33,9 @@ def create_students(data):
     errors = []
 
     for student_data in students:
-        student_data = {k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()}
+        student_data = {
+            k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()
+        }
 
         try:
             row = student_dict_to_row(student_data)
@@ -41,33 +43,25 @@ def create_students(data):
             if student_id:
                 created_ids.append(student_id)
             else:
-                errors.append({
-                    "student": student_data,
-                    "error": "Failed to insert student (unknown DB error)"
-                })
+                errors.append(
+                    {
+                        "student": student_data,
+                        "error": "Failed to insert student (unknown DB error)",
+                    }
+                )
         except (ValueError, RuntimeError) as e:
-            errors.append({
-                "student": student_data,
-                "error": str(e)
-            })
+            errors.append({"student": student_data, "error": str(e)})
 
     if not created_ids:
-        return [], {
-            "error": "No students were created",
-            "details": errors
-        }, 400
+        return [], {"error": "No students were created", "details": errors}, 400
 
     created_students_rows = read_students_by_ids(created_ids)
     created_students = [student_row_to_dict(row) for row in created_students_rows]
 
     if errors:
-        return {
-            "created": created_students,
-            "errors": errors
-        }, None, 201
+        return {"created": created_students, "errors": errors}, None, 201
 
     return created_students, None, 201
-
 
 
 def update_students(data):
@@ -76,14 +70,15 @@ def update_students(data):
     errors = []
 
     for student_data in students:
-        student_data = {k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()}
+        student_data = {
+            k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()
+        }
 
         student_id = student_data.get("id")
         if not student_id:
-            errors.append({
-                "student": student_data,
-                "error": "Missing student ID for update"
-            })
+            errors.append(
+                {"student": student_data, "error": "Missing student ID for update"}
+            )
             continue
 
         try:
@@ -92,30 +87,23 @@ def update_students(data):
             if success:
                 updated_ids.append(student_id)
             else:
-                errors.append({
-                    "student": student_data,
-                    "error": f"Student ID {student_id} not found or not updated"
-                })
+                errors.append(
+                    {
+                        "student": student_data,
+                        "error": f"Student ID {student_id} not found or not updated",
+                    }
+                )
         except (ValueError, RuntimeError) as e:
-            errors.append({
-                "student": student_data,
-                "error": str(e)
-            })
+            errors.append({"student": student_data, "error": str(e)})
 
     if not updated_ids:
-        return [], {
-            "error": "No students were updated",
-            "details": errors
-        }, 400
+        return [], {"error": "No students were updated", "details": errors}, 400
 
     updated_students_rows = read_students_by_ids(updated_ids)
     updated_students = [student_row_to_dict(row) for row in updated_students_rows]
 
     if errors:
-        return {
-            "updated": updated_students,
-            "errors": errors
-        }, None, 200
+        return {"updated": updated_students, "errors": errors}, None, 200
 
     return updated_students, None, 200
 

@@ -9,6 +9,7 @@ db = Database()
 # student_db_update_by_id
 # student_db_archive_by_id
 
+
 def read_all_active_students():
     query = "SELECT * FROM students WHERE status = 'active';"
     return db.execute_query(query)

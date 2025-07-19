@@ -31,7 +31,6 @@ def get_student_by_id(student_id: int):
 def create_students(data):
     students = normalize_to_list(data)
 
-    # Bulk create students
     created_ids = []
     for student_data in students:
         row = student_dict_to_row(student_data)
@@ -42,7 +41,6 @@ def create_students(data):
     if not created_ids:
         return [], None
 
-    # Fetch all created students in a single query
     created_students_rows = read_students_by_ids(created_ids)
     return [student_row_to_dict(row) for row in created_students_rows], None
 

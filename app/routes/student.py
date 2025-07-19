@@ -36,10 +36,10 @@ def handle_get_student_by_id(student_id):
 @student_bp.route("/students", methods=["POST"])
 def handle_create_student():
     try:
-        results, error_data, error_code = create_students(request.get_json())
+        results, error_data = create_students(request.get_json())
 
         if error_data:
-            return api_response_error(error_data["error"], error_code)
+            return api_response_error(error_data["error"])
 
         response_data, status_code = build_bulk_response(
             success_list=results,
@@ -50,7 +50,7 @@ def handle_create_student():
         return jsonify(response_data), status_code
 
     except KeyError as e:
-        return api_response_error(f"Missing required field: {str(e)}", 400)
+        return api_response_error(f"Missing required field: {str(e)}")
     except Exception as e:
         return api_response_error(
             f"An internal error occurred while inserting the student(s): {str(e)}"

@@ -2,6 +2,13 @@ from db.database import Database
 
 db = Database()
 
+# TODO:
+# student_db_read_all_active
+# student_db_read_by_id
+# student_db_insert
+# student_db_update_by_id
+# student_db_archive_by_id
+
 
 def read_all_active_students():
     query = "SELECT * FROM students WHERE status = 'active';"
@@ -28,9 +35,9 @@ def create_student(student_data):
     query = """
     INSERT INTO students (
         first_name, last_name, email, address, city, province, country,
-        address_type, status, coop, is_international, program_id
+        address_type, is_international, program_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
     cursor = db.execute_query(query, student_data)
     if cursor:

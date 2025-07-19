@@ -85,7 +85,10 @@ def update_students(data):
         existing_data = get_student_by_id(student_id)
         if not existing_data:
             errors.append(
-                {"student": incoming_data, "error": f"Student ID {student_id} not found"}
+                {
+                    "student": incoming_data,
+                    "error": f"Student ID {student_id} not found",
+                }
             )
             continue
 
@@ -94,7 +97,6 @@ def update_students(data):
 
         try:
             row = student_dict_to_row(full_data)
-            print(f"Updating student ID {student_id} with data: {row}")
             success = update_student(student_id, row)
             if success:
                 updated_ids.append(student_id)
@@ -118,7 +120,6 @@ def update_students(data):
         return {"updated": updated_students, "errors": errors}, None, 200
 
     return updated_students, None, 200
-
 
 
 def archive_students(ids):

@@ -249,14 +249,13 @@ course_schedule_patch='{
   "updated_at": "2025-07-20"
 }'
 
-#!/usr/bin/env bash
-
-# (your existing functions and JSON variables here)
-
-# Helper to print usage
 usage() {
-  echo "Usage: $0 {get|post|put|patch} resource [id]"
-  echo "Example: $0 post students"
+  echo "Usage: $0 {read|create|update|archive} resource [id]"
+  echo "Example: $0 read students"
+  echo "Example: $0 read students 1"
+  echo "Example: $0 create students students_post"
+  echo "Example: $0 update students students_put"
+  echo "Example: $0 archive students students_patch"
   exit 1
 }
 

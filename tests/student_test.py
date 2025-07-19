@@ -178,10 +178,11 @@ class TestStudentCreateService:
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_student_rows
 
-        created, error = create_students(valid_student_create_data)
+        results, error, status_code = create_students(valid_student_create_data)
 
+        assert len(results) == 2
         assert error is None
-        assert len(created) == 2
+        assert status_code == 201
         assert mock_db_create.call_count == 2
         mock_db_read_many.assert_called_once_with([1, 2])
 
@@ -189,10 +190,11 @@ class TestStudentCreateService:
         self, mock_db_create, mock_db_read_many, valid_student_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        created, error = create_students(valid_student_create_data)
+        results, error, status_code = create_students(valid_student_create_data)
 
-        assert created == []
-        assert error is None
+        assert results == []
+        assert error["error"] == "No students were created"
+        assert status_code == 400
         mock_db_read_many.assert_not_called()
 
 
@@ -207,10 +209,11 @@ class TestStudentUpdateService:
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_student_row]
 
-        updated, error = update_students(valid_student_update_data)
+        results, error, status_code = update_students(valid_student_update_data)
 
+        assert len(results) == 1
         assert error is None
-        assert len(updated) == 1
+        assert status_code == 200
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_called_once_with([1])
 
@@ -218,20 +221,22 @@ class TestStudentUpdateService:
         self, mock_db_update, mock_db_read_many, valid_student_update_data
     ):
         mock_db_update.return_value = 0
-        updated, error = update_students(valid_student_update_data)
+        results, error, status_code = update_students(valid_student_update_data)
 
-        assert updated == []
-        assert error is None
+        assert results == []
+        assert error["error"] == "No students were updated"
+        assert status_code == 400
         mock_db_update.assert_called_once()
         mock_db_read_many.assert_not_called()
 
     def test_update_students_missing_id(
         self, mock_db_update, mock_db_read_many, student_missing_id
     ):
-        updated, error = update_students(student_missing_id)
+        results, error, status_code = update_students(student_missing_id)
 
-        assert updated == []
-        assert error is None
+        assert results == []
+        assert error["error"] == "No students were updated"
+        assert status_code == 400
         mock_db_update.assert_not_called()
         mock_db_read_many.assert_not_called()
 
@@ -454,7 +459,7 @@ class TestStudentCreateRoute:
         response = client.post("/students", json=valid_student_create_data)
         data = response.get_json()
 
-        assert response.status_code == 400
+        assert response.status_code == 500
         assert "Missing required field" in data["error"]
 
     @patch("app.routes.student.create_students")
@@ -530,7 +535,7 @@ class TestStudentArchiveRoute:
     ):
         mock_archive_students.return_value = valid_student_ids
 
-        response = client.patch("/students", json=valid_student_ids)
+        response = client.patch("/students", json={"ids": valid_student_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -546,7 +551,7 @@ class TestStudentArchiveRoute:
     ):
         mock_archive_students.return_value = []
 
-        response = client.patch("/students", json=valid_student_ids)
+        response = client.patch("/students", json={"ids": valid_student_ids})
         data = response.get_json()
 
         assert response.status_code == 404
@@ -558,7 +563,7 @@ class TestStudentArchiveRoute:
     ):
         mock_archive_students.side_effect = Exception("DB failure")
 
-        response = client.patch("/students", json=valid_student_ids)
+        response = client.patch("/students", json={"ids": valid_student_ids})
         data = response.get_json()
 
         assert response.status_code == 500

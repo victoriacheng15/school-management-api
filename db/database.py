@@ -74,14 +74,16 @@ class Database:
             self.cursor.execute(query, params)
             logger.info(f"Executed query: {query}")
             if query.strip().lower().startswith("select"):
-                result = self.cursor.fetchall()
-                return result
+                return self.cursor.fetchall()
             else:
                 self.conn.commit()
                 return self.cursor
+        except sqlite3.IntegrityError as e:
+            logger.warning(f"Integrity error: {e}")
+            raise ValueError(f"Integrity error: {str(e)}")
         except sqlite3.Error as e:
             logger.error(f"Error executing query: {e}")
-            return None
+            raise RuntimeError(f"Database error: {str(e)}")
         finally:
             self.close()
 

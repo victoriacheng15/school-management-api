@@ -36,10 +36,10 @@ def handle_get_student_by_id(student_id):
 @student_bp.route("/students", methods=["POST"])
 def handle_create_student():
     try:
-        results, error_data = create_students(request.get_json())
+        results, error_data, status_code = create_students(request.get_json())
 
         if error_data:
-            return api_response_error(error_data["error"])
+            return api_response_error(error_data["error"], status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=results,
@@ -60,10 +60,10 @@ def handle_create_student():
 @student_bp.route("/students", methods=["PUT"])
 def handle_update_students():
     try:
-        results, error_data, error_code = update_students(request.get_json())
+        results, error_data, status_code = update_students(request.get_json())
 
         if error_data:
-            return api_response_error(error_data["error"], error_code)
+            return api_response_error(error_data["error"], status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=results,
@@ -81,7 +81,12 @@ def handle_update_students():
 @student_bp.route("/students", methods=["PATCH"])
 def handle_archive_students():
     try:
-        archived_ids = archive_students(request.get_json())
+        payload = request.get_json()
+
+        if not payload or "ids" not in payload:
+            return api_response_error("Missing 'ids' in request", 400)
+
+        archived_ids = archive_students(payload["ids"])
 
         if not archived_ids:
             return api_response_error("No students were archived", 404)
@@ -92,5 +97,7 @@ def handle_archive_students():
             status_code=200,
         )
 
+    except ValueError as ve:
+        return api_response_error(str(ve), 400)
     except Exception as e:
         return api_response_error(f"Internal error while archiving students: {str(e)}")

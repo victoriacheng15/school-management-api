@@ -2,17 +2,17 @@ import pytest
 from datetime import date
 from unittest.mock import patch
 from app.models import (
-    read_all_active_students,
-    read_student_by_id,
-    create_student,
-    update_student,
-    archive_student,
-    read_students_by_ids,
+    student_db_read_all,
+    student_db_read_by_id,
+    student_db_read_by_ids,
+    student_db_insert,
+    student_db_update,
+    student_db_archive,
 )
 from app.services import (
-    get_all_active_students,
+    get_all_students,
     get_student_by_id,
-    create_students,
+    create_new_students,
     update_students,
     archive_students,
 )
@@ -103,37 +103,37 @@ def valid_student_ids():
 
 @pytest.fixture
 def mock_db_read_all():
-    with patch("app.services.student.read_all_active_students") as mock:
+    with patch("app.services.student.student_db_read_all") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_db_read_one():
-    with patch("app.services.student.read_student_by_id") as mock:
+    with patch("app.services.student.student_db_read_by_id") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_db_read_many():
-    with patch("app.services.student.read_students_by_ids") as mock:
+    with patch("app.services.student.student_db_read_by_ids") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_db_create():
-    with patch("app.services.student.create_student") as mock:
+    with patch("app.services.student.student_db_insert") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_db_update():
-    with patch("app.services.student.update_student") as mock:
+    with patch("app.services.student.student_db_update") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_db_archive():
-    with patch("app.services.student.archive_student") as mock:
+    with patch("app.services.student.student_db_archive") as mock:
         yield mock
 
 
@@ -143,17 +143,17 @@ def mock_db_archive():
 
 
 class TestStudentReadService:
-    def test_get_all_active_students(self, mock_db_read_all, valid_student_row):
+    def test_get_all_students(self, mock_db_read_all, valid_student_row):
         mock_db_read_all.return_value = [valid_student_row]
-        students = get_all_active_students()
+        students = get_all_students()
         assert len(students) == 1
         assert students[0]["first_name"] == "John"
         mock_db_read_all.assert_called_once()
 
-    def test_get_all_active_students_none(self, mock_db_read_all):
+    def test_get_all_students_none(self, mock_db_read_all):
         mock_db_read_all.return_value = None
         with pytest.raises(RuntimeError):
-            get_all_active_students()
+            get_all_students()
 
     def test_get_student_by_id(self, mock_db_read_one, valid_student_row):
         mock_db_read_one.return_value = valid_student_row
@@ -168,7 +168,7 @@ class TestStudentReadService:
 
 
 class TestStudentCreateService:
-    def test_create_students(
+    def test_create_new_students(
         self,
         mock_db_create,
         mock_db_read_many,
@@ -178,7 +178,7 @@ class TestStudentCreateService:
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_student_rows
 
-        results, error, status_code = create_students(valid_student_create_data)
+        results, error, status_code = create_new_students(valid_student_create_data)
 
         assert len(results) == 2
         assert error is None
@@ -186,14 +186,14 @@ class TestStudentCreateService:
         assert mock_db_create.call_count == 2
         mock_db_read_many.assert_called_once_with([1, 2])
 
-    def test_create_students_failure(
+    def test_create_new_students_failure(
         self, mock_db_create, mock_db_read_many, valid_student_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        results, error, status_code = create_students(valid_student_create_data)
+        results, error, status_code = create_new_students(valid_student_create_data)
 
         assert results == []
-        assert error["error"] == "No students were created"
+        assert error["message"] == "No students were created"
         assert status_code == 400
         mock_db_read_many.assert_not_called()
 
@@ -212,7 +212,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(valid_student_update_data)
 
         assert len(results) == 1
-        assert error is None
+        assert error == []
         assert status_code == 200
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_called_once_with([1])
@@ -224,7 +224,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(valid_student_update_data)
 
         assert results == []
-        assert error["error"] == "No students were updated"
+        assert error == [{"message": "Student ID 1 not updated (maybe archived?)"}]
         assert status_code == 400
         mock_db_update.assert_called_once()
         mock_db_read_many.assert_not_called()
@@ -235,7 +235,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(student_missing_id)
 
         assert results == []
-        assert error["error"] == "No students were updated"
+        assert error == [{"message": "Missing student ID for update"}]
         assert status_code == 400
         mock_db_update.assert_not_called()
         mock_db_read_many.assert_not_called()
@@ -246,14 +246,14 @@ class TestStudentArchiveService:
         mock_db_archive.side_effect = [1, 1]
         archived = archive_students(valid_student_ids)
 
-        assert len(archived) == 2
+        assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
     def test_archive_students_none_archived(self, mock_db_archive, valid_student_ids):
         mock_db_archive.return_value = 0
         archived = archive_students(valid_student_ids)
 
-        assert archived == []
+        assert archived[0] == []
 
     def test_archive_students_invalid_ids(self):
         with pytest.raises(ValueError):
@@ -267,40 +267,40 @@ class TestStudentArchiveService:
 
 class TestStudentModel:
     @patch("app.models.student.db.execute_query")
-    def test_read_all_active_students(self, mock_execute):
+    def test_student_db_read_alls(self, mock_execute):
         mock_execute.return_value = [("mocked",)]
-        result = read_all_active_students()
+        result = student_db_read_all()
         assert result == [("mocked",)]
         mock_execute.assert_called_once_with(
             "SELECT * FROM students WHERE status = 'active';"
         )
 
     @patch("app.models.student.db.execute_query")
-    def test_read_student_by_id_found(self, mock_execute):
+    def test_student_db_read_by_id_found(self, mock_execute):
         mock_execute.return_value = [("student_1",)]
-        result = read_student_by_id(1)
+        result = student_db_read_by_id(1)
         assert result == ("student_1",)
         mock_execute.assert_called_once_with(
             "SELECT * FROM students WHERE id = ?;", (1,)
         )
 
     @patch("app.models.student.db.execute_query")
-    def test_read_student_by_id_not_found(self, mock_execute):
+    def test_student_db_read_by_id_not_found(self, mock_execute):
         mock_execute.return_value = []
-        result = read_student_by_id(999)
+        result = student_db_read_by_id(999)
         assert result is None
         mock_execute.assert_called_once()
 
     @patch("app.models.student.db.execute_query")
-    def test_read_students_by_ids_empty_list(self, mock_execute):
-        result = read_students_by_ids([])
+    def test_student_db_read_by_ids_empty_list(self, mock_execute):
+        result = student_db_read_by_ids([])
         assert result == []
         mock_execute.assert_not_called()
 
     @patch("app.models.student.db.execute_query")
-    def test_read_students_by_ids_success(self, mock_execute):
+    def test_student_db_read_by_ids_success(self, mock_execute):
         mock_execute.return_value = [("s1",), ("s2",)]
-        result = read_students_by_ids([1, 2])
+        result = student_db_read_by_ids([1, 2])
 
         assert result == [("s1",), ("s2",)]
         mock_execute.assert_called_once()
@@ -308,12 +308,12 @@ class TestStudentModel:
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.student.db.execute_query")
-    def test_create_student_success(self, mock_execute, valid_student_row):
+    def test_student_db_insert_success(self, mock_execute, valid_student_row):
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
         params = valid_student_row
-        result = create_student(params)
+        result = student_db_insert(params)
 
         assert result == 10
         mock_execute.assert_called_once()
@@ -323,36 +323,36 @@ class TestStudentModel:
         assert called_params == params
 
     @patch("app.models.student.db.execute_query")
-    def test_create_student_failure(self, mock_execute):
+    def test_student_db_insert_failure(self, mock_execute):
         mock_execute.return_value = None
-        result = create_student(("bad",))
+        result = student_db_insert(("bad",))
         assert result is None
 
     @patch("app.models.student.db.execute_query")
-    def test_update_student_success(self, mock_execute):
+    def test_student_db_update_success(self, mock_execute):
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
 
-        result = update_student(1, ("x",) * 12)
+        result = student_db_update(1, ("x",) * 12)
         assert result == 1
 
     @patch("app.models.student.db.execute_query")
-    def test_update_student_failure(self, mock_execute):
+    def test_student_db_update_failure(self, mock_execute):
         mock_execute.return_value = None
-        result = update_student(1, ("x",) * 12)
+        result = student_db_update(1, ("x",) * 12)
         assert result == 0
 
     @patch("app.models.student.db.execute_query")
-    def test_archive_student_success(self, mock_execute):
+    def test_student_db_archive_success(self, mock_execute):
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
-        result = archive_student(1)
+        result = student_db_archive(1)
         assert result == 1
 
     @patch("app.models.student.db.execute_query")
-    def test_archive_student_failure(self, mock_execute):
+    def test_student_db_archive_failure(self, mock_execute):
         mock_execute.return_value = None
-        result = archive_student(999)
+        result = student_db_archive(999)
         assert result == 0
 
 
@@ -362,8 +362,8 @@ class TestStudentModel:
 
 
 class TestStudentReadRoute:
-    @patch("app.routes.student.get_all_active_students")
-    def test_handle_read_all_active_students_success(
+    @patch("app.routes.student.get_all_students")
+    def test_handle_student_db_read_all_success(
         self, mock_get, client, valid_student_create_data
     ):
         mock_get.return_value = valid_student_create_data
@@ -376,8 +376,8 @@ class TestStudentReadRoute:
         assert data["data"] == valid_student_create_data
         mock_get.assert_called_once()
 
-    @patch("app.routes.student.get_all_active_students")
-    def test_handle_read_all_active_students_exception(self, mock_get_all, client):
+    @patch("app.routes.student.get_all_students")
+    def test_handle_student_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
         response = client.get("/students")
@@ -423,11 +423,11 @@ class TestStudentReadRoute:
 
 
 class TestStudentCreateRoute:
-    @patch("app.routes.student.create_students")
-    def test_handle_create_student_success(
-        self, mock_create_students, client, valid_student_create_data
+    @patch("app.routes.student.create_new_students")
+    def test_handle_student_db_insert_success(
+        self, mock_create_new_students, client, valid_student_create_data
     ):
-        mock_create_students.return_value = (valid_student_create_data, None, None)
+        mock_create_new_students.return_value = (valid_student_create_data, None, None)
 
         response = client.post("/students", json=valid_student_create_data)
         data = response.get_json()
@@ -436,13 +436,13 @@ class TestStudentCreateRoute:
         assert "2 students created successfully" in data["message"]
         assert isinstance(data["data"], dict) or isinstance(data["data"], list)
 
-    @patch("app.routes.student.create_students")
-    def test_handle_create_student_service_error(
-        self, mock_create_students, client, valid_student_create_data
+    @patch("app.routes.student.create_new_students")
+    def test_handle_student_db_insert_service_error(
+        self, mock_create_new_students, client, valid_student_create_data
     ):
         error_data = {"error": "Invalid data"}
         error_code = 422
-        mock_create_students.return_value = ([], error_data, error_code)
+        mock_create_new_students.return_value = ([], error_data, error_code)
 
         response = client.post("/students", json=valid_student_create_data)
         data = response.get_json()
@@ -450,11 +450,11 @@ class TestStudentCreateRoute:
         assert response.status_code == error_code
         assert "Invalid data" in data["error"]
 
-    @patch("app.routes.student.create_students")
-    def test_handle_create_student_key_error(
-        self, mock_create_students, client, valid_student_create_data
+    @patch("app.routes.student.create_new_students")
+    def test_handle_student_db_insert_key_error(
+        self, mock_create_new_students, client, valid_student_create_data
     ):
-        mock_create_students.side_effect = KeyError("first_name")
+        mock_create_new_students.side_effect = KeyError("first_name")
 
         response = client.post("/students", json=valid_student_create_data)
         data = response.get_json()
@@ -462,11 +462,11 @@ class TestStudentCreateRoute:
         assert response.status_code == 500
         assert "Missing required field" in data["error"]
 
-    @patch("app.routes.student.create_students")
-    def test_handle_create_student_exception(
-        self, mock_create_students, client, valid_student_create_data
+    @patch("app.routes.student.create_new_students")
+    def test_handle_student_db_insert_exception(
+        self, mock_create_new_students, client, valid_student_create_data
     ):
-        mock_create_students.side_effect = Exception("DB failure")
+        mock_create_new_students.side_effect = Exception("DB failure")
 
         response = client.post("/students", json=valid_student_create_data)
         data = response.get_json()
@@ -493,7 +493,7 @@ class TestStudentUpdateRoute:
     def test_handle_update_students_service_error(
         self, mock_update_students, client, valid_student_update_data
     ):
-        error_data = {"error": "Invalid data"}
+        error_data = {"message": "Invalid data"}
         error_code = 422
         mock_update_students.return_value = ([], error_data, error_code)
 
@@ -501,7 +501,7 @@ class TestStudentUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]
+        assert "Invalid data" in data["error"]["message"]
 
     @patch("app.routes.student.update_students")
     def test_handle_update_students_key_error(
@@ -533,29 +533,40 @@ class TestStudentArchiveRoute:
     def test_handle_archive_students_success(
         self, mock_archive_students, client, valid_student_ids
     ):
-        mock_archive_students.return_value = valid_student_ids
+        mock_archive_students.return_value = (valid_student_ids, None, 200)
 
         response = client.patch("/students", json={"ids": valid_student_ids})
         data = response.get_json()
 
         assert response.status_code == 200
-        assert (
-            f"{len(valid_student_ids)} student(s) archived successfully"
-            in data["message"]
-        )
-        assert isinstance(data["data"], list)
+        assert "2 students archived successfully" in data["message"]
+        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
 
     @patch("app.routes.student.archive_students")
-    def test_handle_archive_students_no_students_archived(
+    def test_handle_archive_students_service_error(
         self, mock_archive_students, client, valid_student_ids
     ):
-        mock_archive_students.return_value = []
+        error_data = {"message": "No students were archived"}
+        error_code = 400
+        mock_archive_students.return_value = ([], error_data, error_code)
 
         response = client.patch("/students", json={"ids": valid_student_ids})
         data = response.get_json()
 
-        assert response.status_code == 404
-        assert "No students were archived" in data["error"]
+        assert response.status_code == error_code
+        assert "No students were archived" in data["error"]["message"]
+
+    @patch("app.routes.student.archive_students")
+    def test_handle_archive_students_key_error(
+        self, mock_archive_students, client, valid_student_ids
+    ):
+        mock_archive_students.side_effect = KeyError("ids")
+
+        response = client.patch("/students", json={"ids": valid_student_ids})
+        data = response.get_json()
+
+        assert response.status_code == 400
+        assert "Missing required field" in data["error"]
 
     @patch("app.routes.student.archive_students")
     def test_handle_archive_students_exception(

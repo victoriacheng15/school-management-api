@@ -26,3 +26,6 @@ docker-clean:
 	docker stop school-flask-api-container || true
 	docker rm school-flask-api-container || true
 	docker rmi school-flask-api || true
+
+reset:
+	rm db/school.db && make setup-db

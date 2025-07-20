@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
 from app.utils import build_bulk_response, api_response, api_response_error
 from app.services import (
-    get_all_active_students,
+    get_all_students,
     get_student_by_id,
-    create_students,
+    create_new_students,
     update_students,
     archive_students,
 )
@@ -14,7 +14,7 @@ student_bp = Blueprint("student", __name__)
 @student_bp.route("/students", methods=["GET"])
 def handle_read_all_active_students():
     try:
-        students = get_all_active_students()
+        students = get_all_students()
         return api_response(students, "Students fetched successfully")
     except Exception as e:
         return api_response_error(f"Unexpected error: {str(e)}")
@@ -36,7 +36,7 @@ def handle_get_student_by_id(student_id):
 @student_bp.route("/students", methods=["POST"])
 def handle_create_student():
     try:
-        results, error_data, status_code = create_students(request.get_json())
+        results, error_data, status_code = create_new_students(request.get_json())
 
         if error_data:
             return api_response_error(error_data["error"], status_code)
@@ -60,10 +60,9 @@ def handle_create_student():
 @student_bp.route("/students", methods=["PUT"])
 def handle_update_students():
     try:
-        results, error_data, status_code = update_students(request.get_json())
-
-        if error_data:
-            return api_response_error(error_data["error"], status_code)
+        results, error_messages, status_code = update_students(request.get_json())
+        if error_messages:
+            return api_response_error(error_messages, status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=results,
@@ -84,20 +83,21 @@ def handle_archive_students():
         payload = request.get_json()
 
         if not payload or "ids" not in payload:
-            return api_response_error("Missing 'ids' in request", 400)
+            raise KeyError("ids")
 
-        archived_ids = archive_students(payload["ids"])
+        archived_data, error_messages, status_code = archive_students(payload["ids"])
 
-        if not archived_ids:
-            return api_response_error("No students were archived", 404)
-
-        return api_response(
-            archived_ids,
-            message=f"{len(archived_ids)} student(s) archived successfully",
-            status_code=200,
+        if error_messages:
+            return api_response_error(error_messages, status_code)
+        response_data, status_code = build_bulk_response(
+            success_list=archived_data,
+            success_msg_single="Student archived successfully",
+            success_msg_bulk="{} students archived successfully",
         )
 
-    except ValueError as ve:
-        return api_response_error(str(ve), 400)
+        return jsonify(response_data), status_code
+
+    except KeyError as e:
+        return api_response_error(f"Missing required field: {str(e)}", 400)
     except Exception as e:
         return api_response_error(f"Internal error while archiving students: {str(e)}")

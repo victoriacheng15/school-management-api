@@ -6,11 +6,11 @@ from .enrollment import get_all_active_enrollments
 from .instructor import get_all_active_instructors
 from .program import get_all_active_programs
 from .student import (
-    read_all_active_students,
-    read_student_by_id,
-    create_student,
-    update_student,
-    archive_student,
-    read_students_by_ids,
+    student_db_read_all,
+    student_db_read_by_id,
+    student_db_read_by_ids,
+    student_db_insert,
+    student_db_update,
+    student_db_archive,
 )
 from .term import get_all_active_terms

@@ -2,9 +2,11 @@ from db.database import Database
 
 db = Database()
 
+
 def student_db_read_all():
     query = "SELECT * FROM students WHERE status = 'active';"
     return db.execute_query(query)
+
 
 def student_db_read_by_id(student_id):
     query = "SELECT * FROM students WHERE id = ?;"
@@ -13,12 +15,14 @@ def student_db_read_by_id(student_id):
         return result[0]
     return None
 
+
 def student_db_read_by_ids(student_ids):
     if not student_ids:
         return []
     placeholders = ",".join("?" for _ in student_ids)
     query = f"SELECT * FROM students WHERE id IN ({placeholders});"
     return db.execute_query(query, student_ids)
+
 
 def student_db_insert(student_data):
     query = """
@@ -31,6 +35,7 @@ def student_db_insert(student_data):
     cursor = db.execute_query(query, student_data)
     return cursor.lastrowid if cursor else None
 
+
 def student_db_update(student_id, student_data):
     query = """
     UPDATE students
@@ -41,6 +46,7 @@ def student_db_update(student_id, student_data):
     values = student_data + (student_id,)
     cursor = db.execute_query(query, values)
     return cursor.rowcount if cursor else 0
+
 
 def student_db_archive(student_id):
     query = """

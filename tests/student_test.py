@@ -224,9 +224,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(valid_student_update_data)
 
         assert results == []
-        assert error == [
-            {"message": "Student ID 1 not updated (maybe archived?)"}
-        ]
+        assert error == [{"message": "Student ID 1 not updated (maybe archived?)"}]
         assert status_code == 400
         mock_db_update.assert_called_once()
         mock_db_read_many.assert_not_called()
@@ -543,7 +541,7 @@ class TestStudentArchiveRoute:
         assert response.status_code == 200
         assert "2 students archived successfully" in data["message"]
         assert isinstance(data["data"], dict) or isinstance(data["data"], list)
-    
+
     @patch("app.routes.student.archive_students")
     def test_handle_archive_students_service_error(
         self, mock_archive_students, client, valid_student_ids

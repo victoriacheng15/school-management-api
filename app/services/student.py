@@ -1,10 +1,10 @@
 from app.models import (
-  student_db_read_all,
-  student_db_read_by_id,
-  student_db_read_by_ids,
-  student_db_insert,
-  student_db_update,
-  student_db_archive,
+    student_db_read_all,
+    student_db_read_by_id,
+    student_db_read_by_ids,
+    student_db_insert,
+    student_db_update,
+    student_db_archive,
 )
 from app.utils import (
     student_row_to_dict,
@@ -76,9 +76,7 @@ def update_students(data):
 
         student_id = incoming_data.get("id")
         if not student_id:
-            errors.append(
-                {"message": "Missing student ID for update"}
-            )
+            errors.append({"message": "Missing student ID for update"})
             continue
 
         existing_data = student_db_read_by_id(student_id)
@@ -106,7 +104,7 @@ def update_students(data):
                     }
                 )
         except (ValueError, RuntimeError) as e:
-            errors.append({ "message": str(e)})
+            errors.append({"message": str(e)})
 
     if not updated_ids:
         return [], errors, 400
@@ -130,10 +128,12 @@ def archive_students(ids):
         if rows_updated > 0:
             archived_ids.append(student_id)
         else:
-            errors.append({
-                "id": student_id,
-                "message": f"Student ID {student_id} is not found or already archived)"
-            })
+            errors.append(
+                {
+                    "id": student_id,
+                    "message": f"Student ID {student_id} is not found or already archived)",
+                }
+            )
 
     if not archived_ids:
         return [], errors, 400

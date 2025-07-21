@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS instructors (
     address TEXT,
     province TEXT,
     employment TEXT CHECK(employment IN ('full-time', 'part-time', 'adjunct')) NOT NULL,
-    status TEXT CHECK(status IN ('active', 'inactive')),
+    status TEXT CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
     department_id INTEGER NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

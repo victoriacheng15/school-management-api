@@ -13,8 +13,8 @@ from app.utils import (
 )
 
 
-def get_all_students():
-    results = student_db_read_all()
+def get_all_students(active_only):
+    results = student_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch students")
     return [student_row_to_dict(student) for student in results]

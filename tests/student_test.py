@@ -145,7 +145,7 @@ def mock_db_archive():
 class TestStudentReadService:
     def test_get_all_students(self, mock_db_read_all, valid_student_row):
         mock_db_read_all.return_value = [valid_student_row]
-        students = get_all_students()
+        students = get_all_students(active_only=True)
         assert len(students) == 1
         assert students[0]["first_name"] == "John"
         mock_db_read_all.assert_called_once()
@@ -153,7 +153,7 @@ class TestStudentReadService:
     def test_get_all_students_none(self, mock_db_read_all):
         mock_db_read_all.return_value = None
         with pytest.raises(RuntimeError):
-            get_all_students()
+            get_all_students(active_only=True)
 
     def test_get_student_by_id(self, mock_db_read_one, valid_student_row):
         mock_db_read_one.return_value = valid_student_row
@@ -267,12 +267,12 @@ class TestStudentArchiveService:
 
 class TestStudentModel:
     @patch("app.models.student.db.execute_query")
-    def test_student_db_read_alls(self, mock_execute):
+    def test_student_db_read_all(self, mock_execute):
         mock_execute.return_value = [("mocked",)]
         result = student_db_read_all()
         assert result == [("mocked",)]
         mock_execute.assert_called_once_with(
-            "SELECT * FROM students WHERE status = 'active';"
+            "SELECT * FROM students;"
         )
 
     @patch("app.models.student.db.execute_query")

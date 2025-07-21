@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-# ===== Usage examples: ======
-# post_resource "students" "$students_post"
-# patch_resource "students" "$students_patch"
-
-# post_resource "instructors" "$instructors_post"
-# patch_resource "instructors" "$instructors_patch"
-
 BASE_URL="http://127.0.0.1:5000"
 
 get_resource() {

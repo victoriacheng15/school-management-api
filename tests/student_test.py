@@ -271,9 +271,7 @@ class TestStudentModel:
         mock_execute.return_value = [("mocked",)]
         result = student_db_read_all()
         assert result == [("mocked",)]
-        mock_execute.assert_called_once_with(
-            "SELECT * FROM students;"
-        )
+        mock_execute.assert_called_once_with("SELECT * FROM students;")
 
     @patch("app.models.student.db.execute_query")
     def test_student_db_read_by_id_found(self, mock_execute):

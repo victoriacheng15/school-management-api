@@ -34,7 +34,8 @@ def create_new_instructors(data):
 
     for instructor_data in instructors:
         instructor_data = {
-            k: (v.strip() if isinstance(v, str) else v) for k, v in instructor_data.items()
+            k: (v.strip() if isinstance(v, str) else v)
+            for k, v in instructor_data.items()
         }
 
         try:
@@ -55,7 +56,9 @@ def create_new_instructors(data):
         return [], {"message": "No instructors were created", "details": errors}, 400
 
     created_instructors_rows = instructor_db_read_by_ids(created_ids)
-    created_instructors = [instructor_row_to_dict(row) for row in created_instructors_rows]
+    created_instructors = [
+        instructor_row_to_dict(row) for row in created_instructors_rows
+    ]
 
     return created_instructors, None, 201
 
@@ -107,7 +110,9 @@ def update_instructors(data):
         return [], errors, 400
 
     updated_instructors_rows = instructor_db_read_by_ids(updated_ids)
-    updated_instructors = [instructor_row_to_dict(row) for row in updated_instructors_rows]
+    updated_instructors = [
+        instructor_row_to_dict(row) for row in updated_instructors_rows
+    ]
 
     return updated_instructors, errors, 200
 

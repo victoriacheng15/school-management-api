@@ -12,9 +12,10 @@ student_bp = Blueprint("student", __name__)
 
 
 @student_bp.route("/students", methods=["GET"])
-def handle_read_all_active_students():
+def handle_read_all_students():
     try:
-        students = get_all_students()
+        active_only = request.args.get("active_only", "false").lower() == "true"
+        students = get_all_students(active_only=active_only)
         return api_response(students, "Students fetched successfully")
     except Exception as e:
         return api_response_error(f"Unexpected error: {str(e)}")

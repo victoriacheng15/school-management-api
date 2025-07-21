@@ -55,14 +55,14 @@ def instructor_row_to_dict(row):
 
 def instructor_dict_to_row(data):
     return (
-        data["first_name"],
-        data["last_name"],
-        data["email"],
-        data["address"],
-        data["province"],
-        data["employment"],
-        data["status"],
-        data["department_id"],
+        data.get("first_name", None),
+        data.get("last_name", None),
+        data.get("email", None),
+        data.get("address"),
+        data.get("province"),
+        data.get("employment", "full-time"),
+        data.get("status", "active"),
+        data.get("department_id"),
     )
 
 

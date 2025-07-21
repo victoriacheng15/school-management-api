@@ -3,8 +3,11 @@ from db.database import Database
 db = Database()
 
 
-def student_db_read_all():
-    query = "SELECT * FROM students WHERE status = 'active';"
+def student_db_read_all(active_only=False):
+    query = "SELECT * FROM students"
+    if active_only:
+        query += " WHERE status = 'active'"
+    query += ";"
     return db.execute_query(query)
 
 

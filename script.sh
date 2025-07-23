@@ -40,7 +40,7 @@ patch_resource() {
     -d "$data"
 }
 
-students_post='[
+create_students='[
   {
     "first_name": "John",
     "last_name": "Doe",
@@ -67,7 +67,7 @@ students_post='[
   }
 ]'
 
-students_put='[
+update_students='[
   {
     "id": 1,
     "status": "inactive",
@@ -81,13 +81,12 @@ students_put='[
 ]'
 
 
-students_patch='{
-  "ids": [1, 2],
-  "updated_at": "2025-07-20"
+archive_students='{
+  "ids": [3, 4],
 }'
 
 
-instructors_post='[
+create_instructors='[
   {
     "first_name": "Jane",
     "last_name": "Smith",
@@ -110,10 +109,13 @@ instructors_post='[
   }
 ]'
 
-instructors_patch='{
-  "ids": [1, 2],
-  "status": "inactive",
-  "updated_at": "2025-07-20"
+update_instructors='[
+  { "id": 1, "status": "inactive" },
+  { "id": 2, "status": "inactive" }
+]'
+
+archive_instructors='{
+  "ids": [3, 4]
 }'
 
 departments_post='[
@@ -250,9 +252,9 @@ usage() {
   echo "Usage: $0 {read|create|update|archive} resource [id]"
   echo "Example: $0 read students"
   echo "Example: $0 read students 1"
-  echo "Example: $0 create students students_post"
-  echo "Example: $0 update students students_put"
-  echo "Example: $0 archive students students_patch"
+  echo "Example: $0 create students create_students"
+  echo "Example: $0 update students update_students"
+  echo "Example: $0 archive students archive_students"
   exit 1
 }
 
@@ -271,7 +273,7 @@ case "$method" in
     get_resource "$resource" "$id" "$keyword"
     ;;
   create)
-    var_name="${resource}_post"
+    var_name="create_${resource}"
     data="${!var_name}"
     if [ -z "$data" ]; then
       echo "No POST data defined for resource '$resource'"
@@ -280,7 +282,7 @@ case "$method" in
     post_resource "$resource" "$data"
     ;;
   update)
-    var_name="${resource}_put"
+    var_name="update_${resource}"
     data="${!var_name}"
     if [ -z "$data" ]; then
       echo "No PUT data defined for resource '$resource'"
@@ -289,7 +291,7 @@ case "$method" in
     put_resource "$resource" "$data"
     ;;
   archive)
-    var_name="${resource}_patch"
+    var_name="archive_${resource}"
     data="${!var_name}"
     if [ -z "$data" ]; then
       echo "No PATCH data defined for resource '$resource'"

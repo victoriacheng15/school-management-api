@@ -14,7 +14,8 @@ instructor_bp = Blueprint("instructor", __name__)
 @instructor_bp.route("/instructors", methods=["GET"])
 def handle_read_all_instructors():
     try:
-        instructors = get_all_instructors()
+        active_only = request.args.get("active_only", "false").lower() == "true"
+        instructors = get_all_instructors(active_only=active_only)
         return api_response(instructors, "Instructors fetched successfully")
     except Exception as e:
         return api_response_error(f"Unexpected error: {str(e)}")

@@ -82,7 +82,7 @@ update_students='[
 
 
 archive_students='{
-  "ids": [3, 4],
+  "ids": [3, 4]
 }'
 
 

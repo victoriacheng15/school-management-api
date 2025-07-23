@@ -13,8 +13,8 @@ from app.utils import (
 )
 
 
-def get_all_instructors():
-    results = instructor_db_read_all()
+def get_all_instructors(active_only):
+    results = instructor_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch instructors")
     return [instructor_row_to_dict(instructor) for instructor in results]

@@ -274,6 +274,15 @@ class TestStudentModel:
         mock_execute.assert_called_once_with("SELECT * FROM students;")
 
     @patch("app.models.student.db.execute_query")
+    def test_student_db_read_all_active(self, mock_execute):
+        mock_execute.return_value = [("active_student",)]
+        result = student_db_read_all(active_only=True)
+        assert result == [("active_student",)]
+        mock_execute.assert_called_once_with(
+            "SELECT * FROM students WHERE status = 'active';"
+        )
+
+    @patch("app.models.student.db.execute_query")
     def test_student_db_read_by_id_found(self, mock_execute):
         mock_execute.return_value = [("student_1",)]
         result = student_db_read_by_id(1)
@@ -457,7 +466,7 @@ class TestStudentCreateRoute:
         response = client.post("/students", json=valid_student_create_data)
         data = response.get_json()
 
-        assert response.status_code == 500
+        assert response.status_code == 400
         assert "Missing required field" in data["error"]
 
     @patch("app.routes.student.create_new_students")

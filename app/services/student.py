@@ -57,9 +57,6 @@ def create_new_students(data):
     created_students_rows = student_db_read_by_ids(created_ids)
     created_students = [student_row_to_dict(row) for row in created_students_rows]
 
-    # if errors:
-    #     return {"message": errors}, None, 201
-
     return created_students, None, 201
 
 

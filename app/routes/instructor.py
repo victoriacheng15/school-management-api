@@ -14,7 +14,8 @@ instructor_bp = Blueprint("instructor", __name__)
 @instructor_bp.route("/instructors", methods=["GET"])
 def handle_read_all_instructors():
     try:
-        instructors = get_all_instructors()
+        active_only = request.args.get("active_only", "false").lower() == "true"
+        instructors = get_all_instructors(active_only=active_only)
         return api_response(instructors, "Instructors fetched successfully")
     except Exception as e:
         return api_response_error(f"Unexpected error: {str(e)}")
@@ -50,7 +51,7 @@ def handle_create_instructor():
         return jsonify(response_data), status_code
 
     except KeyError as e:
-        return api_response_error(f"Missing required field: {str(e)}")
+        return api_response_error(f"Missing required field: {str(e)}", 400)
     except Exception as e:
         return api_response_error(
             f"An internal error occurred while inserting the instructor(s): {str(e)}"

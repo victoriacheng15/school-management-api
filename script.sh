@@ -5,10 +5,14 @@ BASE_URL="http://127.0.0.1:5000"
 get_resource() {
   local resource=$1
   local id=$2
-  if [ -z "$id" ]; then
-    curl -s "$BASE_URL/$resource"
+  local keyword=$3
+
+  if [ -n "$id" ]; then
+    curl -s "$BASE_URL/$resource/$id" | jq
+  elif [ "$keyword" == "active" ]; then
+    curl -s "$BASE_URL/$resource?active_only=true" | jq
   else
-    curl -s "$BASE_URL/$resource/$id"
+    curl -s "$BASE_URL/$resource" | jq
   fi
 }
 
@@ -17,7 +21,7 @@ post_resource() {
   local data=$2
   curl -X POST "$BASE_URL/$resource" \
     -H "Content-Type: application/json" \
-    -d "$data"
+    -d "$data" | jq
 }
 
 put_resource() {
@@ -259,11 +263,12 @@ fi
 
 method=$1
 resource=$2
-id=$3  # optional
+id=$3
+keyword=$4
 
 case "$method" in
   read)
-    get_resource "$resource" "$id"
+    get_resource "$resource" "$id" "$keyword"
     ;;
   create)
     var_name="${resource}_post"

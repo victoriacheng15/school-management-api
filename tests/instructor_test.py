@@ -174,7 +174,9 @@ class TestInstructorCreateService:
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_instructor_rows
 
-        results, error, status_code = create_new_instructors(valid_instructor_create_data)
+        results, error, status_code = create_new_instructors(
+            valid_instructor_create_data
+        )
 
         assert len(results) == 2
         assert error is None
@@ -186,7 +188,9 @@ class TestInstructorCreateService:
         self, mock_db_create, mock_db_read_many, valid_instructor_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        results, error, status_code = create_new_instructors(valid_instructor_create_data)
+        results, error, status_code = create_new_instructors(
+            valid_instructor_create_data
+        )
 
         assert results == []
         assert error["message"] == "No instructors were created"
@@ -245,7 +249,9 @@ class TestInstructorArchiveService:
         assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_instructors_none_archived(self, mock_db_archive, valid_instructor_ids):
+    def test_archive_instructors_none_archived(
+        self, mock_db_archive, valid_instructor_ids
+    ):
         mock_db_archive.return_value = 0
         archived = archive_instructors(valid_instructor_ids)
 
@@ -268,6 +274,15 @@ class TestInstructorModel:
         result = instructor_db_read_all()
         assert result == [("mocked",)]
         mock_execute.assert_called_once_with("SELECT * FROM instructors;")
+
+    @patch("app.models.instructor.db.execute_query")
+    def test_instructor_db_read_all_active(self, mock_execute):
+        mock_execute.return_value = [("active_instructor",)]
+        result = instructor_db_read_all(active_only=True)
+        assert result == [("active_instructor",)]
+        mock_execute.assert_called_once_with(
+            "SELECT * FROM instructors WHERE status = 'active';"
+        )
 
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_read_by_id_found(self, mock_execute):
@@ -421,7 +436,11 @@ class TestInstructorCreateRoute:
     def test_handle_instructor_db_insert_success(
         self, mock_create_new_instructors, client, valid_instructor_create_data
     ):
-        mock_create_new_instructors.return_value = (valid_instructor_create_data, None, None)
+        mock_create_new_instructors.return_value = (
+            valid_instructor_create_data,
+            None,
+            None,
+        )
 
         response = client.post("/instructors", json=valid_instructor_create_data)
         data = response.get_json()
@@ -453,7 +472,7 @@ class TestInstructorCreateRoute:
         response = client.post("/instructors", json=valid_instructor_create_data)
         data = response.get_json()
 
-        assert response.status_code == 500
+        assert response.status_code == 400
         assert "Missing required field" in data["error"]
 
     @patch("app.routes.instructor.create_new_instructors")
@@ -474,7 +493,11 @@ class TestInstructorUpdateRoute:
     def test_handle_update_instructors_success(
         self, mock_update_instructors, client, valid_instructor_update_data
     ):
-        mock_update_instructors.return_value = (valid_instructor_update_data, None, None)
+        mock_update_instructors.return_value = (
+            valid_instructor_update_data,
+            None,
+            None,
+        )
 
         response = client.put("/instructors", json=valid_instructor_update_data)
         data = response.get_json()

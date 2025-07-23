@@ -51,7 +51,7 @@ def handle_create_instructor():
         return jsonify(response_data), status_code
 
     except KeyError as e:
-        return api_response_error(f"Missing required field: {str(e)}")
+        return api_response_error(f"Missing required field: {str(e)}",400)
     except Exception as e:
         return api_response_error(
             f"An internal error occurred while inserting the instructor(s): {str(e)}"

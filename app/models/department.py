@@ -14,9 +14,7 @@ def department_db_read_all(active_only=False):
 def department_db_read_by_id(department_id):
     query = "SELECT * FROM departments WHERE id = ?;"
     result = db.execute_query(query, (department_id,))
-    if result and len(result) > 0:
-        return result[0]
-    return None
+    return result[0] if result else None
 
 
 def department_db_read_by_ids(department_ids):

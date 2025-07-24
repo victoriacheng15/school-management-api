@@ -440,8 +440,8 @@ class TestDepartmentCreateRoute:
     def test_handle_department_db_insert_service_error(
         self, mock_create_new_departments, client, valid_department_create_data
     ):
-        error_data = {"error": "Invalid data"}
-        error_code = 422
+        error_data = {"message": "Invalid data"}
+        error_code = 400
         mock_create_new_departments.return_value = ([], error_data, error_code)
 
         response = client.post("/departments", json=valid_department_create_data)
@@ -498,7 +498,7 @@ class TestDepartmentUpdateRoute:
         self, mock_update_departments, client, valid_department_update_data
     ):
         error_data = {"message": "Invalid data"}
-        error_code = 422
+        error_code = 400
         mock_update_departments.return_value = ([], error_data, error_code)
 
         response = client.put("/departments", json=valid_department_update_data)

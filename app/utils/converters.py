@@ -77,7 +77,7 @@ def department_row_to_dict(row):
 
 
 def department_dict_to_row(data):
-    return data.get("name", None),
+    return (data.get("name", None),)
 
 
 def program_row_to_dict(row):

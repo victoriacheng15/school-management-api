@@ -14,9 +14,7 @@ def instructor_db_read_all(active_only=False):
 def instructor_db_read_by_id(instructor_id):
     query = "SELECT * FROM instructors WHERE id = ?;"
     result = db.execute_query(query, (instructor_id,))
-    if result and len(result) > 0:
-        return result[0]
-    return None
+    return result[0] if result else None
 
 
 def instructor_db_read_by_ids(instructor_ids):

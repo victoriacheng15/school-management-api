@@ -19,3 +19,10 @@ from .department import (
     update_departments,
     archive_departments,
 )
+from .program import (
+    get_all_programs,
+    get_program_by_id,
+    create_new_programs,
+    update_programs,
+    archive_programs,
+)

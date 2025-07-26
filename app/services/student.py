@@ -16,7 +16,7 @@ from app.utils import (
 def get_all_students(active_only):
     results = student_db_read_all(active_only=active_only)
     if results is None:
-        raise RuntimeError("Failed to fetch students")
+        raise RuntimeError("Failed to fetch students.")
     return [student_row_to_dict(student) for student in results]
 
 
@@ -44,9 +44,7 @@ def create_new_students(data):
                 created_ids.append(student_id)
             else:
                 errors.append(
-                    {
-                        "message": "Failed to insert student (unknown DB error)",
-                    }
+                    {"message": "Failed to insert student (unknown DB error)."}
                 )
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
@@ -73,17 +71,12 @@ def update_students(data):
 
         student_id = incoming_data.get("id")
         if not student_id:
-            errors.append({"message": "Missing student ID for update"})
-            continue
+            return [], [{"message": "Missing student ID for update."}], 400
 
         existing_data = student_db_read_by_id(student_id)
         if not existing_data:
-            errors.append(
-                {
-                    "message": f"Student ID {student_id} not found",
-                }
-            )
-            continue
+            return [], [{"message": f"Student ID {student_id} not found."}], 422
+
         if not isinstance(existing_data, dict):
             existing_data = student_row_to_dict(existing_data)
 
@@ -95,11 +88,7 @@ def update_students(data):
             if success:
                 updated_ids.append(student_id)
             else:
-                errors.append(
-                    {
-                        "message": f"Student ID {student_id} not updated (maybe archived?)",
-                    }
-                )
+                errors.append({"message": f"Student ID {student_id} not updated."})
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -115,7 +104,7 @@ def update_students(data):
 def archive_students(ids):
     ids = normalize_to_list(ids)
     if not all(isinstance(item, int) for item in ids):
-        raise ValueError("IDs must be integers")
+        return [], [{"message": "IDs must be integers"}], 400
 
     archived_ids = []
     errors = []
@@ -126,14 +115,11 @@ def archive_students(ids):
             archived_ids.append(student_id)
         else:
             errors.append(
-                {
-                    "id": student_id,
-                    "message": f"Student ID {student_id} is not found or already archived)",
-                }
+                {"message": f"Student ID {student_id} not found or already archived."}
             )
 
     if not archived_ids:
-        return [], errors, 400
+        return [], errors, 422
 
     # Read and return the updated records
     archived_rows = student_db_read_by_ids(archived_ids)

@@ -180,7 +180,7 @@ class TestDepartmentCreateService:
         )
 
         assert results == []
-        assert error["message"] == "No departments were created"
+        assert error["message"] == "No departments were created."
         assert status_code == 400
         mock_db_read_many.assert_not_called()
 
@@ -211,7 +211,7 @@ class TestDepartmentUpdateService:
         results, error, status_code = update_departments(valid_department_update_data)
 
         assert results == []
-        assert error == [{"message": "Department ID 1 not updated (maybe archived?)"}]
+        assert error == [{"message": "Department ID 1 not updated."}]
         assert status_code == 400
         mock_db_update.assert_called_once()
         mock_db_read_many.assert_not_called()
@@ -222,7 +222,7 @@ class TestDepartmentUpdateService:
         results, error, status_code = update_departments(department_missing_id)
 
         assert results == []
-        assert error == [{"message": "Missing department ID for update"}]
+        assert error == [{"message": "Missing department ID for update."}]
         assert status_code == 400
         mock_db_update.assert_not_called()
         mock_db_read_many.assert_not_called()
@@ -245,8 +245,9 @@ class TestDepartmentArchiveService:
         assert archived == []
 
     def test_archive_departments_invalid_ids(self):
-        with pytest.raises(ValueError):
-            archive_departments(["one", 2])
+        results, errors, status = archive_departments(["one", 2])
+        assert status == 400
+        assert any("must be integers" in e["message"] for e in errors)
 
 
 # =======================
@@ -367,7 +368,7 @@ class TestDepartmentReadRoute:
         resp = client.get("/departments")
         assert resp.status_code == 200
         data = resp.get_json()
-        assert "Departments fetched successfully" in data["message"]
+        assert "Departments fetched successfully." in data["message"]
         assert isinstance(data["data"], list)
         assert data["data"] == valid_department_create_data
         mock_get.assert_called_once()
@@ -426,7 +427,7 @@ class TestDepartmentCreateRoute:
         mock_create_new_departments.return_value = (
             valid_department_create_data,
             None,
-            None,
+            201,
         )
 
         response = client.post("/departments", json=valid_department_create_data)
@@ -434,7 +435,7 @@ class TestDepartmentCreateRoute:
 
         assert response.status_code == 201
         assert "2 departments created successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.department.create_new_departments")
     def test_handle_department_db_insert_service_error(
@@ -448,7 +449,7 @@ class TestDepartmentCreateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.department.create_new_departments")
     def test_handle_department_db_insert_key_error(
@@ -482,8 +483,8 @@ class TestDepartmentUpdateRoute:
     ):
         mock_update_departments.return_value = (
             valid_department_update_data,
-            None,
-            None,
+            [],
+            200,
         )
 
         response = client.put("/departments", json=valid_department_update_data)
@@ -491,7 +492,7 @@ class TestDepartmentUpdateRoute:
 
         assert response.status_code == 200
         assert "Department updated successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.department.update_departments")
     def test_handle_update_departments_service_error(
@@ -505,7 +506,7 @@ class TestDepartmentUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]["message"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.department.update_departments")
     def test_handle_update_departments_key_error(
@@ -537,14 +538,14 @@ class TestDepartmentArchiveRoute:
     def test_handle_archive_departments_success(
         self, mock_archive_departments, client, valid_department_ids
     ):
-        mock_archive_departments.return_value = ([{"id": 1}, {"id": 2}], None, 200)
+        mock_archive_departments.return_value = ([{"id": 1}, {"id": 2}], [], 200)
 
         response = client.patch("/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 200
         assert "2 departments archived successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.department.archive_departments")
     def test_handle_archive_departments_service_error(
@@ -558,15 +559,13 @@ class TestDepartmentArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "No departments were archived" in data["error"]["message"]
+        assert "No departments were archived" in data["message"]
 
     @patch("app.routes.department.archive_departments")
     def test_handle_archive_departments_key_error(
-        self, mock_archive_departments, client, valid_department_ids
+        self, mock_archive_departments, client
     ):
-        mock_archive_departments.side_effect = KeyError("ids")
-
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/departments", json={})
         data = response.get_json()
 
         assert response.status_code == 400

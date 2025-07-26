@@ -19,18 +19,10 @@ def test_normalize_to_list_list_item():
 @pytest.fixture
 def mock_funcs():
     return {
-        "process_func": MagicMock(
-            return_value=1
-        ),  # Simulate successful DB operation returning an ID
-        "success_func": MagicMock(
-            return_value={"id": 1, "name": "Test"}
-        ),  # Simulate fetching full data
-        "dict_to_row_func": MagicMock(
-            side_effect=lambda x: (x["name"],)
-        ),  # Simulate dict to row conversion
-        "row_to_dict_func": MagicMock(
-            side_effect=lambda x: {"id": x, "name": "Test"}
-        ),  # Simulate row to dict conversion
+        "process_func": MagicMock(return_value=1),
+        "success_func": MagicMock(return_value={"id": 1, "name": "Test"}),
+        "dict_to_row_func": MagicMock(side_effect=lambda x: (x["name"],)),
+        "row_to_dict_func": MagicMock(side_effect=lambda x: {"id": x, "name": "Test"}),
     }
 
 
@@ -55,7 +47,7 @@ def test_handle_bulk_process_create_success(mock_funcs):
 
 def test_handle_bulk_process_update_success(mock_funcs):
     items = [{"id": 1, "name": "UpdatedItem1"}]
-    mock_funcs["process_func"].return_value = 1  # Simulate 1 row updated
+    mock_funcs["process_func"].return_value = 1
     results, error_data, error_code = handle_bulk_process(
         items=items,
         process_func=mock_funcs["process_func"],
@@ -77,7 +69,7 @@ def test_handle_bulk_process_update_success(mock_funcs):
 
 def test_handle_bulk_process_no_records_processed(mock_funcs):
     items = [{"name": "Item1"}]
-    mock_funcs["process_func"].return_value = 0  # Simulate no rows processed
+    mock_funcs["process_func"].return_value = 0
     results, error_data, error_code = handle_bulk_process(
         items=items,
         process_func=mock_funcs["process_func"],
@@ -104,5 +96,7 @@ def test_handle_bulk_process_missing_id_for_update(mock_funcs):
     )
 
     assert results is None
-    assert error_data == {"error": "Missing ID"}
+    assert error_data == {
+        "errors": [{"index": 0, "data": {"name": "Item1"}, "error": "'id'"}]
+    }
     assert error_code == 400

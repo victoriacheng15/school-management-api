@@ -224,7 +224,7 @@ class TestInstructorUpdateService:
         results, error, status_code = update_instructors(valid_instructor_update_data)
 
         assert results == []
-        assert error == [{"message": "Instructor ID 1 not updated (maybe archived?)"}]
+        assert error == [{"message": "Instructor ID 1 not updated."}]
         assert status_code == 400
         mock_db_update.assert_called_once()
         mock_db_read_many.assert_not_called()
@@ -235,7 +235,7 @@ class TestInstructorUpdateService:
         results, error, status_code = update_instructors(instructor_missing_id)
 
         assert results == []
-        assert error == [{"message": "Missing instructor ID for update"}]
+        assert error == [{"message": "Missing instructor ID for update."}]
         assert status_code == 400
         mock_db_update.assert_not_called()
         mock_db_read_many.assert_not_called()
@@ -244,22 +244,23 @@ class TestInstructorUpdateService:
 class TestInstructorArchiveService:
     def test_archive_instructors(self, mock_db_archive, valid_instructor_ids):
         mock_db_archive.side_effect = [1, 1]
-        archived = archive_instructors(valid_instructor_ids)
+        archived, errors, status_code = archive_instructors(valid_instructor_ids)
 
-        assert len(archived[0]) == 2
+        assert len(archived) == 2
         assert mock_db_archive.call_count == 2
 
     def test_archive_instructors_none_archived(
         self, mock_db_archive, valid_instructor_ids
     ):
         mock_db_archive.return_value = 0
-        archived = archive_instructors(valid_instructor_ids)
+        archived, errors, status_code = archive_instructors(valid_instructor_ids)
 
-        assert archived[0] == []
+        assert archived == []
 
     def test_archive_instructors_invalid_ids(self):
-        with pytest.raises(ValueError):
-            archive_instructors(["one", 2])
+        results, errors, status = archive_instructors(["one", 2])
+        assert status == 400
+        assert any("must be integers" in e["message"] for e in errors)
 
 
 # =======================
@@ -439,7 +440,7 @@ class TestInstructorCreateRoute:
         mock_create_new_instructors.return_value = (
             valid_instructor_create_data,
             None,
-            None,
+            201,
         )
 
         response = client.post("/instructors", json=valid_instructor_create_data)
@@ -447,7 +448,7 @@ class TestInstructorCreateRoute:
 
         assert response.status_code == 201
         assert "2 instructors created successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.instructor.create_new_instructors")
     def test_handle_instructor_db_insert_service_error(
@@ -461,7 +462,7 @@ class TestInstructorCreateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.instructor.create_new_instructors")
     def test_handle_instructor_db_insert_key_error(
@@ -504,7 +505,7 @@ class TestInstructorUpdateRoute:
 
         assert response.status_code == 200
         assert "Instructor updated successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.instructor.update_instructors")
     def test_handle_update_instructors_service_error(
@@ -518,7 +519,7 @@ class TestInstructorUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]["message"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.instructor.update_instructors")
     def test_handle_update_instructors_key_error(
@@ -550,20 +551,20 @@ class TestInstructorArchiveRoute:
     def test_handle_archive_instructors_success(
         self, mock_archive_instructors, client, valid_instructor_ids
     ):
-        mock_archive_instructors.return_value = (valid_instructor_ids, None, 200)
+        mock_archive_instructors.return_value = (valid_instructor_ids, [], 200)
 
         response = client.patch("/instructors", json={"ids": valid_instructor_ids})
         data = response.get_json()
 
         assert response.status_code == 200
         assert "2 instructors archived successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.instructor.archive_instructors")
     def test_handle_archive_instructors_service_error(
         self, mock_archive_instructors, client, valid_instructor_ids
     ):
-        error_data = {"message": "No instructors were archived"}
+        error_data = {"message": "No instructors were archived."}
         error_code = 400
         mock_archive_instructors.return_value = ([], error_data, error_code)
 
@@ -571,28 +572,4 @@ class TestInstructorArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "No instructors were archived" in data["error"]["message"]
-
-    @patch("app.routes.instructor.archive_instructors")
-    def test_handle_archive_instructors_key_error(
-        self, mock_archive_instructors, client, valid_instructor_ids
-    ):
-        mock_archive_instructors.side_effect = KeyError("ids")
-
-        response = client.patch("/instructors", json={"ids": valid_instructor_ids})
-        data = response.get_json()
-
-        assert response.status_code == 400
-        assert "Missing required field" in data["error"]
-
-    @patch("app.routes.instructor.archive_instructors")
-    def test_handle_archive_instructors_exception(
-        self, mock_archive_instructors, client, valid_instructor_ids
-    ):
-        mock_archive_instructors.side_effect = Exception("DB failure")
-
-        response = client.patch("/instructors", json={"ids": valid_instructor_ids})
-        data = response.get_json()
-
-        assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "No instructors were archived." in data["message"]

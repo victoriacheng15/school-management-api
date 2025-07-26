@@ -44,7 +44,9 @@ def create_new_instructors(data):
             if instructor_id:
                 created_ids.append(instructor_id)
             else:
-                errors.append({"message": "Failed to insert instructor (unknown DB error)."})
+                errors.append(
+                    {"message": "Failed to insert instructor (unknown DB error)."}
+                )
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -77,7 +79,7 @@ def update_instructors(data):
         existing_data = instructor_db_read_by_id(instructor_id)
         if not existing_data:
             return [], [{"message": f"Instructor ID {instructor_id} not found."}], 422
-        
+
         if not isinstance(existing_data, dict):
             existing_data = instructor_row_to_dict(existing_data)
 
@@ -121,7 +123,11 @@ def archive_instructors(ids):
         if rows_updated > 0:
             archived_ids.append(instructor_id)
         else:
-            errors.append({"message": f"Instructor ID {instructor_id} is not found or already archived.",})
+            errors.append(
+                {
+                    "message": f"Instructor ID {instructor_id} is not found or already archived.",
+                }
+            )
 
     if not archived_ids:
         return [], errors, 422

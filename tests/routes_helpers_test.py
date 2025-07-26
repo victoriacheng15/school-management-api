@@ -96,5 +96,7 @@ def test_handle_bulk_process_missing_id_for_update(mock_funcs):
     )
 
     assert results is None
-    assert error_data == {"errors": [{"index": 0, "data": {"name": "Item1"}, "error": "'id'"}]}
+    assert error_data == {
+        "errors": [{"index": 0, "data": {"name": "Item1"}, "error": "'id'"}]
+    }
     assert error_code == 400

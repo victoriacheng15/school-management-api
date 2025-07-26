@@ -44,7 +44,9 @@ def create_new_departments(data):
             if department_id:
                 created_ids.append(department_id)
             else:
-                errors.append({"message": "Failed to insert department (unknown DB error)."})
+                errors.append(
+                    {"message": "Failed to insert department (unknown DB error)."}
+                )
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -77,7 +79,7 @@ def update_departments(data):
         existing_data = department_db_read_by_id(department_id)
         if not existing_data:
             return [], [{"message": f"Department ID {department_id} not found."}], 404
-        
+
         if not isinstance(existing_data, dict):
             existing_data = department_row_to_dict(existing_data)
 
@@ -89,7 +91,9 @@ def update_departments(data):
             if success:
                 updated_ids.append(department_id)
             else:
-                errors.append({"message": f"Department ID {department_id} not updated."})
+                errors.append(
+                    {"message": f"Department ID {department_id} not updated."}
+                )
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -117,7 +121,11 @@ def archive_departments(ids):
         if rows_updated > 0:
             archived_ids.append(department_id)
         else:
-            errors.append({"message": f"Department ID {department_id} is not found or already archived)"})
+            errors.append(
+                {
+                    "message": f"Department ID {department_id} is not found or already archived)"
+                }
+            )
 
     if not archived_ids:
         return [], errors, 42

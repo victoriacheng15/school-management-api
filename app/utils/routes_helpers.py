@@ -14,7 +14,7 @@ def handle_bulk_process(
     missing_id_msg: Optional[str] = None,
     dict_to_row_func: Optional[Callable[[Dict[str, Any]], Any]] = None,
     row_to_dict_func: Optional[Callable[[Any], Dict[str, Any]]] = None,
-)-> Tuple[List[Dict[str, Any] | Any] | None, Optional[Dict[str, Any]], Optional[int]]:
+) -> Tuple[List[Dict[str, Any] | Any] | None, Optional[Dict[str, Any]], Optional[int]]:
     """
     Generic bulk process handler for create/update/archive operations.
 
@@ -34,7 +34,7 @@ def handle_bulk_process(
     items = normalize_to_list(items)
     if not items:
         return None, {"error": "Empty Payload"}, 400
-    
+
     success_results: List[Dict[str, Any] | Any] = []
     errors: List[Dict[str, Any]] = []
 
@@ -43,11 +43,17 @@ def handle_bulk_process(
             if id_key:
                 item_id = item[id_key] if isinstance(item, dict) else item
                 if item_id in (None, ""):
-                    errors.append({"index": idx, "data": item, "error":missing_id_msg or "ID is required"})
+                    errors.append(
+                        {
+                            "index": idx,
+                            "data": item,
+                            "error": missing_id_msg or "ID is required",
+                        }
+                    )
                     continue
             row = dict_to_row_func(item) if dict_to_row_func else item
 
-            result = process_func(item_id, row) if id_key else process_func(row) 
+            result = process_func(item_id, row) if id_key else process_func(row)
 
             if not result:
                 continue
@@ -61,7 +67,7 @@ def handle_bulk_process(
                 success_results.append(item if id_key is None else item_id)
         except Exception as e:
             errors.append({"index": idx, "data": item, "error": str(e)})
-    
+
     if errors:
         return None, {"errors": errors}, 400
     if not success_results:

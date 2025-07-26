@@ -93,7 +93,7 @@ def handle_archive_students():
         archived_data, error_data, status_code = archive_students(payload["ids"])
 
         if error_data:
-            return jsonify({"errors": error_data}), status_code
+            return api_response_error(error_data, status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=archived_data,

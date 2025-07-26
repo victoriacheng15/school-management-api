@@ -562,7 +562,7 @@ class TestStudentArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "No students were archived." in data["errors"]["message"]
+        assert "No students were archived." in data["message"]
 
     @patch("app.routes.student.archive_students")
     def test_handle_archive_students_key_error(

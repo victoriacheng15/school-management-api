@@ -250,7 +250,6 @@ class TestDepartmentArchiveService:
         assert any("must be integers" in e["message"] for e in errors)
 
 
-
 # =======================
 # Model Tests
 # =======================
@@ -442,7 +441,7 @@ class TestDepartmentCreateRoute:
     def test_handle_department_db_insert_service_error(
         self, mock_create_new_departments, client, valid_department_create_data
     ):
-        error_data = [{"message": "Invalid data"}]
+        error_data = {"message": "Invalid data"}
         error_code = 400
         mock_create_new_departments.return_value = ([], error_data, error_code)
 
@@ -450,7 +449,7 @@ class TestDepartmentCreateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["errors"][0]["message"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.department.create_new_departments")
     def test_handle_department_db_insert_key_error(
@@ -499,7 +498,7 @@ class TestDepartmentUpdateRoute:
     def test_handle_update_departments_service_error(
         self, mock_update_departments, client, valid_department_update_data
     ):
-        error_data = [{"message": "Invalid data"}]
+        error_data = {"message": "Invalid data"}
         error_code = 400
         mock_update_departments.return_value = ([], error_data, error_code)
 
@@ -507,7 +506,7 @@ class TestDepartmentUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["errors"][0]["message"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.department.update_departments")
     def test_handle_update_departments_key_error(
@@ -552,7 +551,7 @@ class TestDepartmentArchiveRoute:
     def test_handle_archive_departments_service_error(
         self, mock_archive_departments, client, valid_department_ids
     ):
-        error_data = [{"message": "No departments were archived"}]
+        error_data = {"message": "No departments were archived"}
         error_code = 400
         mock_archive_departments.return_value = ([], error_data, error_code)
 
@@ -560,7 +559,7 @@ class TestDepartmentArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "No departments were archived" in data["errors"][0]["message"]
+        assert "No departments were archived" in data["message"]
 
     @patch("app.routes.department.archive_departments")
     def test_handle_archive_departments_key_error(

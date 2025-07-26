@@ -43,7 +43,9 @@ def create_new_students(data):
             if student_id:
                 created_ids.append(student_id)
             else:
-                errors.append({"message": "Failed to insert student (unknown DB error)."})
+                errors.append(
+                    {"message": "Failed to insert student (unknown DB error)."}
+                )
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -74,7 +76,7 @@ def update_students(data):
         existing_data = student_db_read_by_id(student_id)
         if not existing_data:
             return [], [{"message": f"Student ID {student_id} not found."}], 422
-        
+
         if not isinstance(existing_data, dict):
             existing_data = student_row_to_dict(existing_data)
 
@@ -112,7 +114,9 @@ def archive_students(ids):
         if rows_updated > 0:
             archived_ids.append(student_id)
         else:
-            errors.append({"message": f"Student ID {student_id} not found or already archived."})
+            errors.append(
+                {"message": f"Student ID {student_id} not found or already archived."}
+            )
 
     if not archived_ids:
         return [], errors, 422

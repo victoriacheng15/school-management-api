@@ -80,7 +80,9 @@ def handle_update_instructors():
         return api_response_error(f"Missing required field: {str(e)}.", 400)
     except Exception as e:
         logging.exception("Unexpected error during update.")
-        return api_response_error(f"Internal error while updating instructors: {str(e)}.")
+        return api_response_error(
+            f"Internal error while updating instructors: {str(e)}."
+        )
 
 
 @instructor_bp.route("/instructors", methods=["PATCH"])
@@ -108,4 +110,6 @@ def handle_archive_instructors():
         return api_response_error(f"Missing required field: {str(e)}.", 400)
     except Exception as e:
         logging.exception("Unexpected error during archive")
-        return api_response_error(f"Internal error while archiving instructors: {str(e)}.")
+        return api_response_error(
+            f"Internal error while archiving instructors: {str(e)}."
+        )

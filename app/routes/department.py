@@ -42,7 +42,7 @@ def handle_create_department():
         results, error_data, status_code = create_new_departments(request.get_json())
 
         if error_data:
-            return jsonify({"errors": error_data}), status_code
+            return api_response_error(error_data, status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=results,
@@ -67,7 +67,7 @@ def handle_update_departments():
         results, error_data, status_code = update_departments(request.get_json())
 
         if error_data:
-            return jsonify({"errors": error_data}), status_code
+            return api_response_error(error_data, status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=results,
@@ -80,7 +80,9 @@ def handle_update_departments():
         return api_response_error(f"Missing required field: {str(e)}.", 400)
     except Exception as e:
         logging.exception("Unexpected error during update.")
-        return api_response_error(f"Internal error while updating departments: {str(e)}.")
+        return api_response_error(
+            f"Internal error while updating departments: {str(e)}."
+        )
 
 
 @department_bp.route("/departments", methods=["PATCH"])
@@ -93,7 +95,7 @@ def handle_archive_departments():
         archived_data, error_data, status_code = archive_departments(payload["ids"])
 
         if error_data:
-            return jsonify({"errors": error_data}), status_code
+            return api_response_error(error_data, status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=archived_data,

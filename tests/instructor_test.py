@@ -494,7 +494,11 @@ class TestInstructorUpdateRoute:
     def test_handle_update_instructors_success(
         self, mock_update_instructors, client, valid_instructor_update_data
     ):
-        mock_update_instructors.return_value = (valid_instructor_update_data,None,None)
+        mock_update_instructors.return_value = (
+            valid_instructor_update_data,
+            None,
+            None,
+        )
 
         response = client.put("/instructors", json=valid_instructor_update_data)
         data = response.get_json()
@@ -569,4 +573,3 @@ class TestInstructorArchiveRoute:
 
         assert response.status_code == error_code
         assert "No instructors were archived." in data["message"]
-

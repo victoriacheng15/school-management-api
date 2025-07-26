@@ -24,15 +24,7 @@ from app.services import (
 
 def make_program_row():
     today = date.today().isoformat()
-    return (
-        1,
-        "Computer Science",
-        "bachelor",
-        1,
-        today,
-        today,
-        0
-    )
+    return (1, "Computer Science", "bachelor", 1, today, today, 0)
 
 
 def make_program_dict():
@@ -309,7 +301,7 @@ class TestProgramModel:
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
-        params = valid_program_row[1:4] # name, type, department_id
+        params = valid_program_row[1:4]  # name, type, department_id
         result = program_db_insert(params)
 
         assert result == 10

@@ -224,7 +224,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(valid_student_update_data)
 
         assert results == []
-        assert error == [{"message": "Student ID 1 not updated (maybe archived?)"}]
+        assert error == [{"message": "Student ID 1 not updated."}]
         assert status_code == 400
         mock_db_update.assert_called_once()
         mock_db_read_many.assert_not_called()
@@ -235,7 +235,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(student_missing_id)
 
         assert results == []
-        assert error == [{"message": "Missing student ID for update"}]
+        assert error == [{"message": "Missing student ID for update."}]
         assert status_code == 400
         mock_db_update.assert_not_called()
         mock_db_read_many.assert_not_called()
@@ -256,8 +256,9 @@ class TestStudentArchiveService:
         assert archived[0] == []
 
     def test_archive_students_invalid_ids(self):
-        with pytest.raises(ValueError):
-            archive_students(["one", 2])
+        results, errors, status = archive_students(["one", 2])
+        assert status == 400
+        assert any("must be integers" in e["message"] for e in errors)
 
 
 # =======================
@@ -378,7 +379,7 @@ class TestStudentReadRoute:
         resp = client.get("/students")
         assert resp.status_code == 200
         data = resp.get_json()
-        assert "Students fetched successfully" in data["message"]
+        assert "Students fetched successfully." in data["message"]
         assert isinstance(data["data"], list)
         assert data["data"] == valid_student_create_data
         mock_get.assert_called_once()
@@ -441,7 +442,7 @@ class TestStudentCreateRoute:
 
         assert response.status_code == 201
         assert "2 students created successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.student.create_new_students")
     def test_handle_student_db_insert_service_error(
@@ -455,7 +456,7 @@ class TestStudentCreateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.student.create_new_students")
     def test_handle_student_db_insert_key_error(
@@ -494,7 +495,7 @@ class TestStudentUpdateRoute:
 
         assert response.status_code == 200
         assert "Student updated successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.student.update_students")
     def test_handle_update_students_service_error(
@@ -508,7 +509,7 @@ class TestStudentUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "Invalid data" in data["error"]["message"]
+        assert "Invalid data" in data["message"]
 
     @patch("app.routes.student.update_students")
     def test_handle_update_students_key_error(
@@ -547,13 +548,13 @@ class TestStudentArchiveRoute:
 
         assert response.status_code == 200
         assert "2 students archived successfully" in data["message"]
-        assert isinstance(data["data"], dict) or isinstance(data["data"], list)
+        assert data["data"]
 
     @patch("app.routes.student.archive_students")
     def test_handle_archive_students_service_error(
         self, mock_archive_students, client, valid_student_ids
     ):
-        error_data = {"message": "No students were archived"}
+        error_data = {"message": "No students were archived."}
         error_code = 400
         mock_archive_students.return_value = ([], error_data, error_code)
 
@@ -561,7 +562,7 @@ class TestStudentArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "No students were archived" in data["error"]["message"]
+        assert "No students were archived." in data["errors"]["message"]
 
     @patch("app.routes.student.archive_students")
     def test_handle_archive_students_key_error(

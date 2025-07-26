@@ -21,8 +21,8 @@ from .converters import (
 
 from .routes_helpers import (
     normalize_to_list,
-    handle_bulk_process,
-    build_bulk_response,
     api_response,
     api_response_error,
+    build_bulk_response,
+    from_bulk_result,
 )

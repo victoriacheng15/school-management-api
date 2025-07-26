@@ -16,7 +16,7 @@ from app.utils import (
 def get_all_instructors(active_only):
     results = instructor_db_read_all(active_only=active_only)
     if results is None:
-        raise RuntimeError("Failed to fetch instructors")
+        raise RuntimeError("Failed to fetch instructors.")
     return [instructor_row_to_dict(instructor) for instructor in results]
 
 
@@ -44,11 +44,7 @@ def create_new_instructors(data):
             if instructor_id:
                 created_ids.append(instructor_id)
             else:
-                errors.append(
-                    {
-                        "message": "Failed to insert instructor (unknown DB error)",
-                    }
-                )
+                errors.append({"message": "Failed to insert instructor (unknown DB error)."})
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -76,17 +72,12 @@ def update_instructors(data):
 
         instructor_id = incoming_data.get("id")
         if not instructor_id:
-            errors.append({"message": "Missing instructor ID for update"})
-            continue
+            return [], [{"message": "Missing instructor ID for update."}], 400
 
         existing_data = instructor_db_read_by_id(instructor_id)
         if not existing_data:
-            errors.append(
-                {
-                    "message": f"Instructor ID {instructor_id} not found",
-                }
-            )
-            continue
+            return [], [{"message": f"Instructor ID {instructor_id} not found."}], 422
+        
         if not isinstance(existing_data, dict):
             existing_data = instructor_row_to_dict(existing_data)
 
@@ -100,7 +91,7 @@ def update_instructors(data):
             else:
                 errors.append(
                     {
-                        "message": f"Instructor ID {instructor_id} not updated (maybe archived?)",
+                        "message": f"Instructor ID {instructor_id} not updated.",
                     }
                 )
         except (ValueError, RuntimeError) as e:
@@ -120,7 +111,7 @@ def update_instructors(data):
 def archive_instructors(ids):
     ids = normalize_to_list(ids)
     if not all(isinstance(item, int) for item in ids):
-        raise ValueError("IDs must be integers")
+        return [], [{"message": "IDs must be integers"}], 400
 
     archived_ids = []
     errors = []
@@ -130,15 +121,10 @@ def archive_instructors(ids):
         if rows_updated > 0:
             archived_ids.append(instructor_id)
         else:
-            errors.append(
-                {
-                    "id": instructor_id,
-                    "message": f"Instructor ID {instructor_id} is not found or already archived)",
-                }
-            )
+            errors.append({"message": f"Instructor ID {instructor_id} is not found or already archived.",})
 
     if not archived_ids:
-        return [], errors, 400
+        return [], errors, 422
 
     archived_rows = instructor_db_read_by_ids(archived_ids)
     archived_instructors = [instructor_row_to_dict(row) for row in archived_rows]

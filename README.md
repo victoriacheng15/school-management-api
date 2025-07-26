@@ -1,44 +1,62 @@
-# School Flask API - WIP
+# School Flask API — A Personal Project for Learning Backend Development
 
-A Flask-based backend API for managing school records including students, courses, instructors, programs, and enrollments. It uses SQLite for lightweight data storage, runs in a Dockerized environment, and includes Pytest for automated testing to ensure code quality.
+This is a personal, hands-on project to build a comprehensive backend API for managing school data — students, courses, instructors, programs, and more. It’s designed as a fun but challenging way to deepen my skills in Flask, database management, Docker, and test automation.
 
-## Documentation
+---
 
-- [Architecture](docs/architecture.md)
-- [DevOps Practice](docs/devops_practices.md)
-- [Learning Notes](docs/learning_note.md)
+## Why I Built This
 
-## Features
+Building a realistic, multi-entity API is a great way to practice:
 
-- Manage core school entities: students, instructors, departments, programs, courses, enrollments, assignments, terms, and course schedules.
-- Supports operations for each entity:
-  - **Read** (GET)
-  - **Add** (POST)
-  - **Update** (PUT/PATCH)
-  - **Archive** (soft delete, PATCH)
-- Archive functionality to keep historical data without permanent deletion.
-- Docker support with multi-stage builds for optimized deployment.
-- Automated route testing with Pytest.
-- Simple SQLite database setup with schema initialization.
+- Designing clean, modular backend architectures  
+- Handling CRUD and soft-delete operations across related resources  
+- Writing automated tests to ensure code correctness  
+- Using Docker to containerize and deploy applications  
+- Managing SQLite databases without heavy ORM layers
+
+This project is a playground for applying best practices I’m learning and improving my understanding of backend systems from end to end.
+
+---
+
+## What It Does
+
+- Provides RESTful endpoints for core school entities like students, instructors, courses, and enrollments  
+- Supports full CRUD plus archiving (soft deletes) to preserve data history  
+- Uses SQLite as an embedded database **within the Docker container** for easy, lightweight local development and testing  
+- Fully containerized with Docker (including multi-stage builds) for clean deployment  
+- Deployed on Render, demonstrating real-world cloud deployment experience  
+- Includes Pytest-based tests covering routes and business logic  
+
+### Documentation & Notes
+
+- [Architecture Overview](docs/architecture.md)  
+- [DevOps Practices](docs/devops_practices.md)  
+- [Learning Notes](docs/learning_note.md)  
+
+---
 
 ## Tech Stack
 
-- **Flask** – API framework  
-- **SQLite** – Lightweight relational database  
-- **Docker** – Containerization  
-- **Pytest** – Testing framework  
-- **GitHub Actions** – Continuous Integration (CI)
+| Technology     | Purpose                      |
+|----------------|------------------------------|
+| Flask          | Lightweight web framework    |
+| SQLite         | Simple relational database   |
+| Docker         | Containerization             |
+| Pytest         | Testing framework            |
+| GitHub Actions | CI/CD automation             |
 
-## API Routes and Supported Operations
+---
 
-| Route             | Read (GET) | Add (POST) | Update (PUT) | Archive (PATCH) |
-|-------------------|----------------|------------|--------------------|-----------------|
-| `/assignments`    | ✔              | ✘         | ✘                  | ✘               |
-| `/course_schedule`| ✔              | ✘         | ✘                  | ✘               |
-| `/courses`        | ✔              | ✘         | ✘                  | ✘               |
-| `/departments`    | ✔              | ✘         | ✘                  | ✘               |
-| `/enrollments`    | ✔              | ✘         | ✘                  | ✘               |
-| `/instructors`    | ✔              | ✘         | ✘                  | ✘               |
-| `/programs`       | ✔              | ✘         | ✘                  | ✘               |
-| `/students`       | ✔              | ✔         | ✔                  | ✔               |
-| `/terms`          | ✔              | ✘         | ✘                  | ✘               |
+## API Highlights
+
+| Resource           | GET | POST | PUT | PATCH (Archive) |
+|--------------------|-----|------|-----|-----------------|
+| Assignments        | ✔   | ✘    | ✘   | ✘               |
+| Course Schedule    | ✔   | ✘    | ✘   | ✘               |
+| Courses            | ✔   | ✘    | ✘   | ✘               |
+| Departments        | ✔   | ✔    | ✔   | ✔               |
+| Enrollments        | ✔   | ✘    | ✘   | ✘               |
+| Instructors        | ✔   | ✔    | ✔   | ✔               |
+| Programs           | ✔   | ✘    | ✘   | ✘               |
+| Students           | ✔   | ✔    | ✔   | ✔               |
+| Terms              | ✔   | ✘    | ✘   | ✘               |

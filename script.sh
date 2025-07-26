@@ -29,7 +29,7 @@ put_resource() {
   local data=$2
   curl -X PUT "$BASE_URL/$resource" \
     -H "Content-Type: application/json" \
-    -d "$data"
+    -d "$data" | jq
 }
 
 patch_resource() {
@@ -37,7 +37,7 @@ patch_resource() {
   local data=$2
   curl -X PATCH "$BASE_URL/$resource" \
     -H "Content-Type: application/json" \
-    -d "$data"
+    -d "$data" | jq
 }
 
 create_students='[
@@ -80,11 +80,9 @@ update_students='[
   }
 ]'
 
-
 archive_students='{
   "ids": [3, 4]
 }'
-
 
 create_instructors='[
   {
@@ -118,7 +116,7 @@ archive_instructors='{
   "ids": [3, 4]
 }'
 
-departments_post='[
+create_departments='[
   {
     "name": "Computer Science"
   },
@@ -127,13 +125,12 @@ departments_post='[
   }
 ]'
 
-departments_patch='{
+archive_departments='{
   "ids": [1, 2],
-  "is_archived": 1,
   "updated_at": "2025-07-20"
 }'
 
-programs_post='[
+create_programs='[
   {
     "name": "Software Engineering",
     "type": "bachelor",
@@ -146,13 +143,12 @@ programs_post='[
   }
 ]'
 
-programs_patch='{
+archive_programs='{
   "ids": [1, 2],
-  "is_archived": 1,
   "updated_at": "2025-07-20"
 }'
 
-courses_post='[
+create_courses='[
   {
     "title": "Intro to Programming",
     "code": "CS101",
@@ -167,13 +163,13 @@ courses_post='[
   }
 ]'
 
-courses_patch='{
+archive_courses='{
   "ids": [1, 2],
-  "is_archived": 1,
+  
   "updated_at": "2025-07-20"
 }'
 
-terms_post='[
+create_terms='[
   {
     "name": "Fall 2025",
     "start_date": "2025-09-01",
@@ -186,12 +182,12 @@ terms_post='[
   }
 ]'
 
-terms_patch='{
+archive_terms='{
   "ids": [1, 2],
   "updated_at": "2025-07-20"
 }'
 
-enrollments_post='[
+create_enrollments='[
   {
     "student_id": 1,
     "course_id": 1,
@@ -204,13 +200,13 @@ enrollments_post='[
   }
 ]'
 
-enrollments_patch='{
+archive_enrollments='{
   "ids": [1, 2],
   "grade": "A-",
   "updated_at": "2025-07-20"
 }'
 
-assignments_post='[
+create_assignments='[
   {
     "instructor_id": 1,
     "course_id": 1
@@ -221,13 +217,12 @@ assignments_post='[
   }
 ]'
 
-assignments_patch='{
+archive_assignments='{
   "ids": [1, 2],
-  "is_archived": 1,
   "updated_at": "2025-07-20"
 }'
 
-course_schedule_post='[
+create_course_schedule='[
   {
     "course_id": 1,
     "day": "Monday",
@@ -242,23 +237,23 @@ course_schedule_post='[
   }
 ]'
 
-course_schedule_patch='{
+archive_course_schedule='{
   "ids": [1, 2],
-  "is_archived": 1,
   "updated_at": "2025-07-20"
 }'
 
 usage() {
-  echo "Usage: $0 {read|create|update|archive} resource [id]"
-  echo "Example: $0 read students"
-  echo "Example: $0 read students 1"
-  echo "Example: $0 create students create_students"
-  echo "Example: $0 update students update_students"
-  echo "Example: $0 archive students archive_students"
+  echo "Usage: $0 {read|create|update|archive} resource [id] [keyword]"
+  echo "Examples:"
+  echo "  $0 read students"
+  echo "  $0 read students 1"
+  echo "  $0 read students  active"
+  echo "  $0 create students create_students"
+  echo "  $0 update students update_students"
+  echo "  $0 archive students archive_students"
   exit 1
 }
 
-# Check at least 2 args
 if [ $# -lt 2 ]; then
   usage
 fi

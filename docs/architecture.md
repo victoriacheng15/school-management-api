@@ -10,25 +10,40 @@ The architecture follows a layered approach, separating routing, business logic,
 
 ```mermaid
 flowchart TD
-  Client["Client (Postman / Browser)"]
-  API["Flask API Routes"]
-  Service["Service Layer"]
-  DBLayer["Database Layer"]
-  SQLite["SQLite Database"]
+    ClientTool["Client (curl / Postman)"]
 
-  Client --> API
-  API --> Service
-  Service --> DBLayer
-  DBLayer --> SQLite
+    subgraph "API Layer"
+        Routes["Flask Routes (routes/)"]
+    end
+
+    subgraph "Business Logic Layer"
+        Services["Service Layer (services/)"]
+    end
+
+    subgraph "Shared Utilities"
+        Utils["Utilities (utils/)"]
+    end
+
+    subgraph "Data Access Layer"
+        DB["Raw SQL Access (db/)"]
+        SQLite["SQLite DB (school.db)"]
+    end
+
+    ClientTool --> Routes
+    Routes --> Services
+    Routes --> Utils
+    Services --> Utils
+    Services --> DB
+    DB --> SQLite
 ```
 
 ## Key Components
 
-- Client: Any tool like Postman or browser used to send HTTP requests.
-- Flask API Routes: Defines endpoints for each resource (e.g., /students, /courses).
-- Service Layer: Contains the business logic, validations, and orchestration of data operations.
-- Database Layer: Executes raw SQL or ORM-based interactions with the SQLite database.
-- SQLite: Stores all data persistently using the defined school schema.
+- Client: Any tool or user agent—like Postman, curl, or a web browser—used to send HTTP requests to the API.
+- Flask API Routes: Defines HTTP endpoints (e.g., /students, /courses) that handle requests, parse inputs, and send responses.
+- Service Layer: Contains business logic such as data validation, processing rules, and orchestration between routes and the database layer.
+- Database Layer: Responsible for executing raw SQL queries or ORM operations to interact with the SQLite database.
+- SQLite: The persistent database that stores all application data according to your defined schema.
 
 ## Request Flow
 
@@ -42,36 +57,51 @@ sequenceDiagram
 
     Client->>Flask: POST /students
     Flask->>Service: validate & process data
-    Service->>DB: insert student
-    DB->>SQLite: INSERT INTO students (...)
-    SQLite-->>DB: OK
-    DB-->>Service: success
-    Service-->>Flask: return 201 Created
-    Flask-->>Client: 201 Created + JSON
+    alt Data valid
+        Service->>DB: insert student
+        DB->>SQLite: INSERT INTO students (...)
+        SQLite-->>DB: OK
+        DB-->>Service: success
+        Service-->>Flask: return 201 Created
+        Flask-->>Client: 201 Created + JSON success response
+    else Data invalid / error occurs
+        Service-->>Flask: return error message + status code
+        Flask-->>Client: Error response (400, 500, etc.) + JSON error message
+    end
 ```
 
 ## Folder Structure
 
 ```plaintext
 project/
-├── app.py                    # Flask app entry point
-├── routes/                   # Controller layer
-│   ├── students.py
-│   ├── instructors.py
+├── run.py                      # Flask app entry point
+├── app/                        # Main application package
+│   ├── __init__.py             # App factory, extensions initialization
+│   ├── routes/                 # Controller layer (API endpoints)
+│   │   ├── student.py
+│   │   ├── instructor.py
+│   │   └── ...
+│   ├── services/               # Business logic layer
+│   │   ├── student.py
+│   │   ├── instructor.py
+│   │   └── ...
+│   ├── models/                 # Data models (dataclasses or schemas)
+│   │   ├── student.py
+│   │   ├── instructor.py
+│   │   └── ...
+│   ├── utils/                  # Reusable helpers
+│   │   ├── conversions.py
+│   │   └── ...
+├── db/                        # Database layer (SQL helpers, connections)
+├── tests/                     # Unit and integration tests
+│   ├── test_students.py
 │   └── ...
-├── models/                   # Model layer
-│   ├── student.py
-│   ├── instructor.py
-│   └── ...
-├── db/                       # Database setup
-├── utils/                    # Utility/helper functions
-├── docs/                     # Documentation
-├── requirements.txt          # Python dependencies
-├── Dockerfile                # Container image build instructions
-├── Dockerfile.multi-stage    # Multi-stage Docker build for smaller images
-├── entrypoint.sh             # Docker container entry script
-├── Makefile                  # Convenience commands (build, run, test)
-└── tests/                    # Unit and integration tests
+├── docs/                      # Project documentation
+├── requirements.txt           # Python dependencies
+├── Dockerfile                 # Docker image build instructions
+├── Dockerfile.multi-stage     # Multi-stage Docker build for smaller images
+├── entrypoint.sh              # Docker container entrypoint script
+└── Makefile                   # Convenience commands (build, run, test)
 ```
 
 ## Tools Used
@@ -80,5 +110,5 @@ project/
 - SQLite – Lightweight DB
 - Docker – Containerization
 - Gunicorn – WSGI server
-- GitHub Actions – CI for markdown linting
+- GitHub Actions – CI for format, test, coverage, and markdown linting
 - Render – Deployment platform

@@ -1,3 +1,4 @@
+import logging
 from flask import Blueprint, jsonify, request
 from app.utils import build_bulk_response, api_response, api_response_error
 from app.services import (
@@ -18,6 +19,7 @@ def handle_read_all_students():
         students = get_all_students(active_only=active_only)
         return api_response(students, "Students fetched successfully")
     except Exception as e:
+        logging.error(f"Student operation failed: {str(e)}", exc_info=True)
         return api_response_error(f"Unexpected error: {str(e)}")
 
 
@@ -40,7 +42,7 @@ def handle_create_student():
         results, error_data, status_code = create_new_students(request.get_json())
 
         if error_data:
-            return api_response_error(error_data["error"], status_code)
+            return api_response_error(error_data["message"], status_code)
 
         response_data, status_code = build_bulk_response(
             success_list=results,

@@ -12,3 +12,10 @@ from .instructor import (
     update_instructors,
     archive_instructors,
 )
+from .department import (
+    get_all_departments,
+    get_department_by_id,
+    create_new_departments,
+    update_departments,
+    archive_departments,
+)

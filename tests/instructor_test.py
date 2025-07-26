@@ -453,8 +453,8 @@ class TestInstructorCreateRoute:
     def test_handle_instructor_db_insert_service_error(
         self, mock_create_new_instructors, client, valid_instructor_create_data
     ):
-        error_data = {"error": "Invalid data"}
-        error_code = 422
+        error_data = {"message": "Invalid data"}
+        error_code = 400
         mock_create_new_instructors.return_value = ([], error_data, error_code)
 
         response = client.post("/instructors", json=valid_instructor_create_data)

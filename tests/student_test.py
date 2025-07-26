@@ -447,8 +447,8 @@ class TestStudentCreateRoute:
     def test_handle_student_db_insert_service_error(
         self, mock_create_new_students, client, valid_student_create_data
     ):
-        error_data = {"error": "Invalid data"}
-        error_code = 422
+        error_data = {"message": "Invalid data"}
+        error_code = 400
         mock_create_new_students.return_value = ([], error_data, error_code)
 
         response = client.post("/students", json=valid_student_create_data)

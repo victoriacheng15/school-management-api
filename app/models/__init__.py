@@ -1,7 +1,14 @@
 from .assignment import get_all_active_assignments
 from .course_schedule import get_all_active_course_schedules
 from .course import get_all_active_courses
-from .department import get_all_active_departments
+from .department import (
+    department_db_read_all,
+    department_db_read_by_id,
+    department_db_read_by_ids,
+    department_db_insert,
+    department_db_update,
+    department_db_archive,
+)
 from .enrollment import get_all_active_enrollments
 from .instructor import (
     instructor_db_read_all,

@@ -242,11 +242,11 @@ create_enrollments='[
 update_enrollments='[
   {
     "id": 1,
-    "grade": "A-",
+    "grade": "A-"
   },
   {
     "id": 2,
-    "grade": "B+",
+    "grade": "B+"
   }
 ]'
 

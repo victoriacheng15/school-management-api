@@ -437,7 +437,11 @@ class TestInstructorCreateRoute:
     def test_handle_instructor_db_insert_success(
         self, mock_create_new_instructors, client, valid_instructor_create_data
     ):
-        mock_create_new_instructors.return_value = (valid_instructor_create_data, None, None)
+        mock_create_new_instructors.return_value = (
+            valid_instructor_create_data,
+            None,
+            None,
+        )
 
         response = client.post("/instructors", json=valid_instructor_create_data)
         data = response.get_json()
@@ -490,7 +494,11 @@ class TestInstructorUpdateRoute:
     def test_handle_update_instructors_success(
         self, mock_update_instructors, client, valid_instructor_update_data
     ):
-        mock_update_instructors.return_value = (valid_instructor_update_data, None, None)
+        mock_update_instructors.return_value = (
+            valid_instructor_update_data,
+            None,
+            None,
+        )
 
         response = client.put("/instructors", json=valid_instructor_update_data)
         data = response.get_json()

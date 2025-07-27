@@ -88,4 +88,3 @@ def handle_archive_courses():
         success_msg_bulk="{} courses archived successfully.",
     )
     return jsonify(response_data), status_code
-

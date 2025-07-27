@@ -141,8 +141,6 @@ def enrollment_dict_to_row(data):
     )
 
 
-
-
 def assignment_row_to_dict(row):
     return {
         "id": row[0],

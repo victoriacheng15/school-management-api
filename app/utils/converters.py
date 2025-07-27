@@ -159,6 +159,24 @@ def assignment_dict_to_row(data):
     )
 
 
+def assignment_row_to_dict(row):
+    return {
+        "id": row[0],
+        "instructor_id": row[1],
+        "course_id": row[2],
+        "created_at": row[3],
+        "updated_at": row[4],
+        "is_archived": row[5],
+    }
+
+
+def assignment_dict_to_row(data):
+    return (
+        data.get("instructor_id"),
+        data.get("course_id"),
+    )
+
+
 def term_row_to_dict(row):
     return {
         "id": row[0],

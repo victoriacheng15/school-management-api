@@ -270,11 +270,11 @@ create_assignments='[
 update_assignments='[
   {
     "id": 1,
-    "course_id": "2"
+    "course_id": 2
   },
   {
     "id": 2,
-    "course_id": "1"
+    "course_id": 1
   }
 ]'
 

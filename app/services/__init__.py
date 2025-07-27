@@ -26,3 +26,10 @@ from .program import (
     update_programs,
     archive_programs,
 )
+from .course import (
+    get_all_courses,
+    get_course_by_id,
+    create_new_courses,
+    update_courses,
+    archive_courses,
+)

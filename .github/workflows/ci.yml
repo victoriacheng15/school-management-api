@@ -84,21 +84,32 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
+          COVERAGE_THRESHOLD: 80
         run: |
-          COVERAGE_OUTPUT=$(make coverage)
-          COVERAGE_PERCENTAGE=$(echo "$COVERAGE_OUTPUT" | grep -E "TOTAL.*[0-9]+%" | awk '{print substr($NF, 1, length($NF)-1)}')
-          
-          COVERAGE_STATUS="🔴 Fail"
-          if (( $(echo "$COVERAGE_PERCENTAGE >= 80" | bc -l) )); then
-            COVERAGE_STATUS="🟢 Pass"
+          # Extract the percentage from the saved output
+          COVERAGE_LINE=$(grep -E "TOTAL.*[0-9]+%" coverage_output.txt || true)
+
+          if [ -z "$COVERAGE_LINE" ]; then
+            echo "No coverage data found."
+            exit 1
           fi
 
-          SUMMARY=$(cat <<EOF
+          # Parse the coverage percentage
+          COVERAGE_PERCENTAGE=$(echo "$COVERAGE_LINE" | awk '{print substr($NF, 1, length($NF)-1)}')
+          
+          STATUS="🔴 Fail"
+          if (( $(echo "$COVERAGE_PERCENTAGE >= $COVERAGE_THRESHOLD" | bc -l) )); then
+            STATUS="🟢 Pass"
+          fi
+
+          COMMENT_BODY=$(cat <<EOF
           ### Code Coverage Summary
           | Metric | Value | Status |
           |---|---|---|
           | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${COVERAGE_STATUS} |
+          
+          _Threshold: ${COVERAGE_THRESHOLD}%_
           EOF
           )
 
-          gh pr comment ${{ github.event.pull_request.number }} --body "$SUMMARY" --edit-last --create-if-none
+          gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" --edit-last --create-if-none

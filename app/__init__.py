@@ -22,6 +22,7 @@ def create_app():
     from app.routes import program_bp
     from app.routes import student_bp
     from app.routes import term_bp
+    from app.routes import enrollment_bp
 
     blueprints = [
         home_bp,

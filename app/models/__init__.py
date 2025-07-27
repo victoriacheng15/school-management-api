@@ -16,7 +16,7 @@ from .department import (
     department_db_update,
     department_db_archive,
 )
-from .enrollment import get_all_active_enrollments
+
 from .instructor import (
     instructor_db_read_all,
     instructor_db_read_by_id,
@@ -47,4 +47,12 @@ from .term import (
     term_db_read_by_ids,
     term_db_insert,
     term_db_update,
+)
+
+from .enrollment import (
+    enrollment_db_read_all,
+    enrollment_db_read_by_id,
+    enrollment_db_read_by_ids,
+    enrollment_db_insert,
+    enrollment_db_update,
 )

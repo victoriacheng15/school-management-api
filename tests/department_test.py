@@ -381,7 +381,7 @@ class TestDepartmentReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB failure" in data["error"]
+        assert "internal server error: db failure." in data["error"].lower()
         mock_get_all.assert_called_once()
 
     @patch("app.routes.department.get_department_by_id")
@@ -415,7 +415,7 @@ class TestDepartmentReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB error" in data["error"]
+        assert "internal server error: db error" in data["error"].lower()
         mock_get_by_id.assert_called_once_with(1)
 
 
@@ -427,7 +427,7 @@ class TestDepartmentCreateRoute:
         mock_create_new_departments.return_value = (
             valid_department_create_data,
             None,
-            201,
+            None,
         )
 
         response = client.post("/departments", json=valid_department_create_data)
@@ -473,7 +473,7 @@ class TestDepartmentCreateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestDepartmentUpdateRoute:
@@ -483,8 +483,8 @@ class TestDepartmentUpdateRoute:
     ):
         mock_update_departments.return_value = (
             valid_department_update_data,
-            [],
-            200,
+            None,
+            None,
         )
 
         response = client.put("/departments", json=valid_department_update_data)
@@ -499,7 +499,7 @@ class TestDepartmentUpdateRoute:
         self, mock_update_departments, client, valid_department_update_data
     ):
         error_data = {"message": "Invalid data"}
-        error_code = 400
+        error_code = 422
         mock_update_departments.return_value = ([], error_data, error_code)
 
         response = client.put("/departments", json=valid_department_update_data)
@@ -530,7 +530,7 @@ class TestDepartmentUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestDepartmentArchiveRoute:
@@ -538,7 +538,7 @@ class TestDepartmentArchiveRoute:
     def test_handle_archive_departments_success(
         self, mock_archive_departments, client, valid_department_ids
     ):
-        mock_archive_departments.return_value = ([{"id": 1}, {"id": 2}], [], 200)
+        mock_archive_departments.return_value = (valid_department_ids, None, 200)
 
         response = client.patch("/departments", json={"ids": valid_department_ids})
         data = response.get_json()
@@ -551,7 +551,7 @@ class TestDepartmentArchiveRoute:
     def test_handle_archive_departments_service_error(
         self, mock_archive_departments, client, valid_department_ids
     ):
-        error_data = {"message": "No departments were archived"}
+        error_data = {"message": "No departments were archived."}
         error_code = 400
         mock_archive_departments.return_value = ([], error_data, error_code)
 
@@ -559,13 +559,15 @@ class TestDepartmentArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == error_code
-        assert "No departments were archived" in data["message"]
+        assert "No departments were archived." in data["message"]
 
     @patch("app.routes.department.archive_departments")
     def test_handle_archive_departments_key_error(
-        self, mock_archive_departments, client
+        self, mock_archive_departments, client, valid_department_ids
     ):
-        response = client.patch("/departments", json={})
+        mock_archive_departments.side_effect = KeyError("ids")
+
+        response = client.patch("/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -581,4 +583,4 @@ class TestDepartmentArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()

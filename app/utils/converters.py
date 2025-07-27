@@ -93,7 +93,11 @@ def program_row_to_dict(row):
 
 
 def program_dict_to_row(data):
-    return (data["name"], data["type"], data["department_id"])
+    return (
+        data.get("name", None),
+        data.get("type", "diploma"),
+        data.get("department_id"),
+    )
 
 
 def course_row_to_dict(row):
@@ -110,7 +114,12 @@ def course_row_to_dict(row):
 
 
 def course_dict_to_row(data):
-    return (data["title"], data["code"], data["term_id"], data["department_id"])
+    return (
+        data.get("title", None),
+        data.get("code", None),
+        data.get("term_id"),
+        data.get("department_id"),
+    )
 
 
 def enrollment_row_to_dict(row):
@@ -125,7 +134,13 @@ def enrollment_row_to_dict(row):
 
 
 def enrollment_dict_to_row(data):
-    return (data["student_id"], data["course_id"], data["grade"])
+    return (
+        data.get("student_id"),
+        data.get("course_id"),
+        data.get("grade", None),
+    )
+
+
 
 
 def assignment_row_to_dict(row):
@@ -140,7 +155,10 @@ def assignment_row_to_dict(row):
 
 
 def assignment_dict_to_row(data):
-    return (data["instructor_id"], data["course_id"])
+    return (
+        data.get("instructor_id"),
+        data.get("course_id"),
+    )
 
 
 def term_row_to_dict(row):
@@ -155,7 +173,11 @@ def term_row_to_dict(row):
 
 
 def term_dict_to_row(data):
-    return (data["name"], data["start_date"], data["end_date"])
+    return (
+        data.get("name", None),
+        data.get("start_date", None),
+        data.get("end_date", None),
+    )
 
 
 def course_schedule_row_to_dict(row):
@@ -172,4 +194,9 @@ def course_schedule_row_to_dict(row):
 
 
 def course_schedule_dict_to_row(data):
-    return (data["course_id"], data["day"], data["time"], data["room"])
+    return (
+        data.get("course_id"),
+        data.get("day"),
+        data.get("time"),
+        data.get("room", None),
+    )

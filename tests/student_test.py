@@ -392,7 +392,7 @@ class TestStudentReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB failure" in data["error"]
+        assert "internal server error: db failure." in data["error"].lower()
         mock_get_all.assert_called_once()
 
     @patch("app.routes.student.get_student_by_id")
@@ -426,7 +426,7 @@ class TestStudentReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB error" in data["error"]
+        assert "internal server error: db error" in data["error"].lower()
         mock_get_by_id.assert_called_once_with(1)
 
 
@@ -480,7 +480,7 @@ class TestStudentCreateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestStudentUpdateRoute:
@@ -533,7 +533,7 @@ class TestStudentUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestStudentArchiveRoute:
@@ -584,6 +584,7 @@ class TestStudentArchiveRoute:
 
         response = client.patch("/students", json={"ids": valid_student_ids})
         data = response.get_json()
+        print(data)
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()

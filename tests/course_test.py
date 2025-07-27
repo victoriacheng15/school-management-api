@@ -375,7 +375,7 @@ class TestCourseReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB failure" in data["error"]
+        assert "internal server error: db failure." in data["error"].lower()
         mock_get_all.assert_called_once()
 
     @patch("app.routes.course.get_course_by_id")
@@ -409,7 +409,7 @@ class TestCourseReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB error" in data["error"]
+        assert "internal server error: db error" in data["error"].lower()
         mock_get_by_id.assert_called_once_with(1)
 
 
@@ -463,7 +463,7 @@ class TestCourseCreateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestCourseUpdateRoute:
@@ -516,7 +516,7 @@ class TestCourseUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestCourseArchiveRoute:
@@ -569,4 +569,4 @@ class TestCourseArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()

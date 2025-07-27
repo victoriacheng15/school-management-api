@@ -1,4 +1,3 @@
-import logging
 from flask import Blueprint, jsonify, request
 from app.utils import (
     build_bulk_response,

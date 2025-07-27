@@ -1,4 +1,3 @@
-import logging
 from flask import Blueprint, jsonify, request
 from app.utils import handle_exceptions_read, handle_exceptions_write
 from app.utils import build_bulk_response, api_response, api_response_error

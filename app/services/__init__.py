@@ -5,6 +5,7 @@ from .student import (
     update_students,
     archive_students,
 )
+
 from .instructor import (
     get_all_instructors,
     get_instructor_by_id,
@@ -12,6 +13,7 @@ from .instructor import (
     update_instructors,
     archive_instructors,
 )
+
 from .department import (
     get_all_departments,
     get_department_by_id,
@@ -19,6 +21,7 @@ from .department import (
     update_departments,
     archive_departments,
 )
+
 from .program import (
     get_all_programs,
     get_program_by_id,
@@ -26,10 +29,18 @@ from .program import (
     update_programs,
     archive_programs,
 )
+
 from .course import (
     get_all_courses,
     get_course_by_id,
     create_new_courses,
     update_courses,
     archive_courses,
+)
+
+from .term import (
+    get_all_terms,
+    get_term_by_id,
+    create_new_terms,
+    update_terms,
 )

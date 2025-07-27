@@ -24,16 +24,7 @@ from app.services import (
 
 def make_course_row():
     today = date.today().isoformat()
-    return (
-        1,
-        "Introduction to Programming",
-        "COMP101",
-        1,
-        1,
-        today,
-        today,
-        0
-    )
+    return (1, "Introduction to Programming", "COMP101", 1, 1, today, today, 0)
 
 
 def make_course_dict():
@@ -312,7 +303,7 @@ class TestCourseModel:
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
-        params = valid_course_row[1:5] # title, code, term_id, department_id
+        params = valid_course_row[1:5]  # title, code, term_id, department_id
         result = course_db_insert(params)
 
         assert result == 10

@@ -135,7 +135,9 @@ def mock_db_archive():
 
 
 class TestCourseScheduleReadService:
-    def test_get_all_course_schedules(self, mock_db_read_all, valid_course_schedule_row):
+    def test_get_all_course_schedules(
+        self, mock_db_read_all, valid_course_schedule_row
+    ):
         mock_db_read_all.return_value = [valid_course_schedule_row]
         course_schedules = get_all_course_schedules(active_only=True)
         assert len(course_schedules) == 1
@@ -147,7 +149,9 @@ class TestCourseScheduleReadService:
         with pytest.raises(RuntimeError):
             get_all_course_schedules(active_only=True)
 
-    def test_get_course_schedule_by_id(self, mock_db_read_one, valid_course_schedule_row):
+    def test_get_course_schedule_by_id(
+        self, mock_db_read_one, valid_course_schedule_row
+    ):
         mock_db_read_one.return_value = valid_course_schedule_row
         course_schedule = get_course_schedule_by_id(1)
         assert course_schedule["day"] == "Monday"
@@ -170,7 +174,9 @@ class TestCourseScheduleCreateService:
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_course_schedule_rows
 
-        results, error, status_code = create_new_course_schedules(valid_course_schedule_create_data)
+        results, error, status_code = create_new_course_schedules(
+            valid_course_schedule_create_data
+        )
 
         assert len(results) == 2
         assert error is None
@@ -182,7 +188,9 @@ class TestCourseScheduleCreateService:
         self, mock_db_create, mock_db_read_many, valid_course_schedule_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        results, error, status_code = create_new_course_schedules(valid_course_schedule_create_data)
+        results, error, status_code = create_new_course_schedules(
+            valid_course_schedule_create_data
+        )
 
         assert results == []
         assert error["message"] == "No course schedules were created."
@@ -201,7 +209,9 @@ class TestCourseScheduleUpdateService:
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_course_schedule_row]
 
-        results, error, status_code = update_course_schedules(valid_course_schedule_update_data)
+        results, error, status_code = update_course_schedules(
+            valid_course_schedule_update_data
+        )
 
         assert len(results) == 1
         assert error in (None, [])
@@ -213,7 +223,9 @@ class TestCourseScheduleUpdateService:
         self, mock_db_update, mock_db_read_many, valid_course_schedule_update_data
     ):
         mock_db_update.return_value = 0
-        results, error, status_code = update_course_schedules(valid_course_schedule_update_data)
+        results, error, status_code = update_course_schedules(
+            valid_course_schedule_update_data
+        )
 
         assert results == []
         assert error == [{"message": "Course schedule ID 1 not updated."}]
@@ -224,7 +236,9 @@ class TestCourseScheduleUpdateService:
     def test_update_course_schedules_missing_id(
         self, mock_db_update, mock_db_read_many, course_schedule_missing_id
     ):
-        results, error, status_code = update_course_schedules(course_schedule_missing_id)
+        results, error, status_code = update_course_schedules(
+            course_schedule_missing_id
+        )
 
         assert results == []
         assert error == [{"message": "Missing course schedule ID for update."}]
@@ -241,7 +255,9 @@ class TestCourseScheduleArchiveService:
         assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_course_schedules_none_archived(self, mock_db_archive, valid_course_schedule_ids):
+    def test_archive_course_schedules_none_archived(
+        self, mock_db_archive, valid_course_schedule_ids
+    ):
         mock_db_archive.return_value = 0
         archived = archive_course_schedules(valid_course_schedule_ids)
 
@@ -308,11 +324,15 @@ class TestCourseScheduleModel:
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.course_schedule.db.execute_query")
-    def test_course_schedule_db_insert_success(self, mock_execute, valid_course_schedule_row):
+    def test_course_schedule_db_insert_success(
+        self, mock_execute, valid_course_schedule_row
+    ):
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
-        params = valid_course_schedule_row[1:5] # Exclude id, created_at, updated_at, is_archived
+        params = valid_course_schedule_row[
+            1:5
+        ]  # Exclude id, created_at, updated_at, is_archived
         result = course_schedule_db_insert(params)
 
         assert result == 10
@@ -333,7 +353,7 @@ class TestCourseScheduleModel:
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
 
-        result = course_schedule_db_update(1, ("x",) * 4) # course_id, day, time, room
+        result = course_schedule_db_update(1, ("x",) * 4)  # course_id, day, time, room
         assert result == 1
 
     @patch("app.models.course_schedule.db.execute_query")
@@ -425,11 +445,20 @@ class TestCourseScheduleReadRoute:
 class TestCourseScheduleCreateRoute:
     @patch("app.routes.course_schedule.create_new_course_schedules")
     def test_handle_course_schedule_db_insert_success(
-        self, mock_create_new_course_schedules, client, valid_course_schedule_create_data
+        self,
+        mock_create_new_course_schedules,
+        client,
+        valid_course_schedule_create_data,
     ):
-        mock_create_new_course_schedules.return_value = (valid_course_schedule_create_data, None, None)
+        mock_create_new_course_schedules.return_value = (
+            valid_course_schedule_create_data,
+            None,
+            None,
+        )
 
-        response = client.post("/course_schedules", json=valid_course_schedule_create_data)
+        response = client.post(
+            "/course_schedules", json=valid_course_schedule_create_data
+        )
         data = response.get_json()
 
         assert response.status_code == 201
@@ -438,13 +467,18 @@ class TestCourseScheduleCreateRoute:
 
     @patch("app.routes.course_schedule.create_new_course_schedules")
     def test_handle_course_schedule_db_insert_service_error(
-        self, mock_create_new_course_schedules, client, valid_course_schedule_create_data
+        self,
+        mock_create_new_course_schedules,
+        client,
+        valid_course_schedule_create_data,
     ):
         error_data = {"message": "Invalid data"}
         error_code = 400
         mock_create_new_course_schedules.return_value = ([], error_data, error_code)
 
-        response = client.post("/course_schedules", json=valid_course_schedule_create_data)
+        response = client.post(
+            "/course_schedules", json=valid_course_schedule_create_data
+        )
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -452,11 +486,16 @@ class TestCourseScheduleCreateRoute:
 
     @patch("app.routes.course_schedule.create_new_course_schedules")
     def test_handle_course_schedule_db_insert_key_error(
-        self, mock_create_new_course_schedules, client, valid_course_schedule_create_data
+        self,
+        mock_create_new_course_schedules,
+        client,
+        valid_course_schedule_create_data,
     ):
         mock_create_new_course_schedules.side_effect = KeyError("course_id")
 
-        response = client.post("/course_schedules", json=valid_course_schedule_create_data)
+        response = client.post(
+            "/course_schedules", json=valid_course_schedule_create_data
+        )
         data = response.get_json()
 
         assert response.status_code == 400
@@ -464,11 +503,16 @@ class TestCourseScheduleCreateRoute:
 
     @patch("app.routes.course_schedule.create_new_course_schedules")
     def test_handle_course_schedule_db_insert_exception(
-        self, mock_create_new_course_schedules, client, valid_course_schedule_create_data
+        self,
+        mock_create_new_course_schedules,
+        client,
+        valid_course_schedule_create_data,
     ):
         mock_create_new_course_schedules.side_effect = Exception("DB failure")
 
-        response = client.post("/course_schedules", json=valid_course_schedule_create_data)
+        response = client.post(
+            "/course_schedules", json=valid_course_schedule_create_data
+        )
         data = response.get_json()
 
         assert response.status_code == 500
@@ -480,9 +524,15 @@ class TestCourseScheduleUpdateRoute:
     def test_handle_update_course_schedules_success(
         self, mock_update_course_schedules, client, valid_course_schedule_update_data
     ):
-        mock_update_course_schedules.return_value = (valid_course_schedule_update_data, None, None)
+        mock_update_course_schedules.return_value = (
+            valid_course_schedule_update_data,
+            None,
+            None,
+        )
 
-        response = client.put("/course_schedules", json=valid_course_schedule_update_data)
+        response = client.put(
+            "/course_schedules", json=valid_course_schedule_update_data
+        )
         data = response.get_json()
 
         assert response.status_code == 200
@@ -497,7 +547,9 @@ class TestCourseScheduleUpdateRoute:
         error_code = 422
         mock_update_course_schedules.return_value = ([], error_data, error_code)
 
-        response = client.put("/course_schedules", json=valid_course_schedule_update_data)
+        response = client.put(
+            "/course_schedules", json=valid_course_schedule_update_data
+        )
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -509,7 +561,9 @@ class TestCourseScheduleUpdateRoute:
     ):
         mock_update_course_schedules.side_effect = KeyError("course_id")
 
-        response = client.put("/course_schedules", json=valid_course_schedule_update_data)
+        response = client.put(
+            "/course_schedules", json=valid_course_schedule_update_data
+        )
         data = response.get_json()
 
         assert response.status_code == 400
@@ -521,7 +575,9 @@ class TestCourseScheduleUpdateRoute:
     ):
         mock_update_course_schedules.side_effect = Exception("DB failure")
 
-        response = client.put("/course_schedules", json=valid_course_schedule_update_data)
+        response = client.put(
+            "/course_schedules", json=valid_course_schedule_update_data
+        )
         data = response.get_json()
 
         assert response.status_code == 500
@@ -533,9 +589,15 @@ class TestCourseScheduleArchiveRoute:
     def test_handle_archive_course_schedules_success(
         self, mock_archive_course_schedules, client, valid_course_schedule_ids
     ):
-        mock_archive_course_schedules.return_value = (valid_course_schedule_ids, None, 200)
+        mock_archive_course_schedules.return_value = (
+            valid_course_schedule_ids,
+            None,
+            200,
+        )
 
-        response = client.patch("/course_schedules", json={"ids": valid_course_schedule_ids})
+        response = client.patch(
+            "/course_schedules", json={"ids": valid_course_schedule_ids}
+        )
         data = response.get_json()
 
         assert response.status_code == 200
@@ -550,7 +612,9 @@ class TestCourseScheduleArchiveRoute:
         error_code = 400
         mock_archive_course_schedules.return_value = ([], error_data, error_code)
 
-        response = client.patch("/course_schedules", json={"ids": valid_course_schedule_ids})
+        response = client.patch(
+            "/course_schedules", json={"ids": valid_course_schedule_ids}
+        )
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -562,7 +626,9 @@ class TestCourseScheduleArchiveRoute:
     ):
         mock_archive_course_schedules.side_effect = KeyError("ids")
 
-        response = client.patch("/course_schedules", json={"ids": valid_course_schedule_ids})
+        response = client.patch(
+            "/course_schedules", json={"ids": valid_course_schedule_ids}
+        )
         data = response.get_json()
 
         assert response.status_code == 400
@@ -574,7 +640,9 @@ class TestCourseScheduleArchiveRoute:
     ):
         mock_archive_course_schedules.side_effect = Exception("DB failure")
 
-        response = client.patch("/course_schedules", json={"ids": valid_course_schedule_ids})
+        response = client.patch(
+            "/course_schedules", json={"ids": valid_course_schedule_ids}
+        )
         data = response.get_json()
 
         assert response.status_code == 500

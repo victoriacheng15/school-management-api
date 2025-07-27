@@ -1,7 +1,11 @@
-import logging
 from flask import Blueprint, jsonify, request
-from app.utils import handle_exceptions_read, handle_exceptions_write
-from app.utils import build_bulk_response, api_response, api_response_error
+from app.utils import (
+    build_bulk_response,
+    api_response,
+    api_response_error,
+    handle_exceptions_read,
+    handle_exceptions_write,
+)
 from app.services import (
     get_all_course_schedules,
     get_course_schedule_by_id,

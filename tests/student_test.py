@@ -193,7 +193,7 @@ class TestStudentCreateService:
         results, error, status_code = create_new_students(valid_student_create_data)
 
         assert results == []
-        assert error["message"] == "No students were created"
+        assert error["message"] == "No students were created."
         assert status_code == 400
         mock_db_read_many.assert_not_called()
 
@@ -212,7 +212,7 @@ class TestStudentUpdateService:
         results, error, status_code = update_students(valid_student_update_data)
 
         assert len(results) == 1
-        assert error == []
+        assert error in (None, [])
         assert status_code == 200
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_called_once_with([1])
@@ -258,7 +258,7 @@ class TestStudentArchiveService:
     def test_archive_students_invalid_ids(self):
         results, errors, status = archive_students(["one", 2])
         assert status == 400
-        assert any("must be integers" in e["message"] for e in errors)
+        assert any("must be of type int" in e["message"] for e in errors)
 
 
 # =======================

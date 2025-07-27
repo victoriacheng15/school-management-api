@@ -6,12 +6,12 @@ from app.models import (
     course_db_update,
     course_db_archive,
 )
-from app.utils.converters import (
+from app.utils import (
     course_row_to_dict,
     course_dict_to_row,
-)
-from app.utils.routes_helpers import (
-    normalize_to_list,
+    bulk_create_entities,
+    bulk_update_entities,
+    bulk_archive_entities,
 )
 
 
@@ -24,107 +24,49 @@ def get_all_courses(active_only):
 
 def get_course_by_id(course_id: int):
     course = course_db_read_by_id(course_id)
-    if course is None:
-        return None
-    return course_row_to_dict(course)
+    return course_row_to_dict(course) if course else None
 
 
 def create_new_courses(data):
-    courses = normalize_to_list(data)
-    created_ids = []
-    errors = []
-
-    for course_data in courses:
-        course_data = {
-            k: (v.strip() if isinstance(v, str) else v) for k, v in course_data.items()
-        }
-
-        try:
-            row = course_dict_to_row(course_data)
-            course_id = course_db_insert(row)
-            if course_id:
-                created_ids.append(course_id)
-            else:
-                errors.append(
-                    {"message": "Failed to insert course (unknown DB error)."}
-                )
-        except (ValueError, RuntimeError) as e:
-            errors.append({"message": str(e)})
-
-    if not created_ids:
-        return [], {"message": "No courses were created", "details": errors}, 400
-
-    created_courses_rows = course_db_read_by_ids(created_ids)
-    created_courses = [course_row_to_dict(row) for row in created_courses_rows]
-
-    return created_courses, None, 201
+    return bulk_create_entities(
+        data,
+        insert_func=course_db_insert,
+        to_row_func=course_dict_to_row,
+        to_dict_func=course_row_to_dict,
+        read_by_ids_func=course_db_read_by_ids,
+        no_success_msg="No courses were created.",
+        success_status_code=201,
+        failure_status_code=400,
+    )
 
 
 def update_courses(data):
-    courses = normalize_to_list(data)
-    updated_ids = []
-    errors = []
-
-    for incoming_data in courses:
-        incoming_data = {
-            k: (v.strip() if isinstance(v, str) else v)
-            for k, v in incoming_data.items()
-        }
-
-        course_id = incoming_data.get("id")
-        if not course_id:
-            return [], [{"message": "Missing course ID for update."}], 400
-
-        existing_data = course_db_read_by_id(course_id)
-        if not existing_data:
-            return [], [{"message": f"Course ID {course_id} not found."}], 422
-
-        if not isinstance(existing_data, dict):
-            existing_data = course_row_to_dict(existing_data)
-
-        full_data = {**existing_data, **incoming_data}
-
-        try:
-            row = course_dict_to_row(full_data)
-            success = course_db_update(course_id, row)
-            if success:
-                updated_ids.append(course_id)
-            else:
-                errors.append({"message": f"Course ID {course_id} not updated."})
-        except (ValueError, RuntimeError) as e:
-            errors.append({"message": str(e)})
-
-    if not updated_ids:
-        return [], errors, 400
-
-    updated_courses_rows = course_db_read_by_ids(updated_ids)
-    updated_courses = [course_row_to_dict(row) for row in updated_courses_rows]
-
-    return updated_courses, errors, 200
+    return bulk_update_entities(
+        data,
+        update_func=course_db_update,
+        get_existing_func=course_db_read_by_id,
+        to_row_func=course_dict_to_row,
+        to_dict_func=course_row_to_dict,
+        read_by_ids_func=course_db_read_by_ids,
+        no_success_msg="No courses were updated.",
+        missing_id_msg="Missing course ID for update.",
+        not_found_msg="Course ID {id} not found.",
+        not_updated_msg="Course ID {id} not updated.",
+        failure_status_code=400,
+        success_status_code=200,
+    )
 
 
 def archive_courses(ids):
-    ids = normalize_to_list(ids)
-    if not all(isinstance(item, int) for item in ids):
-        return [], [{"message": "IDs must be integers"}], 400
-
-    archived_ids = []
-    errors = []
-
-    for course_id in ids:
-        rows_updated = course_db_archive(course_id)
-        if rows_updated > 0:
-            archived_ids.append(course_id)
-        else:
-            errors.append(
-                {"message": f"Course ID {course_id} not found or already archived."}
-            )
-
-    if not archived_ids:
-        return [], errors, 422
-
-    # Read and return the updated records
-    archived_rows = course_db_read_by_ids(archived_ids)
-    archived_courses = [course_row_to_dict(row) for row in archived_rows]
-
-    return archived_courses, errors, 200
+    return bulk_archive_entities(
+        ids,
+        archive_func=course_db_archive,
+        get_existing_func=course_db_read_by_id,
+        to_dict_func=course_row_to_dict,
+        read_by_ids_func=course_db_read_by_ids,
+        no_success_msg="No courses were archived.",
+        not_found_msg="Course ID {id} not found or already archived.",
+        not_updated_msg="Course ID {id} not archived.",
+        failure_status_code=422,
+        success_status_code=200,
+    )

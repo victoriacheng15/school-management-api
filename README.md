@@ -53,10 +53,10 @@ This project is a playground for applying best practices I’m learning and impr
 |--------------------|-----|------|-----|-----------------|
 | Assignments        | ✔   | ✘    | ✘   | ✘               |
 | Course Schedule    | ✔   | ✘    | ✘   | ✘               |
-| Courses            | ✔   | ✘    | ✘   | ✘               |
+| Courses            | ✔   | ✔    | ✔   | ✔               |
 | Departments        | ✔   | ✔    | ✔   | ✔               |
 | Enrollments        | ✔   | ✘    | ✘   | ✘               |
 | Instructors        | ✔   | ✔    | ✔   | ✔               |
-| Programs           | ✔   | ✘    | ✘   | ✘               |
+| Programs           | ✔   | ✔    | ✔   | ✔               |
 | Students           | ✔   | ✔    | ✔   | ✔               |
-| Terms              | ✔   | ✘    | ✘   | ✘               |
+| Terms              | ✔   | ✔    | ✔   | ✔               |

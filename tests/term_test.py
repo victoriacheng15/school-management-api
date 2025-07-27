@@ -239,9 +239,7 @@ class TestTermModel:
         mock_execute.return_value = [("term_1",)]
         result = term_db_read_by_id(1)
         assert result == ("term_1",)
-        mock_execute.assert_called_once_with(
-            "SELECT * FROM terms WHERE id = ?;", (1,)
-        )
+        mock_execute.assert_called_once_with("SELECT * FROM terms WHERE id = ?;", (1,))
 
     @patch("app.models.term.db.execute_query")
     def test_term_db_read_by_id_not_found(self, mock_execute):
@@ -271,7 +269,7 @@ class TestTermModel:
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
-        params = valid_term_row[1:4] # Exclude id, created_at, updated_at
+        params = valid_term_row[1:4]  # Exclude id, created_at, updated_at
         result = term_db_insert(params)
 
         assert result == 10
@@ -292,7 +290,7 @@ class TestTermModel:
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
 
-        result = term_db_update(1, ("x",) * 3) # name, start_date, end_date
+        result = term_db_update(1, ("x",) * 3)  # name, start_date, end_date
         assert result == 1
 
     @patch("app.models.term.db.execute_query")

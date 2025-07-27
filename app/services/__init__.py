@@ -59,3 +59,11 @@ from .assignment import (
     update_assignments,
     archive_assignments,
 )
+
+from .course_schedule import (
+    get_all_course_schedules,
+    get_course_schedule_by_id,
+    create_new_course_schedules,
+    update_course_schedules,
+    archive_course_schedules,
+)

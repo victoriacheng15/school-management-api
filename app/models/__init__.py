@@ -1,4 +1,3 @@
-from .course_schedule import get_all_active_course_schedules
 from .course import (
     course_db_read_all,
     course_db_read_by_id,
@@ -63,4 +62,13 @@ from .assignment import (
     assignment_db_insert,
     assignment_db_update,
     assignment_db_archive,
+)
+
+from .course_schedule import (
+    course_schedule_db_read_all,
+    course_schedule_db_read_by_id,
+    course_schedule_db_read_by_ids,
+    course_schedule_db_insert,
+    course_schedule_db_update,
+    course_schedule_db_archive,
 )

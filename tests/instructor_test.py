@@ -381,7 +381,7 @@ class TestInstructorReadRoute:
         resp = client.get("/instructors")
         assert resp.status_code == 200
         data = resp.get_json()
-        assert "Instructors fetched successfully" in data["message"]
+        assert "Instructors fetched successfully." in data["message"]
         assert isinstance(data["data"], list)
         assert data["data"] == valid_instructor_create_data
         mock_get.assert_called_once()
@@ -394,7 +394,7 @@ class TestInstructorReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB failure" in data["error"]
+        assert "internal server error: db failure." in data["error"].lower()
         mock_get_all.assert_called_once()
 
     @patch("app.routes.instructor.get_instructor_by_id")
@@ -428,7 +428,7 @@ class TestInstructorReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB error" in data["error"]
+        assert "internal server error: db error" in data["error"].lower()
         mock_get_by_id.assert_called_once_with(1)
 
 
@@ -440,7 +440,7 @@ class TestInstructorCreateRoute:
         mock_create_new_instructors.return_value = (
             valid_instructor_create_data,
             None,
-            201,
+            None,
         )
 
         response = client.post("/instructors", json=valid_instructor_create_data)
@@ -486,7 +486,7 @@ class TestInstructorCreateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestInstructorUpdateRoute:
@@ -543,7 +543,7 @@ class TestInstructorUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestInstructorArchiveRoute:
@@ -551,7 +551,7 @@ class TestInstructorArchiveRoute:
     def test_handle_archive_instructors_success(
         self, mock_archive_instructors, client, valid_instructor_ids
     ):
-        mock_archive_instructors.return_value = (valid_instructor_ids, [], 200)
+        mock_archive_instructors.return_value = (valid_instructor_ids, None, 200)
 
         response = client.patch("/instructors", json={"ids": valid_instructor_ids})
         data = response.get_json()
@@ -573,3 +573,28 @@ class TestInstructorArchiveRoute:
 
         assert response.status_code == error_code
         assert "No instructors were archived." in data["message"]
+
+    @patch("app.routes.instructor.archive_instructors")
+    def test_handle_archive_instructors_key_error(
+        self, mock_archive_instructors, client, valid_instructor_ids
+    ):
+        mock_archive_instructors.side_effect = KeyError("ids")
+
+        response = client.patch("/instructors", json={"ids": valid_instructor_ids})
+        data = response.get_json()
+
+        assert response.status_code == 400
+        assert "Missing required field" in data["error"]
+
+    @patch("app.routes.instructor.archive_instructors")
+    def test_handle_archive_instructors_exception(
+        self, mock_archive_instructors, client, valid_instructor_ids
+    ):
+        mock_archive_instructors.side_effect = Exception("DB failure")
+
+        response = client.patch("/instructors", json={"ids": valid_instructor_ids})
+        data = response.get_json()
+        print(data)
+
+        assert response.status_code == 500
+        assert "internal server error: db failure." in data["error"].lower()

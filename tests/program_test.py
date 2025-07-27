@@ -373,7 +373,7 @@ class TestProgramReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB failure" in data["error"]
+        assert "internal server error: db failure." in data["error"].lower()
         mock_get_all.assert_called_once()
 
     @patch("app.routes.program.get_program_by_id")
@@ -407,7 +407,7 @@ class TestProgramReadRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "Unexpected error: DB error" in data["error"]
+        assert "internal server error: db error" in data["error"].lower()
         mock_get_by_id.assert_called_once_with(1)
 
 
@@ -461,7 +461,7 @@ class TestProgramCreateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestProgramUpdateRoute:
@@ -514,7 +514,7 @@ class TestProgramUpdateRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()
 
 
 class TestProgramArchiveRoute:
@@ -567,4 +567,4 @@ class TestProgramArchiveRoute:
         data = response.get_json()
 
         assert response.status_code == 500
-        assert "internal error" in data["error"].lower()
+        assert "internal server error: db failure." in data["error"].lower()

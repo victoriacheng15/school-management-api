@@ -56,7 +56,6 @@ def update_students(data):
         success_status_code=200,
     )
 
-
 def archive_students(ids):
     return bulk_archive_entities(
         ids,

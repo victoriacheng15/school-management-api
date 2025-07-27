@@ -1,13 +1,12 @@
 from .routes_helpers import normalize_to_list
 
-
 def bulk_create_entities(
     data,
     *,
-    insert_func,  # function to insert a single row, returns new ID
-    to_row_func,  # converts dict to DB row format
-    to_dict_func,  # converts DB row to dict for response
-    read_by_ids_func,  # reads rows by list of IDs
+    insert_func,        # function to insert a single row, returns new ID
+    to_row_func,        # converts dict to DB row format
+    to_dict_func,       # converts DB row to dict for response
+    read_by_ids_func,   # reads rows by list of IDs
     no_success_msg="No entities were created.",
     success_status_code=201,
     failure_status_code=400,
@@ -19,9 +18,7 @@ def bulk_create_entities(
     for item in items:
         # Clean string fields
         if isinstance(item, dict):
-            item = {
-                k: (v.strip() if isinstance(v, str) else v) for k, v in item.items()
-            }
+            item = {k: (v.strip() if isinstance(v, str) else v) for k, v in item.items()}
 
         try:
             row = to_row_func(item)
@@ -29,9 +26,7 @@ def bulk_create_entities(
             if new_id:
                 created_ids.append(new_id)
             else:
-                errors.append(
-                    {"message": "Failed to insert entity (unknown DB error)."}
-                )
+                errors.append({"message": "Failed to insert entity (unknown DB error)."})
         except (ValueError, RuntimeError) as e:
             errors.append({"message": str(e)})
 
@@ -47,11 +42,11 @@ def bulk_create_entities(
 def bulk_update_entities(
     data,
     *,
-    update_func,  # function to update entity by ID and row, returns True/False
+    update_func,        # function to update entity by ID and row, returns True/False
     get_existing_func,  # function to read existing entity by ID
-    to_row_func,  # converts dict to DB row format
-    to_dict_func,  # converts DB row to dict for response
-    read_by_ids_func,  # reads rows by list of IDs
+    to_row_func,        # converts dict to DB row format
+    to_dict_func,       # converts DB row to dict for response
+    read_by_ids_func,   # reads rows by list of IDs
     no_success_msg="No entities were updated.",
     missing_id_msg="Missing entity ID for update.",
     not_found_msg="Entity ID {id} not found.",
@@ -66,9 +61,7 @@ def bulk_update_entities(
     for item in items:
         # Clean string fields
         if isinstance(item, dict):
-            item = {
-                k: (v.strip() if isinstance(v, str) else v) for k, v in item.items()
-            }
+            item = {k: (v.strip() if isinstance(v, str) else v) for k, v in item.items()}
 
         entity_id = item.get("id")
         if not entity_id:
@@ -107,10 +100,10 @@ def bulk_update_entities(
 def bulk_archive_entities(
     ids,
     *,
-    archive_func,  # function to archive entity by ID, returns rows updated count
+    archive_func,       # function to archive entity by ID, returns rows updated count
     get_existing_func,  # function to read existing entity by ID
-    to_dict_func,  # converts DB row to dict for response
-    read_by_ids_func,  # reads rows by list of IDs
+    to_dict_func,       # converts DB row to dict for response
+    read_by_ids_func,   # reads rows by list of IDs
     no_success_msg="No entities were archived.",
     id_type=int,
     missing_id_msg="Invalid ID.",

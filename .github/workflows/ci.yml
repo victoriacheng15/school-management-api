@@ -106,7 +106,7 @@ jobs:
           ### Code Coverage Summary
           | Metric | Value | Status |
           |---|---|---|
-          | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${COVERAGE_STATUS} |
+          | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |
           
           _Threshold: ${COVERAGE_THRESHOLD}%_
           EOF

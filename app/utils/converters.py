@@ -178,6 +178,25 @@ def term_dict_to_row(data):
     )
 
 
+def enrollment_row_to_dict(row):
+    return {
+        "id": row[0],
+        "student_id": row[1],
+        "course_id": row[2],
+        "grade": row[3],
+        "created_at": row[4],
+        "updated_at": row[5],
+    }
+
+
+def enrollment_dict_to_row(data):
+    return (
+        data.get("student_id"),
+        data.get("course_id"),
+        data.get("grade", None),
+    )
+
+
 def course_schedule_row_to_dict(row):
     return {
         "id": row[0],

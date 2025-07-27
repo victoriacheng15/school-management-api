@@ -44,3 +44,10 @@ from .term import (
     create_new_terms,
     update_terms,
 )
+
+from .enrollment import (
+    get_all_enrollments,
+    get_enrollment_by_id,
+    create_new_enrollments,
+    update_enrollments,
+)

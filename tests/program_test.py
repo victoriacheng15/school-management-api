@@ -174,7 +174,7 @@ class TestProgramCreateService:
         results, error, status_code = create_new_programs(valid_program_create_data)
 
         assert results == []
-        assert error["message"] == "No programs were created"
+        assert error["message"] == "No programs were created."
         assert status_code == 400
         mock_db_read_many.assert_not_called()
 
@@ -183,17 +183,19 @@ class TestProgramUpdateService:
     def test_update_programs(
         self,
         mock_db_update,
+        mock_db_read_one,
         mock_db_read_many,
         valid_program_update_data,
         valid_program_row,
     ):
         mock_db_update.return_value = 1
+        mock_db_read_one.return_value = valid_program_row
         mock_db_read_many.return_value = [valid_program_row]
 
         results, error, status_code = update_programs(valid_program_update_data)
 
         assert len(results) == 1
-        assert error == []
+        assert error in (None, [])
         assert status_code == 200
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_called_once_with([1])
@@ -202,6 +204,7 @@ class TestProgramUpdateService:
         self, mock_db_update, mock_db_read_many, valid_program_update_data
     ):
         mock_db_update.return_value = 0
+        mock_db_read_one.return_value = valid_program_row
         results, error, status_code = update_programs(valid_program_update_data)
 
         assert results == []
@@ -225,21 +228,27 @@ class TestProgramUpdateService:
 class TestProgramArchiveService:
     def test_archive_programs(self, mock_db_archive, valid_program_ids):
         mock_db_archive.side_effect = [1, 1]
-        archived = archive_programs(valid_program_ids)
+        mock_db_read_one.side_effect = valid_program_rows
+        mock_db_read_many.return_value = valid_program_rows
+        results, errors, status = archive_programs(valid_program_ids)
 
-        assert len(archived[0]) == 2
+        assert len(results) == 2
+        assert errors in (None, [])
+        assert status == 200
         assert mock_db_archive.call_count == 2
 
     def test_archive_programs_none_archived(self, mock_db_archive, valid_program_ids):
         mock_db_archive.return_value = 0
-        archived = archive_programs(valid_program_ids)
+        mock_db_read_one.return_value = valid_program_row
+        results, errors, status = archive_programs(valid_program_ids)
 
-        assert archived[0] == []
+        assert results == []
+        assert len(errors) == 2
 
     def test_archive_programs_invalid_ids(self):
         results, errors, status = archive_programs(["one", 2])
         assert status == 400
-        assert any("must be integers" in e["message"] for e in errors)
+        assert any("must be of type int" in e["message"] for e in errors)
 
 
 # =======================
@@ -416,7 +425,7 @@ class TestProgramCreateRoute:
     def test_handle_program_db_insert_success(
         self, mock_create_new_programs, client, valid_program_create_data
     ):
-        mock_create_new_programs.return_value = (valid_program_create_data, None, None)
+        mock_create_new_programs.return_value = (valid_program_create_data, None, 201)
 
         response = client.post("/programs", json=valid_program_create_data)
         data = response.get_json()
@@ -469,7 +478,7 @@ class TestProgramUpdateRoute:
     def test_handle_update_programs_success(
         self, mock_update_programs, client, valid_program_update_data
     ):
-        mock_update_programs.return_value = (valid_program_update_data, None, None)
+        mock_update_programs.return_value = (valid_program_update_data, None, 200)
 
         response = client.put("/programs", json=valid_program_update_data)
         data = response.get_json()

@@ -6,12 +6,12 @@ from app.models import (
     program_db_update,
     program_db_archive,
 )
-from app.utils.converters import (
+from app.utils import (
     program_row_to_dict,
     program_dict_to_row,
-)
-from app.utils.routes_helpers import (
-    normalize_to_list,
+    bulk_create_entities,
+    bulk_update_entities,
+    bulk_archive_entities,
 )
 
 
@@ -24,107 +24,49 @@ def get_all_programs(active_only):
 
 def get_program_by_id(program_id: int):
     program = program_db_read_by_id(program_id)
-    if program is None:
-        return None
-    return program_row_to_dict(program)
+    return program_row_to_dict(program) if program else None
 
 
 def create_new_programs(data):
-    programs = normalize_to_list(data)
-    created_ids = []
-    errors = []
-
-    for program_data in programs:
-        program_data = {
-            k: (v.strip() if isinstance(v, str) else v) for k, v in program_data.items()
-        }
-
-        try:
-            row = program_dict_to_row(program_data)
-            program_id = program_db_insert(row)
-            if program_id:
-                created_ids.append(program_id)
-            else:
-                errors.append(
-                    {"message": "Failed to insert program (unknown DB error)."}
-                )
-        except (ValueError, RuntimeError) as e:
-            errors.append({"message": str(e)})
-
-    if not created_ids:
-        return [], {"message": "No programs were created", "details": errors}, 400
-
-    created_programs_rows = program_db_read_by_ids(created_ids)
-    created_programs = [program_row_to_dict(row) for row in created_programs_rows]
-
-    return created_programs, None, 201
+    return bulk_create_entities(
+        data,
+        insert_func=program_db_insert,
+        to_row_func=program_dict_to_row,
+        to_dict_func=program_row_to_dict,
+        read_by_ids_func=program_db_read_by_ids,
+        no_success_msg="No programs were created.",
+        success_status_code=201,
+        failure_status_code=400,
+    )
 
 
 def update_programs(data):
-    programs = normalize_to_list(data)
-    updated_ids = []
-    errors = []
-
-    for incoming_data in programs:
-        incoming_data = {
-            k: (v.strip() if isinstance(v, str) else v)
-            for k, v in incoming_data.items()
-        }
-
-        program_id = incoming_data.get("id")
-        if not program_id:
-            return [], [{"message": "Missing program ID for update."}], 400
-
-        existing_data = program_db_read_by_id(program_id)
-        if not existing_data:
-            return [], [{"message": f"Program ID {program_id} not found."}], 422
-
-        if not isinstance(existing_data, dict):
-            existing_data = program_row_to_dict(existing_data)
-
-        full_data = {**existing_data, **incoming_data}
-
-        try:
-            row = program_dict_to_row(full_data)
-            success = program_db_update(program_id, row)
-            if success:
-                updated_ids.append(program_id)
-            else:
-                errors.append({"message": f"Program ID {program_id} not updated."})
-        except (ValueError, RuntimeError) as e:
-            errors.append({"message": str(e)})
-
-    if not updated_ids:
-        return [], errors, 400
-
-    updated_programs_rows = program_db_read_by_ids(updated_ids)
-    updated_programs = [program_row_to_dict(row) for row in updated_programs_rows]
-
-    return updated_programs, errors, 200
+    return bulk_update_entities(
+        data,
+        update_func=program_db_update,
+        get_existing_func=program_db_read_by_id,
+        to_row_func=program_dict_to_row,
+        to_dict_func=program_row_to_dict,
+        read_by_ids_func=program_db_read_by_ids,
+        no_success_msg="No programs were updated.",
+        missing_id_msg="Missing program ID for update.",
+        not_found_msg="Program ID {id} not found.",
+        not_updated_msg="Program ID {id} not updated.",
+        failure_status_code=400,
+        success_status_code=200,
+    )
 
 
 def archive_programs(ids):
-    ids = normalize_to_list(ids)
-    if not all(isinstance(item, int) for item in ids):
-        return [], [{"message": "IDs must be integers"}], 400
-
-    archived_ids = []
-    errors = []
-
-    for program_id in ids:
-        rows_updated = program_db_archive(program_id)
-        if rows_updated > 0:
-            archived_ids.append(program_id)
-        else:
-            errors.append(
-                {"message": f"Program ID {program_id} not found or already archived."}
-            )
-
-    if not archived_ids:
-        return [], errors, 422
-
-    # Read and return the updated records
-    archived_rows = program_db_read_by_ids(archived_ids)
-    archived_programs = [program_row_to_dict(row) for row in archived_rows]
-
-    return archived_programs, errors, 200
+    return bulk_archive_entities(
+        ids,
+        archive_func=program_db_archive,
+        get_existing_func=program_db_read_by_id,
+        to_dict_func=program_row_to_dict,
+        read_by_ids_func=program_db_read_by_ids,
+        no_success_msg="No programs were archived.",
+        not_found_msg="Program ID {id} not found or already archived.",
+        not_updated_msg="Program ID {id} not archived.",
+        failure_status_code=422,
+        success_status_code=200,
+    )

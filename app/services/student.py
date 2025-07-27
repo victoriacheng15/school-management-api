@@ -9,7 +9,9 @@ from app.models import (
 from app.utils import (
     student_row_to_dict,
     student_dict_to_row,
-    normalize_to_list,
+    bulk_create_entities,
+    bulk_update_entities,
+    bulk_archive_entities,
 )
 
 
@@ -22,107 +24,49 @@ def get_all_students(active_only):
 
 def get_student_by_id(student_id: int):
     student = student_db_read_by_id(student_id)
-    if student is None:
-        return None
-    return student_row_to_dict(student)
+    return student_row_to_dict(student) if student else None
 
 
 def create_new_students(data):
-    students = normalize_to_list(data)
-    created_ids = []
-    errors = []
-
-    for student_data in students:
-        student_data = {
-            k: (v.strip() if isinstance(v, str) else v) for k, v in student_data.items()
-        }
-
-        try:
-            row = student_dict_to_row(student_data)
-            student_id = student_db_insert(row)
-            if student_id:
-                created_ids.append(student_id)
-            else:
-                errors.append(
-                    {"message": "Failed to insert student (unknown DB error)."}
-                )
-        except (ValueError, RuntimeError) as e:
-            errors.append({"message": str(e)})
-
-    if not created_ids:
-        return [], {"message": "No students were created", "details": errors}, 400
-
-    created_students_rows = student_db_read_by_ids(created_ids)
-    created_students = [student_row_to_dict(row) for row in created_students_rows]
-
-    return created_students, None, 201
+    return bulk_create_entities(
+        data,
+        insert_func=student_db_insert,
+        to_row_func=student_dict_to_row,
+        to_dict_func=student_row_to_dict,
+        read_by_ids_func=student_db_read_by_ids,
+        no_success_msg="No students were created.",
+        success_status_code=201,
+        failure_status_code=400,
+    )
 
 
 def update_students(data):
-    students = normalize_to_list(data)
-    updated_ids = []
-    errors = []
-
-    for incoming_data in students:
-        incoming_data = {
-            k: (v.strip() if isinstance(v, str) else v)
-            for k, v in incoming_data.items()
-        }
-
-        student_id = incoming_data.get("id")
-        if not student_id:
-            return [], [{"message": "Missing student ID for update."}], 400
-
-        existing_data = student_db_read_by_id(student_id)
-        if not existing_data:
-            return [], [{"message": f"Student ID {student_id} not found."}], 422
-
-        if not isinstance(existing_data, dict):
-            existing_data = student_row_to_dict(existing_data)
-
-        full_data = {**existing_data, **incoming_data}
-
-        try:
-            row = student_dict_to_row(full_data)
-            success = student_db_update(student_id, row)
-            if success:
-                updated_ids.append(student_id)
-            else:
-                errors.append({"message": f"Student ID {student_id} not updated."})
-        except (ValueError, RuntimeError) as e:
-            errors.append({"message": str(e)})
-
-    if not updated_ids:
-        return [], errors, 400
-
-    updated_students_rows = student_db_read_by_ids(updated_ids)
-    updated_students = [student_row_to_dict(row) for row in updated_students_rows]
-
-    return updated_students, errors, 200
+    return bulk_update_entities(
+        data,
+        update_func=student_db_update,
+        get_existing_func=student_db_read_by_id,
+        to_row_func=student_dict_to_row,
+        to_dict_func=student_row_to_dict,
+        read_by_ids_func=student_db_read_by_ids,
+        no_success_msg="No students were updated.",
+        missing_id_msg="Missing student ID for update.",
+        not_found_msg="Student ID {id} not found.",
+        not_updated_msg="Student ID {id} not updated.",
+        failure_status_code=400,
+        success_status_code=200,
+    )
 
 
 def archive_students(ids):
-    ids = normalize_to_list(ids)
-    if not all(isinstance(item, int) for item in ids):
-        return [], [{"message": "IDs must be integers"}], 400
-
-    archived_ids = []
-    errors = []
-
-    for student_id in ids:
-        rows_updated = student_db_archive(student_id)
-        if rows_updated > 0:
-            archived_ids.append(student_id)
-        else:
-            errors.append(
-                {"message": f"Student ID {student_id} not found or already archived."}
-            )
-
-    if not archived_ids:
-        return [], errors, 422
-
-    # Read and return the updated records
-    archived_rows = student_db_read_by_ids(archived_ids)
-    archived_students = [student_row_to_dict(row) for row in archived_rows]
-
-    return archived_students, errors, 200
+    return bulk_archive_entities(
+        ids,
+        archive_func=student_db_archive,
+        get_existing_func=student_db_read_by_id,
+        to_dict_func=student_row_to_dict,
+        read_by_ids_func=student_db_read_by_ids,
+        no_success_msg="No students were archived.",
+        not_found_msg="Student ID {id} not found or already archived.",
+        not_updated_msg="Student ID {id} not archived.",
+        failure_status_code=422,
+        success_status_code=200,
+    )

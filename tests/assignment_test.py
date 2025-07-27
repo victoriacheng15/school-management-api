@@ -164,7 +164,9 @@ class TestAssignmentCreateService:
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_assignment_rows
 
-        results, error, status_code = create_new_assignments(valid_assignment_create_data)
+        results, error, status_code = create_new_assignments(
+            valid_assignment_create_data
+        )
 
         assert len(results) == 2
         assert error is None
@@ -176,7 +178,9 @@ class TestAssignmentCreateService:
         self, mock_db_create, mock_db_read_many, valid_assignment_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        results, error, status_code = create_new_assignments(valid_assignment_create_data)
+        results, error, status_code = create_new_assignments(
+            valid_assignment_create_data
+        )
 
         assert results == []
         assert error["message"] == "No assignments were created."
@@ -235,7 +239,9 @@ class TestAssignmentArchiveService:
         assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_assignments_none_archived(self, mock_db_archive, valid_assignment_ids):
+    def test_archive_assignments_none_archived(
+        self, mock_db_archive, valid_assignment_ids
+    ):
         mock_db_archive.return_value = 0
         archived = archive_assignments(valid_assignment_ids)
 
@@ -306,7 +312,9 @@ class TestAssignmentModel:
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
-        params = valid_assignment_row[1:3] # Exclude id, created_at, updated_at, is_archived
+        params = valid_assignment_row[
+            1:3
+        ]  # Exclude id, created_at, updated_at, is_archived
         result = assignment_db_insert(params)
 
         assert result == 10
@@ -327,7 +335,7 @@ class TestAssignmentModel:
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
 
-        result = assignment_db_update(1, ("x",) * 2) # instructor_id, course_id
+        result = assignment_db_update(1, ("x",) * 2)  # instructor_id, course_id
         assert result == 1
 
     @patch("app.models.assignment.db.execute_query")
@@ -421,7 +429,11 @@ class TestAssignmentCreateRoute:
     def test_handle_assignment_db_insert_success(
         self, mock_create_new_assignments, client, valid_assignment_create_data
     ):
-        mock_create_new_assignments.return_value = (valid_assignment_create_data, None, None)
+        mock_create_new_assignments.return_value = (
+            valid_assignment_create_data,
+            None,
+            None,
+        )
 
         response = client.post("/assignments", json=valid_assignment_create_data)
         data = response.get_json()
@@ -474,7 +486,11 @@ class TestAssignmentUpdateRoute:
     def test_handle_update_assignments_success(
         self, mock_update_assignments, client, valid_assignment_update_data
     ):
-        mock_update_assignments.return_value = (valid_assignment_update_data, None, None)
+        mock_update_assignments.return_value = (
+            valid_assignment_update_data,
+            None,
+            None,
+        )
 
         response = client.put("/assignments", json=valid_assignment_update_data)
         data = response.get_json()

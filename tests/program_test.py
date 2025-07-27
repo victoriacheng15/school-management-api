@@ -201,7 +201,12 @@ class TestProgramUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_programs_no_success(
-        self, mock_db_update, mock_db_read_one, mock_db_read_many, valid_program_update_data, valid_program_row
+        self,
+        mock_db_update,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_program_update_data,
+        valid_program_row,
     ):
         mock_db_update.return_value = 0
         mock_db_read_one.return_value = valid_program_row
@@ -226,7 +231,14 @@ class TestProgramUpdateService:
 
 
 class TestProgramArchiveService:
-    def test_archive_programs(self, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_program_ids, valid_program_rows):
+    def test_archive_programs(
+        self,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_program_ids,
+        valid_program_rows,
+    ):
         mock_db_archive.side_effect = [1, 1]
         mock_db_read_one.side_effect = valid_program_rows
         mock_db_read_many.return_value = valid_program_rows
@@ -237,7 +249,9 @@ class TestProgramArchiveService:
         assert status == 200
         assert mock_db_archive.call_count == 2
 
-    def test_archive_programs_none_archived(self, mock_db_archive, mock_db_read_one, valid_program_ids, valid_program_row):
+    def test_archive_programs_none_archived(
+        self, mock_db_archive, mock_db_read_one, valid_program_ids, valid_program_row
+    ):
         mock_db_archive.return_value = 0
         mock_db_read_one.return_value = valid_program_row
         results, errors, status = archive_programs(valid_program_ids)

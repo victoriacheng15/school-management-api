@@ -41,4 +41,10 @@ from .student import (
     student_db_update,
     student_db_archive,
 )
-from .term import get_all_active_terms
+from .term import (
+    term_db_read_all,
+    term_db_read_by_id,
+    term_db_read_by_ids,
+    term_db_insert,
+    term_db_update,
+)

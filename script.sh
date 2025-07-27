@@ -125,9 +125,19 @@ create_departments='[
   }
 ]'
 
+update_departments='[
+  {
+    "id": 1,
+    "status": "inactive"
+  },
+  {
+    "id": 2,
+    "status": "inactive"
+  }
+]'
+
 archive_departments='{
-  "ids": [1, 2],
-  "updated_at": "2025-07-20"
+  "ids": [3, 4]
 }'
 
 create_programs='[
@@ -143,9 +153,19 @@ create_programs='[
   }
 ]'
 
+update_programs='[
+  {
+    "id": 1,
+    "status": "inactive"
+  },
+  {
+    "id": 2,
+    "status": "inactive"
+  }
+]'
+
 archive_programs='{
-  "ids": [1, 2],
-  "updated_at": "2025-07-20"
+  "ids": [3, 4]
 }'
 
 create_courses='[
@@ -163,10 +183,19 @@ create_courses='[
   }
 ]'
 
+update_courses='[
+  {
+    "id": 1,
+    "status": "inactive"
+  },
+  {
+    "id": 2,
+    "status": "inactive"
+  }
+]'
+
 archive_courses='{
-  "ids": [1, 2],
-  
-  "updated_at": "2025-07-20"
+  "ids": [3, 4]
 }'
 
 create_terms='[
@@ -182,9 +211,19 @@ create_terms='[
   }
 ]'
 
+update_terms='[
+  {
+    "id": 1,
+    "start_date": "2024-09-02"
+  },
+  {
+    "id": 2,
+    "start_date": "2025-01-11"
+  }
+]'
+
 archive_terms='{
-  "ids": [1, 2],
-  "updated_at": "2025-07-20"
+  "ids": [3, 4]
 }'
 
 create_enrollments='[
@@ -196,6 +235,17 @@ create_enrollments='[
   {
     "student_id": 2,
     "course_id": 2,
+    "grade": "B+"
+  }
+]'
+
+update_enrollments='[
+  {
+    "id": 1,
+    "grade": "A-"
+  },
+  {
+    "id": 2,
     "grade": "B+"
   }
 ]'
@@ -217,9 +267,19 @@ create_assignments='[
   }
 ]'
 
+update_assignments='[
+  {
+    "id": 1,
+    "course_id": 2
+  },
+  {
+    "id": 2,
+    "course_id": 1
+  }
+]'
+
 archive_assignments='{
-  "ids": [1, 2],
-  "updated_at": "2025-07-20"
+  "ids": [3, 4]
 }'
 
 create_course_schedule='[
@@ -237,9 +297,23 @@ create_course_schedule='[
   }
 ]'
 
+update_course_schedule='[
+  {
+    "id": 1,
+    "day": "Tuesday",
+    "time": "10:00-12:00",
+    "room": "Room 103"
+  },
+  {
+    "id": 2,
+    "day": "Thursday",
+    "time": "14:00-16:00",
+    "room": "Room 204"
+  }
+]'
+
 archive_course_schedule='{
-  "ids": [1, 2],
-  "updated_at": "2025-07-20"
+  "ids": [3, 4]
 }'
 
 usage() {
@@ -268,31 +342,16 @@ case "$method" in
     get_resource "$resource" "$id" "$keyword"
     ;;
   create)
-    var_name="create_${resource}"
-    data="${!var_name}"
-    if [ -z "$data" ]; then
-      echo "No POST data defined for resource '$resource'"
-      exit 1
-    fi
-    post_resource "$resource" "$data"
+    data_var="create_${resource}"
+    post_resource "$resource" "${!data_var}"
     ;;
   update)
-    var_name="update_${resource}"
-    data="${!var_name}"
-    if [ -z "$data" ]; then
-      echo "No PUT data defined for resource '$resource'"
-      exit 1
-    fi
-    put_resource "$resource" "$data"
+    data_var="update_${resource}"
+    put_resource "$resource" "${!data_var}"
     ;;
   archive)
-    var_name="archive_${resource}"
-    data="${!var_name}"
-    if [ -z "$data" ]; then
-      echo "No PATCH data defined for resource '$resource'"
-      exit 1
-    fi
-    patch_resource "$resource" "$data"
+    data_var="archive_${resource}"
+    patch_resource "$resource" "${!data_var}"
     ;;
   *)
     usage

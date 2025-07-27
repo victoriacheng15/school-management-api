@@ -158,7 +158,9 @@ class TestEnrollmentCreateService:
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_enrollment_rows
 
-        results, error, status_code = create_new_enrollments(valid_enrollment_create_data)
+        results, error, status_code = create_new_enrollments(
+            valid_enrollment_create_data
+        )
 
         assert len(results) == 2
         assert error is None
@@ -170,7 +172,9 @@ class TestEnrollmentCreateService:
         self, mock_db_create, mock_db_read_many, valid_enrollment_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        results, error, status_code = create_new_enrollments(valid_enrollment_create_data)
+        results, error, status_code = create_new_enrollments(
+            valid_enrollment_create_data
+        )
 
         assert results == []
         assert error["message"] == "No enrollments were created."
@@ -271,7 +275,7 @@ class TestEnrollmentModel:
         mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
         mock_execute.return_value = mock_cursor
 
-        params = valid_enrollment_row[1:4] # Exclude id, created_at, updated_at
+        params = valid_enrollment_row[1:4]  # Exclude id, created_at, updated_at
         result = enrollment_db_insert(params)
 
         assert result == 10
@@ -292,7 +296,7 @@ class TestEnrollmentModel:
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
 
-        result = enrollment_db_update(1, ("x",) * 3) # student_id, course_id, grade
+        result = enrollment_db_update(1, ("x",) * 3)  # student_id, course_id, grade
         assert result == 1
 
     @patch("app.models.enrollment.db.execute_query")
@@ -372,7 +376,11 @@ class TestEnrollmentCreateRoute:
     def test_handle_enrollment_db_insert_success(
         self, mock_create_new_enrollments, client, valid_enrollment_create_data
     ):
-        mock_create_new_enrollments.return_value = (valid_enrollment_create_data, None, None)
+        mock_create_new_enrollments.return_value = (
+            valid_enrollment_create_data,
+            None,
+            None,
+        )
 
         response = client.post("/enrollments", json=valid_enrollment_create_data)
         data = response.get_json()
@@ -425,7 +433,11 @@ class TestEnrollmentUpdateRoute:
     def test_handle_update_enrollments_success(
         self, mock_update_enrollments, client, valid_enrollment_update_data
     ):
-        mock_update_enrollments.return_value = (valid_enrollment_update_data, None, None)
+        mock_update_enrollments.return_value = (
+            valid_enrollment_update_data,
+            None,
+            None,
+        )
 
         response = client.put("/enrollments", json=valid_enrollment_update_data)
         data = response.get_json()

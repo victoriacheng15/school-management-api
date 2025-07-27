@@ -51,3 +51,11 @@ from .enrollment import (
     create_new_enrollments,
     update_enrollments,
 )
+
+from .assignment import (
+    get_all_assignments,
+    get_assignment_by_id,
+    create_new_assignments,
+    update_assignments,
+    archive_assignments,
+)

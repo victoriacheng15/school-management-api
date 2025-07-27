@@ -23,6 +23,7 @@ def create_app():
     from app.routes import student_bp
     from app.routes import term_bp
     from app.routes import enrollment_bp
+    from app.routes import course_schedule_bp
 
     blueprints = [
         home_bp,

@@ -317,14 +317,14 @@ archive_course_schedule='{
 }'
 
 usage() {
-  echo "Usage: $0 {read|create|update|archive} resource [id] [keyword]"
+  echo "Usage: $0 {read|create|update|archive} resource [id]"
   echo "Examples:"
   echo "  $0 read students"
   echo "  $0 read students 1"
-  echo "  $0 read students  active"
-  echo "  $0 create students create_students"
-  echo "  $0 update students update_students"
-  echo "  $0 archive students archive_students"
+  echo "  $0 read students active"
+  echo "  $0 create students"
+  echo "  $0 update students"
+  echo "  $0 archive students"
   exit 1
 }
 

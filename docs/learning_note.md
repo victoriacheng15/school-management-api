@@ -58,3 +58,20 @@ While building the database layer for this project, I explored how to manage SQL
       - [PostgreSQL Connection Pooling](https://www.compilenrun.com/docs/database/postgresql/postgresql-best-practices/postgresql-connection-pooling/?utm_source=chatgpt.com)
       - [Why Connection Pooling Is Essential for PostgreSQL Database Optimisation](https://caw.tech/why-connection-pooling-is-essential-for-postgresql-database-optimisation/)
   - Since this is a small app using SQLite, closing the connection after each use is a good, safe choice.
+
+## Python Decorators for Exception Handling
+
+To improve route code readability and reduce repetitive error handling in the Flask API, I wrote custom Python decorators.
+
+- Why use decorators for exception handling?
+  - They allow wrapping route functions to automatically catch and handle common errors.
+  - They reduce boilerplate try-except blocks scattered across multiple routes.
+  - Improve consistency in error responses returned by the API.
+- How I applied it:
+  - Created decorators that catch specific exceptions like `KeyError` and general exceptions.
+  - Decorators return JSON error responses with proper HTTP status codes.
+  - Applied these decorators across route handlers to keep route logic clean and focused on core functionality.
+- What I learned:
+  - Decorators are a powerful Python feature to abstract cross-cutting concerns like error handling.
+  - Simplifying routes this way makes the code easier to maintain and extend.
+  - This pattern can be reused for logging, authorization checks, or input validation in future projects.

@@ -77,10 +77,10 @@ The API will be available at [http://localhost:5000](http://localhost:5000)
 
 ### 🐳 Option 2: Run with Docker (Recommended)
 
-1. **Start the app using Docker**:
+1. **Start the app using Docker Compose**:
 
 ```
-make docker-run
+make up
 ```
 
 2. **(Optional) Enter the Docker container** if you want to run tools like `api_client.sh` from inside:
@@ -98,7 +98,7 @@ Then inside the container, you can run:
 3. **To stop and clean up Docker resources**:
 
 ```
-make docker-clean
+make down
 ```
 
 > ⚠️ **Note:**  

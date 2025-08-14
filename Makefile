@@ -1,4 +1,4 @@
-.PHONY: freeze install setup-db format test coverage docker-build docker-run docker-clean
+.PHONY: freeze install setup-db reset format test coverage docker-build docker-run docker-clean up down
 
 freeze:
 	pip freeze > requirements.txt
@@ -8,6 +8,9 @@ install:
 
 setup-db:
 	python3 db/init_db.py && python3 db/populate_db.py
+
+reset:
+	rm db/school.db && make setup-db
 
 format:
 	ruff format run.py db/ tests/ app/
@@ -27,5 +30,8 @@ docker-clean:
 	docker rm school-flask-api-container || true
 	docker rmi school-flask-api || true
 
-reset:
-	rm db/school.db && make setup-db
+up:
+	docker compose up -d
+
+down:
+	docker compose down

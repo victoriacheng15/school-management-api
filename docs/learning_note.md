@@ -75,3 +75,28 @@ To improve route code readability and reduce repetitive error handling in the Fl
   - Decorators are a powerful Python feature to abstract cross-cutting concerns like error handling.
   - Simplifying routes this way makes the code easier to maintain and extend.
   - This pattern can be reused for logging, authorization checks, or input validation in future projects.
+
+## N+1 Problem in Bulk Operations
+
+While implementing bulk creation endpoints in this API (for students, instructors, courses, etc.), I encountered the classic N+1 problem.
+
+- Why is it a problem?
+  - The current approach inserts each entity one by one in a loop, resulting in a separate database query for each record.
+  - This is inefficient for large batches, as it increases database load and slows down API response times.
+
+- How I handled it in this project:
+  - For simplicity and because this is a sandbox project, I kept the one-by-one insert logic for all bulk creation routes.
+  - I noted that SQLite’s `executemany` can be used for batch inserts, but it does not easily return all inserted row IDs.
+  - Fixing this would require refactoring the service and model layers to support batch inserts and fetching all inserted IDs for the response.
+
+- What I learned:
+  - The N+1 problem is a common performance issue in APIs that process bulk operations.
+  - Batch inserts (using methods like `executemany`) are the recommended solution, but may require additional logic to retrieve all inserted IDs.
+  - For production systems, it’s important to avoid N+1 patterns to ensure scalability and efficiency.
+
+- What I would do in a production app:
+  - Implement a batch insert function in the model layer using `executemany` for all bulk creation endpoints.
+  - Refactor the service/helper logic to use the batch insert and fetch all inserted IDs for the response, possibly by querying with a unique field or timestamp after the insert.
+
+- Sources I referenced:
+  - [Python SQLite executemany docs](https://docs.python.org/3/library/sqlite3.html#sqlite3.Cursor.executemany)

@@ -402,21 +402,19 @@ class TestStudentModel:
         if DATABASE_TYPE == "postgresql":
             # PostgreSQL returns the inserted row with RETURNING clause
             mock_execute.return_value = [{"id": 10}]
-            # Convert dict to the tuple format expected by the insert function
-            dict_data = valid_student_row
             params = (
-                dict_data["first_name"],
-                dict_data["last_name"],
-                dict_data["email"],
-                dict_data["address"],
-                dict_data["city"],
-                dict_data["province"],
-                dict_data["country"],
-                dict_data["address_type"],
-                dict_data["status"],
-                dict_data["is_full_time"],
-                dict_data["is_archived"],
-                dict_data["program_id"],
+                valid_student_row["first_name"],
+                valid_student_row["last_name"],
+                valid_student_row["email"],
+                valid_student_row["address"],
+                valid_student_row["city"],
+                valid_student_row["province"],
+                valid_student_row["country"],
+                valid_student_row["address_type"],
+                valid_student_row["status"],
+                valid_student_row["is_full_time"],
+                valid_student_row["is_archived"],
+                valid_student_row["program_id"],
             )
         else:
             # SQLite returns cursor with lastrowid

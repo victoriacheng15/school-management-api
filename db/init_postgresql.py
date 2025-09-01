@@ -99,6 +99,10 @@ def populate_sample_data():
             instructors_pg,
         )
 
+        db.execute_query(
+            "SELECT setval('instructors_id_seq', (SELECT MAX(id) FROM instructors));"
+        )
+
         # Insert terms
         db.execute_many(
             "INSERT INTO terms (id, name, start_date, end_date, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",

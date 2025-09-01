@@ -38,18 +38,18 @@ def student_dict_to_row(data):
 
 def instructor_row_to_dict(row):
     return {
-        "id": row[0],
-        "first_name": row[1],
-        "last_name": row[2],
-        "email": row[3],
-        "address": row[4],
-        "province": row[5],
-        "employment": row[6],
-        "status": row[7],
-        "department_id": row[8],
-        "created_at": row[9],
-        "updated_at": row[10],
-        "is_archived": row[11],
+        "id": row["id"],
+        "first_name": row["first_name"],
+        "last_name": row["last_name"],
+        "email": row["email"],
+        "address": row["address"],
+        "province": row["province"],
+        "employment": row["employment"],
+        "status": row["status"],
+        "department_id": row["department_id"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "is_archived": row["is_archived"],
     }
 
 

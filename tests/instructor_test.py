@@ -1,4 +1,5 @@
 import pytest
+import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -17,6 +18,9 @@ from app.services import (
     archive_instructors,
 )
 
+# Detect database type for tests
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
+
 # =======================
 # Fixtures
 # =======================
@@ -24,20 +28,39 @@ from app.services import (
 
 def make_instructor_row():
     today = date.today().isoformat()
-    return (
-        1,
-        "John",
-        "Doe",
-        "johndoe@example.com",
-        "123 Main St",
-        "Anytown",
-        "Full-Time",
-        "active",
-        1,
-        today,
-        today,
-        0,
-    )
+
+    if DATABASE_TYPE == "postgresql":
+        # PostgreSQL returns dict-like objects
+        return {
+            "id": 1,
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "johndoe@example.com",
+            "address": "123 Main St",
+            "province": "Anytown",
+            "employment": "Full-Time",
+            "status": "active",
+            "department_id": 1,
+            "created_at": today,
+            "updated_at": today,
+            "is_archived": False,
+        }
+    else:
+        # SQLite returns tuple objects
+        return (
+            1,
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            "123 Main St",
+            "Anytown",
+            "Full-Time",
+            "active",
+            1,
+            today,
+            today,
+            0,
+        )
 
 
 def make_instructor_dict():
@@ -140,7 +163,28 @@ def mock_db_archive():
 
 class TestInstructorReadService:
     def test_get_all_instructors(self, mock_db_read_all, valid_instructor_row):
-        mock_db_read_all.return_value = [valid_instructor_row]
+        # For SQLite, convert tuple fixture to dict to match model behavior
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_all.return_value = [valid_instructor_row]
+        else:
+            # For SQLite, convert tuple fixture to dict to match model behavior
+            tuple_row = valid_instructor_row
+            dict_row = {
+                "id": tuple_row[0],
+                "first_name": tuple_row[1],
+                "last_name": tuple_row[2],
+                "email": tuple_row[3],
+                "address": tuple_row[4],
+                "province": tuple_row[5],
+                "employment": tuple_row[6],
+                "status": tuple_row[7],
+                "department_id": tuple_row[8],
+                "created_at": tuple_row[9],
+                "updated_at": tuple_row[10],
+                "is_archived": bool(tuple_row[11]),
+            }
+            mock_db_read_all.return_value = [dict_row]
+
         instructors = get_all_instructors(active_only=True)
         assert len(instructors) == 1
         assert instructors[0]["first_name"] == "John"
@@ -152,7 +196,28 @@ class TestInstructorReadService:
             get_all_instructors(active_only=True)
 
     def test_get_instructor_by_id(self, mock_db_read_one, valid_instructor_row):
-        mock_db_read_one.return_value = valid_instructor_row
+        # Service layer expects dicts since model layer converts tuples to dicts
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.return_value = valid_instructor_row
+        else:
+            # For SQLite, convert tuple fixture to dict to match model behavior
+            tuple_row = valid_instructor_row
+            dict_row = {
+                "id": tuple_row[0],
+                "first_name": tuple_row[1],
+                "last_name": tuple_row[2],
+                "email": tuple_row[3],
+                "address": tuple_row[4],
+                "province": tuple_row[5],
+                "employment": tuple_row[6],
+                "status": tuple_row[7],
+                "department_id": tuple_row[8],
+                "created_at": tuple_row[9],
+                "updated_at": tuple_row[10],
+                "is_archived": bool(tuple_row[11]),
+            }
+            mock_db_read_one.return_value = dict_row
+
         instructor = get_instructor_by_id(1)
         assert instructor["first_name"] == "John"
         mock_db_read_one.assert_called_once_with(1)
@@ -271,25 +336,26 @@ class TestInstructorArchiveService:
 class TestInstructorModel:
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_read_all(self, mock_execute):
-        mock_execute.return_value = [("mocked",)]
+        mock_execute.return_value = [{"mocked": "data"}]
         result = instructor_db_read_all()
-        assert result == [("mocked",)]
+        assert result == [{"mocked": "data"}]
         mock_execute.assert_called_once_with("SELECT * FROM instructors;")
 
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_read_all_active(self, mock_execute):
-        mock_execute.return_value = [("active_instructor",)]
+        mock_execute.return_value = [{"active": "instructor"}]
         result = instructor_db_read_all(active_only=True)
-        assert result == [("active_instructor",)]
+        assert result == [{"active": "instructor"}]
         mock_execute.assert_called_once_with(
             "SELECT * FROM instructors WHERE status = 'active';"
         )
 
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_read_by_id_found(self, mock_execute):
-        mock_execute.return_value = [("instructor_1",)]
+        mock_execute.return_value = [{"id": 1, "first_name": "John"}]
         result = instructor_db_read_by_id(1)
-        assert result == ("instructor_1",)
+        assert result == {"id": 1, "first_name": "John"}
+        # The model uses SQLite syntax (?), database layer converts internally
         mock_execute.assert_called_once_with(
             "SELECT * FROM instructors WHERE id = ?;", (1,)
         )
@@ -309,20 +375,39 @@ class TestInstructorModel:
 
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_read_by_ids_success(self, mock_execute):
-        mock_execute.return_value = [("i1",), ("i2",)]
+        mock_execute.return_value = [{"id": 1}, {"id": 2}]
         result = instructor_db_read_by_ids([1, 2])
 
-        assert result == [("i1",), ("i2",)]
+        assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
-        assert "IN (?,?)" in mock_execute.call_args.args[0]
+
+        # The model uses SQLite syntax (?), database layer converts internally
+        query_call = mock_execute.call_args.args[0]
+        assert "IN (?,?)" in query_call
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_insert_success(self, mock_execute, valid_instructor_row):
-        mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-        mock_execute.return_value = mock_cursor
+        # For PostgreSQL, we expect dict format, for SQLite tuple format
+        if DATABASE_TYPE == "postgresql":
+            # PostgreSQL returns the inserted row with RETURNING clause
+            mock_execute.return_value = [{"id": 10}]
+            params = (
+                valid_instructor_row["first_name"],
+                valid_instructor_row["last_name"],
+                valid_instructor_row["email"],
+                valid_instructor_row["address"],
+                valid_instructor_row["province"],
+                valid_instructor_row["employment"],
+                valid_instructor_row["status"],
+                valid_instructor_row["department_id"],
+            )
+        else:
+            # SQLite returns cursor with lastrowid
+            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
+            mock_execute.return_value = mock_cursor
+            params = valid_instructor_row
 
-        params = valid_instructor_row
         result = instructor_db_insert(params)
 
         assert result == 10

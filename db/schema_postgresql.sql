@@ -36,12 +36,10 @@ CREATE TABLE IF NOT EXISTS students (
     status VARCHAR(20) CHECK(status IN ('active', 'inactive')) NOT NULL DEFAULT 'active',
     coop BOOLEAN NOT NULL DEFAULT FALSE,
     is_international BOOLEAN NOT NULL DEFAULT FALSE,
-    is_full_time BOOLEAN NOT NULL DEFAULT FALSE,
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
     program_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    archived_by INTEGER DEFAULT NULL,
+    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (program_id) REFERENCES programs(id)
 );
 
@@ -51,8 +49,8 @@ CREATE TABLE IF NOT EXISTS instructors (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    address TEXT,
-    city VARCHAR(100),
+    address VARCHAR(255),
+    province VARCHAR(100),
     employment VARCHAR(20) CHECK(employment IN ('full-time', 'part-time', 'adjunct')) NOT NULL,
     status VARCHAR(20) CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
     department_id INTEGER NOT NULL,
@@ -75,15 +73,15 @@ CREATE TABLE IF NOT EXISTS terms (
 -- Creating courses table
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     code VARCHAR(20) UNIQUE NOT NULL,
     term_id INTEGER NOT NULL,
-    instructor_id INTEGER NOT NULL,
+    department_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (term_id) REFERENCES terms(id),
-    FOREIGN KEY (instructor_id) REFERENCES instructors(id)
+    FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 -- Creating enrollments table
@@ -116,7 +114,7 @@ CREATE TABLE IF NOT EXISTS course_schedule (
     course_id INTEGER NOT NULL,
     day VARCHAR(20) NOT NULL,
     time VARCHAR(20) NOT NULL,
-    location VARCHAR(50) NOT NULL,
+    room VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_archived BOOLEAN NOT NULL DEFAULT FALSE,
@@ -130,7 +128,7 @@ CREATE INDEX IF NOT EXISTS idx_instructors_email ON instructors(email);
 CREATE INDEX IF NOT EXISTS idx_instructors_department_id ON instructors(department_id);
 CREATE INDEX IF NOT EXISTS idx_courses_code ON courses(code);
 CREATE INDEX IF NOT EXISTS idx_courses_term_id ON courses(term_id);
-CREATE INDEX IF NOT EXISTS idx_courses_instructor_id ON courses(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_courses_department_id ON courses(department_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
 CREATE INDEX IF NOT EXISTS idx_assignments_instructor_id ON assignments(instructor_id);

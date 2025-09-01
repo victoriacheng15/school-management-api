@@ -27,4 +27,4 @@ up:
 # make down  -> dont remove volume
 # make down V=1 -> remove volume
 down:
-    docker compose down$(if $(V), -v)
+	docker compose down$(if $(V), -v)

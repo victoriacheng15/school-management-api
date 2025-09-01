@@ -16,13 +16,8 @@ def init_postgresql_database():
     """Initialize PostgreSQL database with schema"""
     print("Initializing PostgreSQL database...")
 
-    # Set environment for PostgreSQL
-    os.environ["DATABASE_TYPE"] = "postgresql"
-    os.environ["DB_HOST"] = "localhost"
-    os.environ["DB_PORT"] = "5432"
-    os.environ["DB_NAME"] = "school"
-    os.environ["DB_USER"] = "schooluser"
-    os.environ["DB_PASSWORD"] = "schoolpass"
+    # Use environment variables already set by docker-compose
+    # No need to override them here
 
     try:
         db = Database()
@@ -62,38 +57,92 @@ def populate_sample_data():
 
     try:
         db = Database()
+        from db.data import departments, programs, instructors, terms, courses, students, enrollments, assignments, course_schedule
 
-        # Sample departments
-        departments_data = [
-            ("Computer Science",),
-            ("Mathematics",),
-            ("Engineering",),
+        # Insert departments (convert boolean)
+        departments_pg = [
+            tuple(bool(v) if i == 4 else v for i, v in enumerate(row))
+            for row in departments
         ]
-
-        db.execute_many("INSERT INTO departments (name) VALUES (%s)", departments_data)
-
-        # Sample programs
-        programs_data = [
-            ("Bachelor of Computer Science", "bachelor", 1),
-            ("Diploma in Software Development", "diploma", 1),
-            ("Certificate in Web Development", "certificate", 1),
-        ]
-
         db.execute_many(
-            "INSERT INTO programs (name, type, department_id) VALUES (%s, %s, %s)",
-            programs_data,
+            "INSERT INTO departments (id, name, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s)",
+            departments_pg
         )
 
-        # Sample terms
-        terms_data = [
-            ("Fall 2024", "2024-09-01", "2024-12-15"),
-            ("Winter 2025", "2025-01-06", "2025-04-30"),
-            ("Summer 2025", "2025-05-01", "2025-08-31"),
+        # Insert programs (convert boolean)
+        programs_pg = [
+            tuple(bool(v) if i == 6 else v for i, v in enumerate(row))
+            for row in programs
         ]
-
         db.execute_many(
-            "INSERT INTO terms (name, start_date, end_date) VALUES (%s, %s, %s)",
-            terms_data,
+            "INSERT INTO programs (id, name, type, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            programs_pg
+        )
+
+        # Insert instructors (convert boolean)
+        instructors_pg = [
+            tuple(bool(v) if i == 11 else v for i, v in enumerate(row))
+            for row in instructors
+        ]
+        db.execute_many(
+            "INSERT INTO instructors (id, first_name, last_name, email, address, city, employment_type, status, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            instructors_pg
+        )
+
+        # Insert terms
+        db.execute_many(
+            "INSERT INTO terms (id, name, start_date, end_date, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",
+            terms
+        )
+
+        # Insert courses (convert boolean)
+        courses_pg = [
+            tuple(bool(v) if i == 7 else v for i, v in enumerate(row))
+            for row in courses
+        ]
+        db.execute_many(
+            "INSERT INTO courses (id, name, code, term_id, instructor_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            courses_pg
+        )
+
+        # Insert students (convert Python bools to PostgreSQL bools)
+        students_pg = [
+            tuple(
+                (True if v is True else False if v is False else v)
+                if i in [10, 11, 12, 13] else v
+                for i, v in enumerate(row)
+            )
+            for row in students
+        ]
+        db.execute_many(
+            "INSERT INTO students (id, first_name, last_name, email, address, city, province, country, residency, status, is_full_time, is_archived, program_id, created_at, updated_at, archived_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            students_pg
+        )
+
+        # Insert enrollments
+        db.execute_many(
+            "INSERT INTO enrollments (id, student_id, course_id, grade, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",
+            enrollments
+        )
+
+        # Insert assignments (convert boolean)
+        assignments_pg = [
+            tuple(bool(v) if i == 5 else v for i, v in enumerate(row))
+            for row in assignments
+        ]
+        db.execute_many(
+            "INSERT INTO assignments (id, instructor_id, course_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s)",
+            assignments_pg
+        )
+
+        # Insert course_schedule (convert boolean)
+        course_schedule_pg = [
+            tuple(bool(v) if i == 7 else v for i, v in enumerate(row))
+            for row in course_schedule
+        ]
+        db.execute_many(
+            "INSERT INTO course_schedule (id, course_id, day, time, location, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            course_schedule_pg
         )
 
         print("✅ Sample data populated successfully!")

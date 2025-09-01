@@ -8,19 +8,24 @@ from db.db_utils import (
 
 db = Database()
 
-
 def student_db_read_all(active_only=False):
     query = "SELECT * FROM students"
     if active_only:
         query += " WHERE status = 'active'"
     query += ";"
-    return db.execute_query(query)
+    result = db.execute_query(query)
+    # Convert all rows to regular dicts for consistency
+    return [dict(row) for row in result] if result else []
 
 
 def student_db_read_by_id(student_id):
     query = "SELECT * FROM students WHERE id = ?;"
     result = db.execute_query(query, (student_id,))
-    return result[0] if result else None
+    if result:
+        # Both SQLite and PostgreSQL return dict-like objects
+        # result[0] is the first row (a dict-like object)
+        return dict(result[0])  # Convert to regular dict for consistency
+    return None
 
 
 def student_db_read_by_ids(student_ids):
@@ -28,7 +33,9 @@ def student_db_read_by_ids(student_ids):
         return []
     placeholders = ",".join("?" for _ in student_ids)
     query = f"SELECT * FROM students WHERE id IN ({placeholders});"
-    return db.execute_query(query, student_ids)
+    result = db.execute_query(query, student_ids)
+    # Convert all rows to regular dicts for consistency
+    return [dict(row) for row in result] if result else []
 
 
 def student_db_insert(student_data):

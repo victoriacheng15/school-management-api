@@ -1,4 +1,6 @@
 import sqlite3
+import psycopg2
+import psycopg2.extras
 import logging
 import os
 
@@ -18,28 +20,50 @@ logger = logging.getLogger(__name__)
 class Database:
     def __init__(self):
         """
-        Initialize the Database class with the given database name.
-
-        Args:
-            db_name (str): The name (or path) of the SQLite database file.
+        Initialize the Database class with support for both SQLite and PostgreSQL.
+        Database type is determined by the DATABASE_TYPE environment variable.
         """
-        self.db_name = os.path.join("db", "school.db")
+        self.db_type = os.getenv("DATABASE_TYPE", "sqlite").lower()
         self.conn = None
         self.cursor = None
 
+        if self.db_type == "postgresql":
+            self.db_config = {
+                "host": os.getenv("DB_HOST", "localhost"),
+                "port": os.getenv("DB_PORT", "5432"),
+                "database": os.getenv("DB_NAME", "school"),
+                "user": os.getenv("DB_USER", "schooluser"),
+                "password": os.getenv("DB_PASSWORD", "schoolpass"),
+            }
+        else:
+            self.db_name = os.path.join("db", "school.db")
+
     def connect(self):
         """
-        Connect to the SQLite database.
+        Connect to the database (SQLite or PostgreSQL).
 
-        This method opens a connection to the SQLite database and creates a cursor object.
+        This method opens a connection to the database and creates a cursor object.
         """
         if self.conn is None:
             try:
-                self.conn = sqlite3.connect(self.db_name)
-                self.cursor = self.conn.cursor()
-                logger.info(f"Successfully connected to the database: {self.db_name}")
-            except sqlite3.Error as e:
+                if self.db_type == "postgresql":
+                    self.conn = psycopg2.connect(**self.db_config)
+                    self.cursor = self.conn.cursor(
+                        cursor_factory=psycopg2.extras.RealDictCursor
+                    )
+                    logger.info(
+                        f"Successfully connected to PostgreSQL database: {self.db_config['database']}"
+                    )
+                else:
+                    self.conn = sqlite3.connect(self.db_name)
+                    self.conn.row_factory = sqlite3.Row  # Enable dict-like access
+                    self.cursor = self.conn.cursor()
+                    logger.info(
+                        f"Successfully connected to SQLite database: {self.db_name}"
+                    )
+            except (sqlite3.Error, psycopg2.Error) as e:
                 logger.error(f"Error connecting to database: {e}")
+                raise
 
     def close(self):
         """
@@ -51,8 +75,13 @@ class Database:
             try:
                 self.conn.commit()
                 self.conn.close()
-                logger.info(f"Connection to {self.db_name} closed.")
-            except sqlite3.Error as e:
+                db_name = (
+                    self.db_config["database"]
+                    if self.db_type == "postgresql"
+                    else self.db_name
+                )
+                logger.info(f"Connection to {db_name} closed.")
+            except (sqlite3.Error, psycopg2.Error) as e:
                 logger.error(f"Error closing the connection: {e}")
             finally:
                 self.conn = None
@@ -71,6 +100,10 @@ class Database:
         """
         self.connect()
         try:
+            # Convert SQLite-style parameters (?) to PostgreSQL-style (%s) if needed
+            if self.db_type == "postgresql" and "?" in query:
+                query = query.replace("?", "%s")
+
             self.cursor.execute(query, params)
             logger.info(f"Executed query: {query}")
             if query.strip().lower().startswith("select"):
@@ -78,10 +111,10 @@ class Database:
             else:
                 self.conn.commit()
                 return self.cursor
-        except sqlite3.IntegrityError as e:
+        except (sqlite3.IntegrityError, psycopg2.IntegrityError) as e:
             logger.warning(f"Integrity error: {e}")
             raise ValueError(f"Integrity error: {str(e)}")
-        except sqlite3.Error as e:
+        except (sqlite3.Error, psycopg2.Error) as e:
             logger.error(f"Error executing query: {e}")
             raise RuntimeError(f"Database error: {str(e)}")
         finally:
@@ -97,11 +130,15 @@ class Database:
         """
         self.connect()
         try:
+            # Convert SQLite-style parameters (?) to PostgreSQL-style (%s) if needed
+            if self.db_type == "postgresql" and "?" in query:
+                query = query.replace("?", "%s")
+
             self.cursor.executemany(query, param_list)
             self.conn.commit()
             logger.info(f"Executed many: {query}")
             return self.cursor
-        except sqlite3.Error as e:
+        except (sqlite3.Error, psycopg2.Error) as e:
             logger.error(f"Error executing many: {e}")
             return None
         finally:
@@ -116,9 +153,34 @@ class Database:
         """
         self.connect()
         try:
-            self.cursor.executescript(script)
+            if self.db_type == "postgresql":
+                # PostgreSQL doesn't have executescript, so split and execute individually
+                statements = [
+                    stmt.strip() for stmt in script.split(";") if stmt.strip()
+                ]
+                for statement in statements:
+                    if statement:
+                        self.cursor.execute(statement)
+                self.conn.commit()
+            else:
+                self.cursor.executescript(script)
             logger.info(f"Executed script with multiple SQL commands.")
-        except sqlite3.Error as e:
+        except (sqlite3.Error, psycopg2.Error) as e:
             logger.error(f"Error executing script: {e}")
         finally:
             self.close()
+
+    def get_last_insert_id(self):
+        """
+        Get the ID of the last inserted row.
+
+        Returns:
+            int: The last inserted row ID
+        """
+        if self.db_type == "postgresql":
+            # PostgreSQL uses RETURNING clause or currval()
+            # This method should be called after an INSERT with RETURNING id
+            return self.cursor.fetchone()[0] if self.cursor.description else None
+        else:
+            # SQLite uses lastrowid
+            return self.cursor.lastrowid if self.cursor else None

@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS instructors (
     email VARCHAR(255) UNIQUE NOT NULL,
     address TEXT,
     city VARCHAR(100),
-    employment_type VARCHAR(20) CHECK(employment_type IN ('full-time', 'part-time', 'adjunct')) NOT NULL,
+    employment VARCHAR(20) CHECK(employment IN ('full-time', 'part-time', 'adjunct')) NOT NULL,
     status VARCHAR(20) CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
     department_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

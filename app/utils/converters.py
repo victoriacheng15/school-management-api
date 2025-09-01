@@ -30,8 +30,8 @@ def student_dict_to_row(data):
         data.get("country"),
         data.get("address_type", "local"),
         data.get("status", "active"),
-        int(bool(data.get("coop", 0))),
-        int(bool(data.get("is_international", 0))),
+        bool(data.get("coop", 0)),
+        bool(data.get("is_international", 0)),
         data.get("program_id"),
     )
 

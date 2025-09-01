@@ -40,7 +40,7 @@ def make_student_row():
             "city": "Anytown",
             "province": "ON",
             "country": "Canada",
-            "residency": "local",
+            "address_type": "local",
             "status": "active",
             "is_full_time": False,
             "is_archived": False,
@@ -171,7 +171,7 @@ def mock_db_archive():
 
 class TestStudentReadService:
     def test_get_all_students(self, mock_db_read_all, valid_student_row):
-        # Service layer expects dicts since model layer converts tuples to dicts
+        # For SQLite, convert tuple fixture to dict to match model behavior
         if DATABASE_TYPE == "postgresql":
             mock_db_read_all.return_value = [valid_student_row]
         else:
@@ -186,7 +186,7 @@ class TestStudentReadService:
                 "city": tuple_row[5],
                 "province": tuple_row[6],
                 "country": tuple_row[7],
-                "residency": tuple_row[8],
+                "address_type": tuple_row[8],
                 "status": tuple_row[9],
                 "is_full_time": bool(tuple_row[10]),
                 "is_archived": bool(tuple_row[11]),
@@ -223,7 +223,7 @@ class TestStudentReadService:
                 "city": tuple_row[5],
                 "province": tuple_row[6],
                 "country": tuple_row[7],
-                "residency": tuple_row[8],
+                "address_type": tuple_row[8],
                 "status": tuple_row[9],
                 "is_full_time": bool(tuple_row[10]),
                 "is_archived": bool(tuple_row[11]),
@@ -412,7 +412,7 @@ class TestStudentModel:
                 dict_data["city"],
                 dict_data["province"],
                 dict_data["country"],
-                dict_data["residency"],
+                dict_data["address_type"],
                 dict_data["status"],
                 dict_data["is_full_time"],
                 dict_data["is_archived"],

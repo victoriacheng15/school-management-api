@@ -60,7 +60,9 @@ def handle_insert_result(result, cursor=None):
         int or None: The inserted record ID
     """
     if is_postgresql():
-        return result[0]["id"] if result else None
+        if result and len(result) > 0:
+            return result[0]["id"]
+        return None
     else:
         return cursor.lastrowid if cursor else None
 

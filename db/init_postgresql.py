@@ -115,18 +115,21 @@ def populate_sample_data():
             courses_pg,
         )
 
-        # Insert students (convert Python bools to PostgreSQL bools)
+        # Insert students (convert Python bools to PostgreSQL bools, force is_archived to False)
+        # Add default values for coop and is_international fields that are missing from sample data
         students_pg = [
             tuple(
-                (True if v is True else False if v is False else v)
-                if i in [10, 11, 12, 13]
-                else v
-                for i, v in enumerate(row)
+                list(row[:10]) +  # First 10 fields (up to status)
+                [False] +  # coop (new field, default False)
+                [False] +  # is_international (new field, default False)
+                [bool(row[10])] +  # is_full_time (convert to bool)
+                [False] +  # is_archived (force to False)
+                list(row[12:])  # remaining fields (program_id, created_at, updated_at, archived_by)
             )
             for row in students
         ]
         db.execute_many(
-            "INSERT INTO students (id, first_name, last_name, email, address, city, province, country, residency, status, is_full_time, is_archived, program_id, created_at, updated_at, archived_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO students (id, first_name, last_name, email, address, city, province, country, address_type, status, coop, is_international, is_full_time, is_archived, program_id, created_at, updated_at, archived_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             students_pg,
         )
 

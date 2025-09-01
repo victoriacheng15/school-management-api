@@ -55,8 +55,6 @@ def student_db_insert(student_data):
         "program_id",
     ]
     query = get_insert_returning_query("students", columns)
-    print(f"DEBUG: Insert query: {query}")
-    print(f"DEBUG: Student data: {student_data}")
     cursor_or_result = db.execute_query(query, student_data)
     return handle_insert_result(cursor_or_result, cursor_or_result)
 

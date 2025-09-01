@@ -95,7 +95,7 @@ def populate_sample_data():
             for row in instructors
         ]
         db.execute_many(
-            "INSERT INTO instructors (id, first_name, last_name, email, address, city, employment_type, status, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO instructors (id, first_name, last_name, email, address, province, employment, status, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             instructors_pg,
         )
 
@@ -111,7 +111,7 @@ def populate_sample_data():
             for row in courses
         ]
         db.execute_many(
-            "INSERT INTO courses (id, name, code, term_id, instructor_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO courses (id, title, code, term_id, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             courses_pg,
         )
 
@@ -160,7 +160,7 @@ def populate_sample_data():
             for row in course_schedule
         ]
         db.execute_many(
-            "INSERT INTO course_schedule (id, course_id, day, time, location, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO course_schedule (id, course_id, day, time, room, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             course_schedule_pg,
         )
 

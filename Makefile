@@ -1,4 +1,4 @@
-.PHONY: freeze install setup-db reset format test coverage docker-build docker-run docker-clean up down
+.PHONY: freeze install setup-db reset format test coverage up down
 
 freeze:
 	pip freeze > requirements.txt
@@ -21,17 +21,10 @@ test:
 coverage:
 	pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -q
 
-docker-run:
-	docker build -t school-flask-api .
-	docker run -d --name school-flask-api-container -p 5000:5000 school-flask-api
-
-docker-clean:
-	docker stop school-flask-api-container || true
-	docker rm school-flask-api-container || true
-	docker rmi school-flask-api || true
-
 up:
 	docker compose up -d
 
+# make down  -> dont remove volume
+# make down V=1 -> remove volume
 down:
-	docker compose down
+    docker compose down$(if $(V), -v)

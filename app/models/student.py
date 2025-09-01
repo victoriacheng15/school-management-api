@@ -1,5 +1,10 @@
 from db.database import Database
-from db.db_utils import get_insert_returning_query, handle_insert_result, get_archived_condition, get_boolean_true
+from db.db_utils import (
+    get_insert_returning_query,
+    handle_insert_result,
+    get_archived_condition,
+    get_boolean_true,
+)
 
 db = Database()
 
@@ -28,10 +33,20 @@ def student_db_read_by_ids(student_ids):
 
 def student_db_insert(student_data):
     columns = [
-        'first_name', 'last_name', 'email', 'address', 'city', 'province', 'country',
-        'address_type', 'status', 'coop', 'is_international', 'program_id'
+        "first_name",
+        "last_name",
+        "email",
+        "address",
+        "city",
+        "province",
+        "country",
+        "address_type",
+        "status",
+        "coop",
+        "is_international",
+        "program_id",
     ]
-    query = get_insert_returning_query('students', columns)
+    query = get_insert_returning_query("students", columns)
     cursor_or_result = db.execute_query(query, student_data)
     return handle_insert_result(cursor_or_result, cursor_or_result)
 

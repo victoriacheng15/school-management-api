@@ -19,7 +19,7 @@ from app.services import (
 )
 
 # Detect database type for tests
-DATABASE_TYPE = os.getenv('DATABASE_TYPE', 'sqlite').lower()
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
 
 # =======================
 # Fixtures
@@ -28,8 +28,8 @@ DATABASE_TYPE = os.getenv('DATABASE_TYPE', 'sqlite').lower()
 
 def make_student_row():
     today = date.today().isoformat()
-    
-    if DATABASE_TYPE == 'postgresql':
+
+    if DATABASE_TYPE == "postgresql":
         # PostgreSQL returns dict-like objects
         return {
             "id": 1,
@@ -172,7 +172,7 @@ def mock_db_archive():
 class TestStudentReadService:
     def test_get_all_students(self, mock_db_read_all, valid_student_row):
         # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == 'postgresql':
+        if DATABASE_TYPE == "postgresql":
             mock_db_read_all.return_value = [valid_student_row]
         else:
             # For SQLite, convert tuple fixture to dict to match model behavior
@@ -196,7 +196,7 @@ class TestStudentReadService:
                 "archived_by": tuple_row[15],
             }
             mock_db_read_all.return_value = [dict_row]
-            
+
         students = get_all_students(active_only=True)
         assert len(students) == 1
         assert students[0]["first_name"] == "John"
@@ -209,10 +209,10 @@ class TestStudentReadService:
 
     def test_get_student_by_id(self, mock_db_read_one, valid_student_row):
         # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == 'postgresql':
+        if DATABASE_TYPE == "postgresql":
             mock_db_read_one.return_value = valid_student_row
         else:
-            # For SQLite, convert tuple fixture to dict to match model behavior  
+            # For SQLite, convert tuple fixture to dict to match model behavior
             tuple_row = valid_student_row
             dict_row = {
                 "id": tuple_row[0],
@@ -233,7 +233,7 @@ class TestStudentReadService:
                 "archived_by": tuple_row[15],
             }
             mock_db_read_one.return_value = dict_row
-            
+
         student = get_student_by_id(1)
         assert student["first_name"] == "John"
         mock_db_read_one.assert_called_once_with(1)
@@ -390,7 +390,7 @@ class TestStudentModel:
 
         assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
-        
+
         # The model uses SQLite syntax (?), database layer converts internally
         query_call = mock_execute.call_args.args[0]
         assert "IN (?,?)" in query_call
@@ -399,16 +399,24 @@ class TestStudentModel:
     @patch("app.models.student.db.execute_query")
     def test_student_db_insert_success(self, mock_execute, valid_student_row):
         # For PostgreSQL, we expect dict format, for SQLite tuple format
-        if DATABASE_TYPE == 'postgresql':
+        if DATABASE_TYPE == "postgresql":
             # PostgreSQL returns the inserted row with RETURNING clause
             mock_execute.return_value = [{"id": 10}]
             # Convert dict to the tuple format expected by the insert function
             dict_data = valid_student_row
             params = (
-                dict_data["first_name"], dict_data["last_name"], dict_data["email"],
-                dict_data["address"], dict_data["city"], dict_data["province"],
-                dict_data["country"], dict_data["residency"], dict_data["status"],
-                dict_data["is_full_time"], dict_data["is_archived"], dict_data["program_id"]
+                dict_data["first_name"],
+                dict_data["last_name"],
+                dict_data["email"],
+                dict_data["address"],
+                dict_data["city"],
+                dict_data["province"],
+                dict_data["country"],
+                dict_data["residency"],
+                dict_data["status"],
+                dict_data["is_full_time"],
+                dict_data["is_archived"],
+                dict_data["program_id"],
             )
         else:
             # SQLite returns cursor with lastrowid

@@ -57,7 +57,17 @@ def populate_sample_data():
 
     try:
         db = Database()
-        from db.data import departments, programs, instructors, terms, courses, students, enrollments, assignments, course_schedule
+        from db.data import (
+            departments,
+            programs,
+            instructors,
+            terms,
+            courses,
+            students,
+            enrollments,
+            assignments,
+            course_schedule,
+        )
 
         # Insert departments (convert boolean)
         departments_pg = [
@@ -66,7 +76,7 @@ def populate_sample_data():
         ]
         db.execute_many(
             "INSERT INTO departments (id, name, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s)",
-            departments_pg
+            departments_pg,
         )
 
         # Insert programs (convert boolean)
@@ -76,7 +86,7 @@ def populate_sample_data():
         ]
         db.execute_many(
             "INSERT INTO programs (id, name, type, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            programs_pg
+            programs_pg,
         )
 
         # Insert instructors (convert boolean)
@@ -86,13 +96,13 @@ def populate_sample_data():
         ]
         db.execute_many(
             "INSERT INTO instructors (id, first_name, last_name, email, address, city, employment_type, status, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            instructors_pg
+            instructors_pg,
         )
 
         # Insert terms
         db.execute_many(
             "INSERT INTO terms (id, name, start_date, end_date, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",
-            terms
+            terms,
         )
 
         # Insert courses (convert boolean)
@@ -102,27 +112,28 @@ def populate_sample_data():
         ]
         db.execute_many(
             "INSERT INTO courses (id, name, code, term_id, instructor_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            courses_pg
+            courses_pg,
         )
 
         # Insert students (convert Python bools to PostgreSQL bools)
         students_pg = [
             tuple(
                 (True if v is True else False if v is False else v)
-                if i in [10, 11, 12, 13] else v
+                if i in [10, 11, 12, 13]
+                else v
                 for i, v in enumerate(row)
             )
             for row in students
         ]
         db.execute_many(
             "INSERT INTO students (id, first_name, last_name, email, address, city, province, country, residency, status, is_full_time, is_archived, program_id, created_at, updated_at, archived_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            students_pg
+            students_pg,
         )
 
         # Insert enrollments
         db.execute_many(
             "INSERT INTO enrollments (id, student_id, course_id, grade, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",
-            enrollments
+            enrollments,
         )
 
         # Insert assignments (convert boolean)
@@ -132,7 +143,7 @@ def populate_sample_data():
         ]
         db.execute_many(
             "INSERT INTO assignments (id, instructor_id, course_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s)",
-            assignments_pg
+            assignments_pg,
         )
 
         # Insert course_schedule (convert boolean)
@@ -142,7 +153,7 @@ def populate_sample_data():
         ]
         db.execute_many(
             "INSERT INTO course_schedule (id, course_id, day, time, location, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            course_schedule_pg
+            course_schedule_pg,
         )
 
         print("✅ Sample data populated successfully!")

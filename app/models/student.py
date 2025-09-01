@@ -8,6 +8,7 @@ from db.db_utils import (
 
 db = Database()
 
+
 def student_db_read_all(active_only=False):
     query = "SELECT * FROM students"
     if active_only:

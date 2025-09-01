@@ -119,12 +119,14 @@ def populate_sample_data():
         # Add default values for coop and is_international fields that are missing from sample data
         students_pg = [
             tuple(
-                list(row[:10]) +  # First 10 fields (up to status)
-                [False] +  # coop (new field, default False)
-                [False] +  # is_international (new field, default False)
-                [bool(row[10])] +  # is_full_time (convert to bool)
-                [False] +  # is_archived (force to False)
-                list(row[12:])  # remaining fields (program_id, created_at, updated_at, archived_by)
+                list(row[:10])  # First 10 fields (up to status)
+                + [False]  # coop (new field, default False)
+                + [False]  # is_international (new field, default False)
+                + [bool(row[10])]  # is_full_time (convert to bool)
+                + [False]  # is_archived (force to False)
+                + list(
+                    row[12:]
+                )  # remaining fields (program_id, created_at, updated_at, archived_by)
             )
             for row in students
         ]

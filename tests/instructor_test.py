@@ -309,7 +309,10 @@ class TestInstructorModel:
 
     @patch("app.models.instructor.db.execute_query")
     def test_instructor_db_read_by_ids_success(self, mock_execute):
-        mock_execute.return_value = [{"id": 1, "first_name": "i1"}, {"id": 2, "first_name": "i2"}]
+        mock_execute.return_value = [
+            {"id": 1, "first_name": "i1"},
+            {"id": 2, "first_name": "i2"},
+        ]
         result = instructor_db_read_by_ids([1, 2])
 
         assert result == [{"id": 1, "first_name": "i1"}, {"id": 2, "first_name": "i2"}]

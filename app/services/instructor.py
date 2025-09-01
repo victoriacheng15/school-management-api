@@ -17,6 +17,7 @@ from app.utils import (
 def instructor_row_to_dict(row):
     return row if isinstance(row, dict) else row
 
+
 def get_all_instructors(active_only):
     results = instructor_db_read_all(active_only=active_only)
     if results is None:

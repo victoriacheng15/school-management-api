@@ -1,4 +1,3 @@
-
 from db.database import Database
 from db.db_utils import (
     get_insert_returning_query,

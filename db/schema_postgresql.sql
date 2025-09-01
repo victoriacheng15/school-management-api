@@ -36,10 +36,12 @@ CREATE TABLE IF NOT EXISTS students (
     status VARCHAR(20) CHECK(status IN ('active', 'inactive')) NOT NULL DEFAULT 'active',
     coop BOOLEAN NOT NULL DEFAULT FALSE,
     is_international BOOLEAN NOT NULL DEFAULT FALSE,
+    is_full_time BOOLEAN NOT NULL DEFAULT FALSE,
+    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
     program_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    archived_by INTEGER DEFAULT NULL,
     FOREIGN KEY (program_id) REFERENCES programs(id)
 );
 
@@ -73,7 +75,7 @@ CREATE TABLE IF NOT EXISTS terms (
 -- Creating courses table
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     code VARCHAR(20) UNIQUE NOT NULL,
     term_id INTEGER NOT NULL,
     instructor_id INTEGER NOT NULL,
@@ -114,7 +116,7 @@ CREATE TABLE IF NOT EXISTS course_schedule (
     course_id INTEGER NOT NULL,
     day VARCHAR(20) NOT NULL,
     time VARCHAR(20) NOT NULL,
-    room VARCHAR(50) NOT NULL,
+    location VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_archived BOOLEAN NOT NULL DEFAULT FALSE,

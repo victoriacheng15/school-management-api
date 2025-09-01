@@ -106,7 +106,10 @@ class Database:
 
             self.cursor.execute(query, params)
             logger.info(f"Executed query: {query}")
-            if query.strip().lower().startswith("select") or "returning" in query.lower():
+            if (
+                query.strip().lower().startswith("select")
+                or "returning" in query.lower()
+            ):
                 return self.cursor.fetchall()
             else:
                 self.conn.commit()

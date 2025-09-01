@@ -119,12 +119,12 @@ def populate_sample_data():
         # Map sample data to match SQLite schema structure
         students_pg = [
             tuple(
-                list(row[:10]) +  # First 10 fields (id through status)
-                [bool(row[10])] +  # coop (convert to bool)
-                [bool(row[11])] +  # is_international (convert to bool) 
-                [row[12]] +  # program_id
-                list(row[13:15]) +  # created_at, updated_at
-                [False]  # is_archived (force to False)
+                list(row[:10])  # First 10 fields (id through status)
+                + [bool(row[10])]  # coop (convert to bool)
+                + [bool(row[11])]  # is_international (convert to bool)
+                + [row[12]]  # program_id
+                + list(row[13:15])  # created_at, updated_at
+                + [False]  # is_archived (force to False)
             )
             for row in students
         ]
@@ -134,7 +134,9 @@ def populate_sample_data():
         )
 
         # Reset students sequence to max ID after inserting with explicit IDs
-        db.execute_query("SELECT setval('students_id_seq', (SELECT MAX(id) FROM students));")
+        db.execute_query(
+            "SELECT setval('students_id_seq', (SELECT MAX(id) FROM students));"
+        )
 
         # Insert enrollments
         db.execute_many(

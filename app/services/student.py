@@ -7,6 +7,7 @@ from app.models import (
     student_db_archive,
 )
 from app.utils import (
+    student_row_to_dict,
     student_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -14,21 +15,16 @@ from app.utils import (
 )
 
 
-# Identity function since our models now return dicts
-def student_row_to_dict(row):
-    return row if isinstance(row, dict) else row
-
-
 def get_all_students(active_only):
     results = student_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch students.")
-    return results  # No need to convert, already dicts from model
+    return [student_row_to_dict(student) for student in results]
 
 
 def get_student_by_id(student_id: int):
     student = student_db_read_by_id(student_id)
-    return student  # No need to convert, already a dict from model
+    return student_row_to_dict(student) if student else None
 
 
 def create_new_students(data):

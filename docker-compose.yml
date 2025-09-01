@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.multi-stage
-      network: host
     ports:
       - "5000:5000"
     environment:
@@ -17,8 +16,6 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-    volumes:
-      - .:/app
   postgres:
     image: postgres:17
     restart: always

@@ -1,21 +1,21 @@
 def student_row_to_dict(row):
     return {
-        "id": row["id"],
-        "first_name": row["first_name"],
-        "last_name": row["last_name"],
-        "email": row["email"],
-        "address": row["address"],
-        "city": row["city"],
-        "province": row["province"],
-        "country": row["country"],
-        "address_type": row["address_type"],
-        "status": row["status"],
-        "coop": row["coop"],
-        "is_international": row["is_international"],
-        "program_id": row["program_id"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
-        "is_archived": row["is_archived"],
+        "id": row[0],
+        "first_name": row[1],
+        "last_name": row[2],
+        "email": row[3],
+        "address": row[4],
+        "city": row[5],
+        "province": row[6],
+        "country": row[7],
+        "address_type": row[8],
+        "status": row[9],
+        "coop": row[10],
+        "is_international": row[11],
+        "program_id": row[12],
+        "created_at": row[13],
+        "updated_at": row[14],
+        "is_archived": row[15],
     }
 
 
@@ -30,8 +30,8 @@ def student_dict_to_row(data):
         data.get("country"),
         data.get("address_type", "local"),
         data.get("status", "active"),
-        bool(data.get("coop", 0)),
-        bool(data.get("is_international", 0)),
+        int(bool(data.get("coop", 0))),
+        int(bool(data.get("is_international", 0))),
         data.get("program_id"),
     )
 

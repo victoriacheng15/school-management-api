@@ -44,14 +44,13 @@ create_students='[
   {
     "first_name": "John",
     "last_name": "Doe",
-    "email": "john.doe@example.com",
+    "email": "joh@example.com",
     "address": "123 Main St",
     "city": "Anytown",
     "province": "ON",
     "country": "Canada",
     "address_type": "local",
-    "coop": true,
-    "is_international": true,
+    "is_international": 1,
     "program_id": 1
   },
   {
@@ -63,8 +62,7 @@ create_students='[
     "province": "BC",
     "country": "Canada",
     "address_type": "permanent",
-    "coop": false,
-    "is_international": false,
+    "is_international": 0,
     "program_id": 2
   }
 ]'
@@ -73,12 +71,12 @@ update_students='[
   {
     "id": 1,
     "status": "inactive",
-    "coop": false
+    "coop": 0
   },
   {
     "id": 2,
     "status": "inactive",
-    "coop": false
+    "coop": 0
   }
 ]'
 

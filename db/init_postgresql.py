@@ -194,7 +194,6 @@ def populate_sample_data():
             "SELECT setval('course_schedule_id_seq', (SELECT MAX(id) FROM course_schedule));"
         )
 
-
         print("✅ Sample data populated successfully!")
         return True
 

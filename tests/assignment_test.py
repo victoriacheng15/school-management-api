@@ -1,4 +1,5 @@
 import pytest
+import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -22,16 +23,30 @@ from app.services import (
 # =======================
 
 
+# Detect database type for tests
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
+
+
 def make_assignment_row():
     today = date.today().isoformat()
-    return (
-        1,
-        1,
-        1,
-        today,
-        today,
-        0,
-    )
+    if DATABASE_TYPE == "postgresql":
+        return {
+            "id": 1,
+            "instructor_id": 1,
+            "course_id": 1,
+            "created_at": today,
+            "updated_at": today,
+            "is_archived": False,
+        }
+    else:
+        return (
+            1,
+            1,
+            1,
+            today,
+            today,
+            0,
+        )
 
 
 def make_assignment_dict():
@@ -130,7 +145,22 @@ def mock_db_archive():
 
 class TestAssignmentReadService:
     def test_get_all_assignments(self, mock_db_read_all, valid_assignment_row):
-        mock_db_read_all.return_value = [valid_assignment_row]
+        # For SQLite, convert tuple fixture to dict to match model behavior
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_all.return_value = [valid_assignment_row]
+        else:
+            # For SQLite, convert tuple fixture to dict to match model behavior
+            tuple_row = valid_assignment_row
+            dict_row = {
+                "id": tuple_row[0],
+                "instructor_id": tuple_row[1],
+                "course_id": tuple_row[2],
+                "created_at": tuple_row[3],
+                "updated_at": tuple_row[4],
+                "is_archived": bool(tuple_row[5]),
+            }
+            mock_db_read_all.return_value = [dict_row]
+
         assignments = get_all_assignments(active_only=True)
         assert len(assignments) == 1
         assert assignments[0]["instructor_id"] == 1
@@ -142,7 +172,22 @@ class TestAssignmentReadService:
             get_all_assignments(active_only=True)
 
     def test_get_assignment_by_id(self, mock_db_read_one, valid_assignment_row):
-        mock_db_read_one.return_value = valid_assignment_row
+        # Service layer expects dicts since model layer converts tuples to dicts
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.return_value = valid_assignment_row
+        else:
+            # For SQLite, convert tuple fixture to dict to match model behavior
+            tuple_row = valid_assignment_row
+            dict_row = {
+                "id": tuple_row[0],
+                "instructor_id": tuple_row[1],
+                "course_id": tuple_row[2],
+                "created_at": tuple_row[3],
+                "updated_at": tuple_row[4],
+                "is_archived": bool(tuple_row[5]),
+            }
+            mock_db_read_one.return_value = dict_row
+
         assignment = get_assignment_by_id(1)
         assert assignment["instructor_id"] == 1
         mock_db_read_one.assert_called_once_with(1)
@@ -261,25 +306,25 @@ class TestAssignmentArchiveService:
 class TestAssignmentModel:
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_read_all(self, mock_execute):
-        mock_execute.return_value = [("mocked",)]
+        mock_execute.return_value = [{"mocked": "data"}]
         result = assignment_db_read_all()
-        assert result == [("mocked",)]
+        assert result == [{"mocked": "data"}]
         mock_execute.assert_called_once_with("SELECT * FROM assignments;")
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_read_all_active(self, mock_execute):
-        mock_execute.return_value = [("active_assignment",)]
+        mock_execute.return_value = [{"active": "assignment"}]
         result = assignment_db_read_all(active_only=True)
-        assert result == [("active_assignment",)]
+        assert result == [{"active": "assignment"}]
         mock_execute.assert_called_once_with(
             "SELECT * FROM assignments WHERE is_archived = 0;"
         )
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_read_by_id_found(self, mock_execute):
-        mock_execute.return_value = [("assignment_1",)]
+        mock_execute.return_value = [{"id": 1, "instructor_id": 1}]
         result = assignment_db_read_by_id(1)
-        assert result == ("assignment_1",)
+        assert result == {"id": 1, "instructor_id": 1}
         mock_execute.assert_called_once_with(
             "SELECT * FROM assignments WHERE id = ?;", (1,)
         )
@@ -299,22 +344,30 @@ class TestAssignmentModel:
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_read_by_ids_success(self, mock_execute):
-        mock_execute.return_value = [("a1",), ("a2",)]
+        mock_execute.return_value = [{"id": 1}, {"id": 2}]
         result = assignment_db_read_by_ids([1, 2])
 
-        assert result == [("a1",), ("a2",)]
+        assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
-        assert "IN (?,?)" in mock_execute.call_args.args[0]
+
+        query_call = mock_execute.call_args.args[0]
+        assert "IN (?,?)" in query_call
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_insert_success(self, mock_execute, valid_assignment_row):
-        mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-        mock_execute.return_value = mock_cursor
+        # For PostgreSQL, we expect dict format, for SQLite tuple format
+        if DATABASE_TYPE == "postgresql":
+            mock_execute.return_value = [{"id": 10}]
+            params = (
+                valid_assignment_row["instructor_id"],
+                valid_assignment_row["course_id"],
+            )
+        else:
+            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
+            mock_execute.return_value = mock_cursor
+            params = valid_assignment_row
 
-        params = valid_assignment_row[
-            1:3
-        ]  # Exclude id, created_at, updated_at, is_archived
         result = assignment_db_insert(params)
 
         assert result == 10
@@ -335,7 +388,7 @@ class TestAssignmentModel:
         mock_cursor = type("MockCursor", (), {"rowcount": 1})()
         mock_execute.return_value = mock_cursor
 
-        result = assignment_db_update(1, ("x",) * 2)  # instructor_id, course_id
+        result = assignment_db_update(1, ("x",) * 2)
         assert result == 1
 
     @patch("app.models.assignment.db.execute_query")

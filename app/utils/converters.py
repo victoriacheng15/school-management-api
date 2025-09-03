@@ -101,16 +101,29 @@ def program_dict_to_row(data):
 
 
 def course_row_to_dict(row):
-    return {
-        "id": row[0],
-        "title": row[1],
-        "code": row[2],
-        "term_id": row[3],
-        "department_id": row[4],
-        "created_at": row[5],
-        "updated_at": row[6],
-        "is_archived": row[7],
-    }
+    # Support both dict (PostgreSQL) and tuple/list (SQLite)
+    if isinstance(row, dict):
+        return {
+            "id": row["id"],
+            "title": row["title"],
+            "code": row["code"],
+            "term_id": row["term_id"],
+            "department_id": row["department_id"],
+            "created_at": row.get("created_at"),
+            "updated_at": row.get("updated_at"),
+            "is_archived": row.get("is_archived"),
+        }
+    else:
+        return {
+            "id": row[0],
+            "title": row[1],
+            "code": row[2],
+            "term_id": row[3],
+            "department_id": row[4],
+            "created_at": row[5],
+            "updated_at": row[6],
+            "is_archived": row[7],
+        }
 
 
 def course_dict_to_row(data):

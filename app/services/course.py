@@ -7,7 +7,6 @@ from app.models import (
     course_db_archive,
 )
 from app.utils import (
-    course_row_to_dict,
     course_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -15,16 +14,21 @@ from app.utils import (
 )
 
 
+def course_row_to_dict(row):
+    # models now normalize rows to dicts; passthrough for compatibility
+    return row if isinstance(row, dict) else row
+
+
 def get_all_courses(active_only):
     results = course_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch courses.")
-    return [course_row_to_dict(course) for course in results]
+    return results  # already dicts from model
 
 
 def get_course_by_id(course_id: int):
     course = course_db_read_by_id(course_id)
-    return course_row_to_dict(course) if course else None
+    return course  # already dict from model
 
 
 def create_new_courses(data):

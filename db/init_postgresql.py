@@ -79,6 +79,10 @@ def populate_sample_data():
             departments_pg,
         )
 
+        db.execute_query(
+            "SELECT setval('departments_id_seq', (SELECT MAX(id) FROM departments));"
+        )
+
         # Insert programs (convert boolean)
         programs_pg = [
             tuple(bool(v) if i == 6 else v for i, v in enumerate(row))
@@ -87,6 +91,10 @@ def populate_sample_data():
         db.execute_many(
             "INSERT INTO programs (id, name, type, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             programs_pg,
+        )
+
+        db.execute_query(
+            "SELECT setval('programs_id_seq', (SELECT MAX(id) FROM programs));"
         )
 
         # Insert instructors (convert boolean)
@@ -109,6 +117,10 @@ def populate_sample_data():
             terms,
         )
 
+        db.execute_query(
+            "SELECT setval('terms_id_seq', (SELECT MAX(id) FROM terms));"
+        )
+
         # Insert courses (convert boolean)
         courses_pg = [
             tuple(bool(v) if i == 7 else v for i, v in enumerate(row))
@@ -118,6 +130,7 @@ def populate_sample_data():
             "INSERT INTO courses (id, title, code, term_id, department_id, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             courses_pg,
         )
+
         db.execute_query(
             "SELECT setval('courses_id_seq', (SELECT MAX(id) FROM courses));"
         )
@@ -173,6 +186,10 @@ def populate_sample_data():
         db.execute_many(
             "INSERT INTO course_schedule (id, course_id, day, time, room, created_at, updated_at, is_archived) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             course_schedule_pg,
+        )
+
+        db.execute_query(
+            "SELECT setval('course_schedule_id_seq', (SELECT MAX(id) FROM course_schedule));"
         )
 
         print("✅ Sample data populated successfully!")

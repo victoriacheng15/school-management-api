@@ -67,13 +67,23 @@ def instructor_dict_to_row(data):
 
 
 def department_row_to_dict(row):
-    return {
-        "id": row[0],
-        "name": row[1],
-        "created_at": row[2],
-        "updated_at": row[3],
-        "is_archived": row[4],
-    }
+    # Support both dict (PostgreSQL) and tuple/list (SQLite)
+    if isinstance(row, dict):
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "created_at": row.get("created_at"),
+            "updated_at": row.get("updated_at"),
+            "is_archived": row.get("is_archived"),
+        }
+    else:
+        return {
+            "id": row[0],
+            "name": row[1],
+            "created_at": row[2],
+            "updated_at": row[3],
+            "is_archived": row[4],
+        }
 
 
 def department_dict_to_row(data):

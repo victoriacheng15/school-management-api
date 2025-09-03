@@ -67,23 +67,13 @@ def instructor_dict_to_row(data):
 
 
 def department_row_to_dict(row):
-    # Support both dict (PostgreSQL) and tuple/list (SQLite)
-    if isinstance(row, dict):
-        return {
-            "id": row["id"],
-            "name": row["name"],
-            "created_at": row.get("created_at"),
-            "updated_at": row.get("updated_at"),
-            "is_archived": row.get("is_archived"),
-        }
-    else:
-        return {
-            "id": row[0],
-            "name": row[1],
-            "created_at": row[2],
-            "updated_at": row[3],
-            "is_archived": row[4],
-        }
+    return {
+        "id": row["id"],
+        "name": row["name"],
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+        "is_archived": row.get("is_archived"),
+    }
 
 
 def department_dict_to_row(data):
@@ -92,13 +82,13 @@ def department_dict_to_row(data):
 
 def program_row_to_dict(row):
     return {
-        "id": row[0],
-        "name": row[1],
-        "type": row[2],
-        "department_id": row[3],
-        "created_at": row[4],
-        "updated_at": row[5],
-        "is_archived": row[6],
+        "id": row["id"],
+        "name": row["name"],
+        "type": row["type"],
+        "department_id": row.get("department_id"),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+        "is_archived": row.get("is_archived"),
     }
 
 
@@ -111,29 +101,16 @@ def program_dict_to_row(data):
 
 
 def course_row_to_dict(row):
-    # Support both dict (PostgreSQL) and tuple/list (SQLite)
-    if isinstance(row, dict):
-        return {
-            "id": row["id"],
-            "title": row["title"],
-            "code": row["code"],
-            "term_id": row["term_id"],
-            "department_id": row["department_id"],
-            "created_at": row.get("created_at"),
-            "updated_at": row.get("updated_at"),
-            "is_archived": row.get("is_archived"),
-        }
-    else:
-        return {
-            "id": row[0],
-            "title": row[1],
-            "code": row[2],
-            "term_id": row[3],
-            "department_id": row[4],
-            "created_at": row[5],
-            "updated_at": row[6],
-            "is_archived": row[7],
-        }
+    return {
+        "id": row["id"],
+        "title": row["title"],
+        "code": row["code"],
+        "term_id": row["term_id"],
+        "department_id": row["department_id"],
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+        "is_archived": row.get("is_archived"),
+    }
 
 
 def course_dict_to_row(data):
@@ -165,25 +142,14 @@ def enrollment_dict_to_row(data):
 
 
 def assignment_row_to_dict(row):
-    # Support both dict (PostgreSQL) and tuple/list (SQLite)
-    if isinstance(row, dict):
-        return {
-            "id": row["id"],
-            "instructor_id": row["instructor_id"],
-            "course_id": row["course_id"],
-            "created_at": row["created_at"],
-            "updated_at": row["updated_at"],
-            "is_archived": row["is_archived"],
-        }
-    else:
-        return {
-            "id": row[0],
-            "instructor_id": row[1],
-            "course_id": row[2],
-            "created_at": row[3],
-            "updated_at": row[4],
-            "is_archived": row[5],
-        }
+    return {
+        "id": row["id"],
+        "instructor_id": row["instructor_id"],
+        "course_id": row["course_id"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "is_archived": row["is_archived"],
+    }
 
 
 def assignment_dict_to_row(data):

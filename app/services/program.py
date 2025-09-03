@@ -7,7 +7,6 @@ from app.models import (
     program_db_archive,
 )
 from app.utils import (
-    program_row_to_dict,
     program_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -15,16 +14,20 @@ from app.utils import (
 )
 
 
+def program_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
 def get_all_programs(active_only):
     results = program_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch programs.")
-    return [program_row_to_dict(program) for program in results]
+    return results
 
 
 def get_program_by_id(program_id: int):
     program = program_db_read_by_id(program_id)
-    return program_row_to_dict(program) if program else None
+    return program  # already dict from model
 
 
 def create_new_programs(data):

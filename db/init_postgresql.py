@@ -122,7 +122,6 @@ def populate_sample_data():
             "SELECT setval('courses_id_seq', (SELECT MAX(id) FROM courses));"
         )
 
-
         # Insert students (convert Python bools to PostgreSQL bools, force is_archived to False)
         # Map sample data to match SQLite schema structure
         students_pg = [

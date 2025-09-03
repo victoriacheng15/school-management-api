@@ -266,6 +266,7 @@ class TestCourseModel:
         result = course_db_read_all()
         assert result == [{"mocked": True}]
         mock_execute.assert_called_once_with("SELECT * FROM courses;")
+
     @patch("app.models.course.db.execute_query")
     def test_course_db_read_all_active(self, mock_execute):
         mock_execute.return_value = [{"mocked": True}]

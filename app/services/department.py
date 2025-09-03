@@ -17,6 +17,7 @@ from app.utils import (
 def department_row_to_dict(row):
     return row if isinstance(row, dict) else row
 
+
 def get_all_departments(active_only):
     results = department_db_read_all(active_only=active_only)
     if results is None:

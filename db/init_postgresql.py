@@ -117,9 +117,7 @@ def populate_sample_data():
             terms,
         )
 
-        db.execute_query(
-            "SELECT setval('terms_id_seq', (SELECT MAX(id) FROM terms));"
-        )
+        db.execute_query("SELECT setval('terms_id_seq', (SELECT MAX(id) FROM terms));")
 
         # Insert courses (convert boolean)
         courses_pg = [

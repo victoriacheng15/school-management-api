@@ -207,7 +207,9 @@ class TestDepartmentCreateService:
                 )
             mock_db_read_many.return_value = dict_rows
 
-        results, error, status_code = create_new_departments(valid_department_create_data)
+        results, error, status_code = create_new_departments(
+            valid_department_create_data
+        )
 
         assert len(results) == 2
         assert error is None
@@ -219,7 +221,9 @@ class TestDepartmentCreateService:
         self, mock_db_create, mock_db_read_many, valid_department_create_data
     ):
         mock_db_create.side_effect = [None, None]
-        results, error, status_code = create_new_departments(valid_department_create_data)
+        results, error, status_code = create_new_departments(
+            valid_department_create_data
+        )
 
         assert results == []
         assert error["message"] == "No departments were created."
@@ -643,6 +647,7 @@ class TestDepartmentArchiveRoute:
 
         assert response.status_code == 500
         assert "internal server error: db failure." in data["error"].lower()
+
 
 class TestDepartmentUpdateRoute:
     @patch("app.routes.department.update_departments")

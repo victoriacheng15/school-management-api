@@ -1,17 +1,22 @@
 from db.database import Database
+from db.db_utils import (
+    get_insert_returning_query,
+    handle_insert_result,
+)
 
 db = Database()
 
 
 def enrollment_db_read_all():
     query = "SELECT * FROM enrollments;"
-    return db.execute_query(query)
+    result = db.execute_query(query)
+    return [dict(row) for row in result] if result else []
 
 
 def enrollment_db_read_by_id(enrollment_id):
     query = "SELECT * FROM enrollments WHERE id = ?;"
     result = db.execute_query(query, (enrollment_id,))
-    return result[0] if result else None
+    return dict(result[0]) if result else None
 
 
 def enrollment_db_read_by_ids(enrollment_ids):
@@ -19,18 +24,15 @@ def enrollment_db_read_by_ids(enrollment_ids):
         return []
     placeholders = ",".join("?" for _ in enrollment_ids)
     query = f"SELECT * FROM enrollments WHERE id IN ({placeholders});"
-    return db.execute_query(query, enrollment_ids)
+    result = db.execute_query(query, enrollment_ids)
+    return [dict(row) for row in result] if result else []
 
 
 def enrollment_db_insert(enrollment_data):
-    query = """
-    INSERT INTO enrollments (
-        student_id, course_id, grade
-    )
-    VALUES (?, ?, ?);
-    """
-    cursor = db.execute_query(query, enrollment_data)
-    return cursor.lastrowid if cursor else None
+    columns = ["student_id", "course_id", "grade"]
+    query = get_insert_returning_query("enrollments", columns)
+    cursor_or_result = db.execute_query(query, enrollment_data)
+    return handle_insert_result(cursor_or_result, cursor_or_result)
 
 
 def enrollment_db_update(enrollment_id, enrollment_data):

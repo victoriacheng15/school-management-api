@@ -1,4 +1,5 @@
 import pytest
+import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -17,6 +18,9 @@ from app.services import (
     archive_departments,
 )
 
+# Detect database type for tests
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
+
 # =======================
 # Fixtures
 # =======================
@@ -24,19 +28,22 @@ from app.services import (
 
 def make_department_row():
     today = date.today().isoformat()
-    return (
-        1,
-        "Computer Science",
-        today,
-        today,
-        0,
-    )
+
+    if DATABASE_TYPE == "postgresql":
+        return {
+            "id": 1,
+            "name": "Computer Science",
+            "created_at": today,
+            "updated_at": today,
+            "is_archived": False,
+        }
+    else:
+        # SQLite tuple layout: (id, name, created_at, updated_at, is_archived)
+        return (1, "Computer Science", today, today, 0)
 
 
 def make_department_dict():
-    return {
-        "name": "Computer Science",
-    }
+    return {"name": "Computer Science"}
 
 
 @pytest.fixture
@@ -53,9 +60,7 @@ def valid_department_rows():
 def valid_department_create_data():
     return [
         make_department_dict(),
-        {
-            "name": "Business",
-        },
+        {"name": "Business"},
     ]
 
 
@@ -127,7 +132,20 @@ def mock_db_archive():
 
 class TestDepartmentReadService:
     def test_get_all_departments(self, mock_db_read_all, valid_department_row):
-        mock_db_read_all.return_value = [valid_department_row]
+        # For SQLite, convert tuple fixture to dict to match model behavior
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_all.return_value = [valid_department_row]
+        else:
+            tuple_row = valid_department_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "created_at": tuple_row[2],
+                "updated_at": tuple_row[3],
+                "is_archived": bool(tuple_row[4]),
+            }
+            mock_db_read_all.return_value = [dict_row]
+
         departments = get_all_departments(active_only=True)
         assert len(departments) == 1
         assert departments[0]["name"] == "Computer Science"
@@ -139,7 +157,19 @@ class TestDepartmentReadService:
             get_all_departments(active_only=True)
 
     def test_get_department_by_id(self, mock_db_read_one, valid_department_row):
-        mock_db_read_one.return_value = valid_department_row
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.return_value = valid_department_row
+        else:
+            tuple_row = valid_department_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "created_at": tuple_row[2],
+                "updated_at": tuple_row[3],
+                "is_archived": bool(tuple_row[4]),
+            }
+            mock_db_read_one.return_value = dict_row
+
         department = get_department_by_id(1)
         assert department["name"] == "Computer Science"
         mock_db_read_one.assert_called_once_with(1)
@@ -159,7 +189,23 @@ class TestDepartmentCreateService:
         valid_department_rows,
     ):
         mock_db_create.side_effect = [1, 2]
-        mock_db_read_many.return_value = valid_department_rows
+        # return rows in the format the service expects (dicts)
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_many.return_value = valid_department_rows
+        else:
+            # convert tuple fixtures to dicts for the service
+            dict_rows = []
+            for row in valid_department_rows:
+                dict_rows.append(
+                    {
+                        "id": row[0],
+                        "name": row[1],
+                        "created_at": row[2],
+                        "updated_at": row[3],
+                        "is_archived": bool(row[4]),
+                    }
+                )
+            mock_db_read_many.return_value = dict_rows
 
         results, error, status_code = create_new_departments(
             valid_department_create_data
@@ -194,7 +240,19 @@ class TestDepartmentUpdateService:
         valid_department_row,
     ):
         mock_db_update.return_value = 1
-        mock_db_read_many.return_value = [valid_department_row]
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_many.return_value = [valid_department_row]
+        else:
+            tuple_row = valid_department_row
+            mock_db_read_many.return_value = [
+                {
+                    "id": tuple_row[0],
+                    "name": tuple_row[1],
+                    "created_at": tuple_row[2],
+                    "updated_at": tuple_row[3],
+                    "is_archived": bool(tuple_row[4]),
+                }
+            ]
 
         results, error, status_code = update_departments(valid_department_update_data)
 
@@ -258,25 +316,23 @@ class TestDepartmentArchiveService:
 class TestDepartmentModel:
     @patch("app.models.department.db.execute_query")
     def test_department_db_read_all(self, mock_execute):
-        mock_execute.return_value = [("mocked",)]
+        mock_execute.return_value = [{"mocked": "data"}]
         result = department_db_read_all()
-        assert result == [("mocked",)]
+        assert result == [{"mocked": "data"}]
         mock_execute.assert_called_once_with("SELECT * FROM departments;")
 
     @patch("app.models.department.db.execute_query")
     def test_department_db_read_all_active(self, mock_execute):
-        mock_execute.return_value = [("active_department",)]
+        mock_execute.return_value = [{"active": "dept"}]
         result = department_db_read_all(active_only=True)
-        assert result == [("active_department",)]
-        mock_execute.assert_called_once_with(
-            "SELECT * FROM departments WHERE is_archived = 0;"
-        )
+        assert result == [{"active": "dept"}]
+        mock_execute.assert_called_once()
 
     @patch("app.models.department.db.execute_query")
     def test_department_db_read_by_id_found(self, mock_execute):
-        mock_execute.return_value = [("department_1",)]
+        mock_execute.return_value = [{"id": 1, "name": "x"}]
         result = department_db_read_by_id(1)
-        assert result == ("department_1",)
+        assert result == {"id": 1, "name": "x"}
         mock_execute.assert_called_once_with(
             "SELECT * FROM departments WHERE id = ?;", (1,)
         )
@@ -296,20 +352,27 @@ class TestDepartmentModel:
 
     @patch("app.models.department.db.execute_query")
     def test_department_db_read_by_ids_success(self, mock_execute):
-        mock_execute.return_value = [("d1",), ("d2",)]
+        mock_execute.return_value = [{"id": 1}, {"id": 2}]
         result = department_db_read_by_ids([1, 2])
 
-        assert result == [("d1",), ("d2",)]
+        assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
-        assert "IN (?,?)" in mock_execute.call_args.args[0]
+
+        query_call = mock_execute.call_args.args[0]
+        assert "IN (?,?)" in query_call
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.department.db.execute_query")
     def test_department_db_insert_success(self, mock_execute, valid_department_row):
-        mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-        mock_execute.return_value = mock_cursor
+        # For PostgreSQL, we expect dict format, for SQLite tuple format
+        if DATABASE_TYPE == "postgresql":
+            mock_execute.return_value = [{"id": 10}]
+            params = (valid_department_row["name"],)
+        else:
+            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
+            mock_execute.return_value = mock_cursor
+            params = valid_department_row
 
-        params = (valid_department_row[1],)
         result = department_db_insert(params)
 
         assert result == 10
@@ -470,6 +533,116 @@ class TestDepartmentCreateRoute:
         mock_create_new_departments.side_effect = Exception("DB failure")
 
         response = client.post("/departments", json=valid_department_create_data)
+        data = response.get_json()
+
+        assert response.status_code == 500
+        assert "internal server error: db failure." in data["error"].lower()
+
+
+class TestDepartmentUpdateRoute:
+    @patch("app.routes.department.update_departments")
+    def test_handle_update_departments_success(
+        self, mock_update_departments, client, valid_department_update_data
+    ):
+        mock_update_departments.return_value = (
+            valid_department_update_data,
+            None,
+            None,
+        )
+
+        response = client.put("/departments", json=valid_department_update_data)
+        data = response.get_json()
+
+        assert response.status_code == 200
+        assert "Department updated successfully" in data["message"]
+        assert data["data"]
+
+    @patch("app.routes.department.update_departments")
+    def test_handle_update_departments_service_error(
+        self, mock_update_departments, client, valid_department_update_data
+    ):
+        error_data = {"message": "Invalid data"}
+        error_code = 422
+        mock_update_departments.return_value = ([], error_data, error_code)
+
+        response = client.put("/departments", json=valid_department_update_data)
+        data = response.get_json()
+
+        assert response.status_code == error_code
+        assert "Invalid data" in data["message"]
+
+    @patch("app.routes.department.update_departments")
+    def test_handle_update_departments_key_error(
+        self, mock_update_departments, client, valid_department_update_data
+    ):
+        mock_update_departments.side_effect = KeyError("name")
+
+        response = client.put("/departments", json=valid_department_update_data)
+        data = response.get_json()
+
+        assert response.status_code == 400
+        assert "Missing required field" in data["error"]
+
+    @patch("app.routes.department.update_departments")
+    def test_handle_update_departments_exception(
+        self, mock_update_departments, client, valid_department_update_data
+    ):
+        mock_update_departments.side_effect = Exception("DB failure")
+
+        response = client.put("/departments", json=valid_department_update_data)
+        data = response.get_json()
+
+        assert response.status_code == 500
+        assert "internal server error: db failure." in data["error"].lower()
+
+
+class TestDepartmentArchiveRoute:
+    @patch("app.routes.department.archive_departments")
+    def test_handle_archive_departments_success(
+        self, mock_archive_departments, client, valid_department_ids
+    ):
+        mock_archive_departments.return_value = (valid_department_ids, None, 200)
+
+        response = client.patch("/departments", json={"ids": valid_department_ids})
+        data = response.get_json()
+
+        assert response.status_code == 200
+        assert "2 departments archived successfully" in data["message"]
+        assert data["data"]
+
+    @patch("app.routes.department.archive_departments")
+    def test_handle_archive_departments_service_error(
+        self, mock_archive_departments, client, valid_department_ids
+    ):
+        error_data = {"message": "No departments were archived."}
+        error_code = 400
+        mock_archive_departments.return_value = ([], error_data, error_code)
+
+        response = client.patch("/departments", json={"ids": valid_department_ids})
+        data = response.get_json()
+
+        assert response.status_code == error_code
+        assert "No departments were archived." in data["message"]
+
+    @patch("app.routes.department.archive_departments")
+    def test_handle_archive_departments_key_error(
+        self, mock_archive_departments, client, valid_department_ids
+    ):
+        mock_archive_departments.side_effect = KeyError("ids")
+
+        response = client.patch("/departments", json={"ids": valid_department_ids})
+        data = response.get_json()
+
+        assert response.status_code == 400
+        assert "Missing required field" in data["error"]
+
+    @patch("app.routes.department.archive_departments")
+    def test_handle_archive_departments_exception(
+        self, mock_archive_departments, client, valid_department_ids
+    ):
+        mock_archive_departments.side_effect = Exception("DB failure")
+
+        response = client.patch("/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 500

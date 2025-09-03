@@ -7,7 +7,6 @@ from app.models import (
     department_db_archive,
 )
 from app.utils import (
-    department_row_to_dict,
     department_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -15,16 +14,20 @@ from app.utils import (
 )
 
 
+def department_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
 def get_all_departments(active_only):
     results = department_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch departments.")
-    return [department_row_to_dict(department) for department in results]
+    return results  # already dicts from model
 
 
 def get_department_by_id(department_id: int):
     department = department_db_read_by_id(department_id)
-    return department_row_to_dict(department) if department else None
+    return department  # already dict from model
 
 
 def create_new_departments(data):

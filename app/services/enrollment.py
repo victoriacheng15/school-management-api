@@ -6,23 +6,26 @@ from app.models import (
     enrollment_db_update,
 )
 from app.utils import (
-    enrollment_row_to_dict,
     enrollment_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
 )
 
 
+def enrollment_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
 def get_all_enrollments():
     results = enrollment_db_read_all()
     if results is None:
         raise RuntimeError("Failed to fetch enrollments.")
-    return [enrollment_row_to_dict(enrollment) for enrollment in results]
+    return results  # already dicts from model
 
 
 def get_enrollment_by_id(enrollment_id: int):
     enrollment = enrollment_db_read_by_id(enrollment_id)
-    return enrollment_row_to_dict(enrollment) if enrollment else None
+    return enrollment  # already dict from model
 
 
 def create_new_enrollments(data):

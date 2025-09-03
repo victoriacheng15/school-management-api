@@ -65,4 +65,3 @@ def assignment_db_archive(assignment_id):
     """
     cursor = db.execute_query(query, (assignment_id,))
     return cursor.rowcount if cursor else 0
-

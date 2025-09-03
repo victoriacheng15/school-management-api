@@ -162,6 +162,7 @@ def assignment_row_to_dict(row):
             "is_archived": row[5],
         }
 
+
 def assignment_dict_to_row(data):
     return (
         data.get("instructor_id"),

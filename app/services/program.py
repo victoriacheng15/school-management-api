@@ -7,7 +7,6 @@ from app.models import (
     program_db_archive,
 )
 from app.utils import (
-    program_row_to_dict,
     program_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -15,16 +14,20 @@ from app.utils import (
 )
 
 
+def program_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
 def get_all_programs(active_only):
     results = program_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch programs.")
-    return [program_row_to_dict(program) for program in results]
+    return results
 
 
 def get_program_by_id(program_id: int):
     program = program_db_read_by_id(program_id)
-    return program_row_to_dict(program) if program else None
+    return program  # already dict from model
 
 
 def create_new_programs(data):
@@ -32,7 +35,7 @@ def create_new_programs(data):
         data,
         insert_func=program_db_insert,
         to_row_func=program_dict_to_row,
-        to_dict_func=program_row_to_dict,
+    to_dict_func=program_row_to_dict,
         read_by_ids_func=program_db_read_by_ids,
         no_success_msg="No programs were created.",
         success_status_code=201,
@@ -46,7 +49,7 @@ def update_programs(data):
         update_func=program_db_update,
         get_existing_func=program_db_read_by_id,
         to_row_func=program_dict_to_row,
-        to_dict_func=program_row_to_dict,
+    to_dict_func=program_row_to_dict,
         read_by_ids_func=program_db_read_by_ids,
         no_success_msg="No programs were updated.",
         missing_id_msg="Missing program ID for update.",
@@ -62,7 +65,7 @@ def archive_programs(ids):
         ids,
         archive_func=program_db_archive,
         get_existing_func=program_db_read_by_id,
-        to_dict_func=program_row_to_dict,
+    to_dict_func=program_row_to_dict,
         read_by_ids_func=program_db_read_by_ids,
         no_success_msg="No programs were archived.",
         not_found_msg="Program ID {id} not found or already archived.",

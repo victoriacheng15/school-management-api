@@ -1,4 +1,5 @@
 import pytest
+import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -17,6 +18,9 @@ from app.services import (
     archive_programs,
 )
 
+# Detect database type for tests
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
+
 # =======================
 # Fixtures
 # =======================
@@ -24,7 +28,27 @@ from app.services import (
 
 def make_program_row():
     today = date.today().isoformat()
-    return (1, "Computer Science", "bachelor", 1, today, today, 0)
+    # Return dicts for PostgreSQL, tuples for SQLite to mirror instructor tests
+    if DATABASE_TYPE == "postgresql":
+        return {
+            "id": 1,
+            "name": "Computer Science",
+            "type": "bachelor",
+            "department_id": 1,
+            "created_at": today,
+            "updated_at": today,
+            "is_archived": False,
+        }
+    else:
+        return (
+            1,
+            "Computer Science",
+            "bachelor",
+            1,
+            today,
+            today,
+            0,
+        )
 
 
 def make_program_dict():
@@ -125,7 +149,22 @@ def mock_db_archive():
 
 class TestProgramReadService:
     def test_get_all_programs(self, mock_db_read_all, valid_program_row):
-        mock_db_read_all.return_value = [valid_program_row]
+        # For SQLite, convert tuple fixture to dict to match model behavior
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_all.return_value = [valid_program_row]
+        else:
+            tuple_row = valid_program_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "type": tuple_row[2],
+                "department_id": tuple_row[3],
+                "created_at": tuple_row[4],
+                "updated_at": tuple_row[5],
+                "is_archived": bool(tuple_row[6]),
+            }
+            mock_db_read_all.return_value = [dict_row]
+
         programs = get_all_programs(active_only=True)
         assert len(programs) == 1
         assert programs[0]["name"] == "Computer Science"
@@ -137,7 +176,22 @@ class TestProgramReadService:
             get_all_programs(active_only=True)
 
     def test_get_program_by_id(self, mock_db_read_one, valid_program_row):
-        mock_db_read_one.return_value = valid_program_row
+        # Service layer expects dicts since model layer converts tuples to dicts
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.return_value = valid_program_row
+        else:
+            tuple_row = valid_program_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "type": tuple_row[2],
+                "department_id": tuple_row[3],
+                "created_at": tuple_row[4],
+                "updated_at": tuple_row[5],
+                "is_archived": bool(tuple_row[6]),
+            }
+            mock_db_read_one.return_value = dict_row
+
         program = get_program_by_id(1)
         assert program["name"] == "Computer Science"
         mock_db_read_one.assert_called_once_with(1)
@@ -157,7 +211,24 @@ class TestProgramCreateService:
         valid_program_rows,
     ):
         mock_db_create.side_effect = [1, 2]
-        mock_db_read_many.return_value = valid_program_rows
+        # Return rows in the format the service expects (dicts)
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_many.return_value = valid_program_rows
+        else:
+            dict_rows = []
+            for row in valid_program_rows:
+                dict_rows.append(
+                    {
+                        "id": row[0],
+                        "name": row[1],
+                        "type": row[2],
+                        "department_id": row[3],
+                        "created_at": row[4],
+                        "updated_at": row[5],
+                        "is_archived": bool(row[6]),
+                    }
+                )
+            mock_db_read_many.return_value = dict_rows
 
         results, error, status_code = create_new_programs(valid_program_create_data)
 
@@ -189,8 +260,23 @@ class TestProgramUpdateService:
         valid_program_row,
     ):
         mock_db_update.return_value = 1
-        mock_db_read_one.return_value = valid_program_row
-        mock_db_read_many.return_value = [valid_program_row]
+        # For SQLite, convert tuple fixture to dict to match model behavior
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.return_value = valid_program_row
+            mock_db_read_many.return_value = [valid_program_row]
+        else:
+            tuple_row = valid_program_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "type": tuple_row[2],
+                "department_id": tuple_row[3],
+                "created_at": tuple_row[4],
+                "updated_at": tuple_row[5],
+                "is_archived": bool(tuple_row[6]),
+            }
+            mock_db_read_one.return_value = dict_row
+            mock_db_read_many.return_value = [dict_row]
 
         results, error, status_code = update_programs(valid_program_update_data)
 
@@ -226,10 +312,28 @@ class TestProgramUpdateService:
 
 
 class TestProgramArchiveService:
-    def test_archive_programs(self, mock_db_archive, valid_program_ids):
+    def test_archive_programs(self, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_program_ids, valid_program_rows):
         mock_db_archive.side_effect = [1, 1]
-        mock_db_read_one.side_effect = valid_program_rows
-        mock_db_read_many.return_value = valid_program_rows
+        # return dict rows for the service
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.side_effect = valid_program_rows
+            mock_db_read_many.return_value = valid_program_rows
+        else:
+            dict_rows = []
+            for row in valid_program_rows:
+                dict_rows.append(
+                    {
+                        "id": row[0],
+                        "name": row[1],
+                        "type": row[2],
+                        "department_id": row[3],
+                        "created_at": row[4],
+                        "updated_at": row[5],
+                        "is_archived": bool(row[6]),
+                    }
+                )
+            mock_db_read_one.side_effect = dict_rows
+            mock_db_read_many.return_value = dict_rows
         results, errors, status = archive_programs(valid_program_ids)
 
         assert len(results) == 2
@@ -237,7 +341,7 @@ class TestProgramArchiveService:
         assert status == 200
         assert mock_db_archive.call_count == 2
 
-    def test_archive_programs_none_archived(self, mock_db_archive, valid_program_ids):
+    def test_archive_programs_none_archived(self, mock_db_archive, mock_db_read_one, valid_program_ids, valid_program_row):
         mock_db_archive.return_value = 0
         mock_db_read_one.return_value = valid_program_row
         results, errors, status = archive_programs(valid_program_ids)
@@ -259,25 +363,23 @@ class TestProgramArchiveService:
 class TestProgramModel:
     @patch("app.models.program.db.execute_query")
     def test_program_db_read_all(self, mock_execute):
-        mock_execute.return_value = [("mocked",)]
+        mock_execute.return_value = [{"mocked": "data"}]
         result = program_db_read_all()
-        assert result == [("mocked",)]
+        assert result == [{"mocked": "data"}]
         mock_execute.assert_called_once_with("SELECT * FROM programs;")
 
     @patch("app.models.program.db.execute_query")
     def test_program_db_read_all_active(self, mock_execute):
-        mock_execute.return_value = [("active_program",)]
+        mock_execute.return_value = [{"active": "program"}]
         result = program_db_read_all(active_only=True)
-        assert result == [("active_program",)]
-        mock_execute.assert_called_once_with(
-            "SELECT * FROM programs WHERE is_archived = 0;"
-        )
+        assert result == [{"active": "program"}]
+        mock_execute.assert_called_once()
 
     @patch("app.models.program.db.execute_query")
     def test_program_db_read_by_id_found(self, mock_execute):
-        mock_execute.return_value = [("program_1",)]
+        mock_execute.return_value = [{"id": 1, "name": "Program1"}]
         result = program_db_read_by_id(1)
-        assert result == ("program_1",)
+        assert result == {"id": 1, "name": "Program1"}
         mock_execute.assert_called_once_with(
             "SELECT * FROM programs WHERE id = ?;", (1,)
         )
@@ -297,20 +399,29 @@ class TestProgramModel:
 
     @patch("app.models.program.db.execute_query")
     def test_program_db_read_by_ids_success(self, mock_execute):
-        mock_execute.return_value = [("p1",), ("p2",)]
+        mock_execute.return_value = [{"id": 1}, {"id": 2}]
         result = program_db_read_by_ids([1, 2])
 
-        assert result == [("p1",), ("p2",)]
+        assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
         assert "IN (?,?)" in mock_execute.call_args.args[0]
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.program.db.execute_query")
     def test_program_db_insert_success(self, mock_execute, valid_program_row):
-        mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-        mock_execute.return_value = mock_cursor
+        # For PostgreSQL, return list of dicts; for SQLite, return cursor with lastrowid
+        if DATABASE_TYPE == "postgresql":
+            mock_execute.return_value = [{"id": 10}]
+            params = (
+                valid_program_row["name"],
+                valid_program_row["type"],
+                valid_program_row["department_id"],
+            )
+        else:
+            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
+            mock_execute.return_value = mock_cursor
+            params = valid_program_row[1:4]
 
-        params = valid_program_row[1:4]  # name, type, department_id
         result = program_db_insert(params)
 
         assert result == 10

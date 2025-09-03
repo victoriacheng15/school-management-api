@@ -1,4 +1,10 @@
 from db.database import Database
+from db.db_utils import (
+    get_insert_returning_query,
+    handle_insert_result,
+    get_archived_condition,
+    get_boolean_true,
+)
 
 db = Database()
 
@@ -6,15 +12,17 @@ db = Database()
 def program_db_read_all(active_only=False):
     query = "SELECT * FROM programs"
     if active_only:
-        query += " WHERE is_archived = 0"
+        archived_condition = get_archived_condition(False)
+        query += f" WHERE {archived_condition}"
     query += ";"
-    return db.execute_query(query)
+    result = db.execute_query(query)
+    return [dict(row) for row in result] if result else []
 
 
 def program_db_read_by_id(program_id):
     query = "SELECT * FROM programs WHERE id = ?;"
     result = db.execute_query(query, (program_id,))
-    return result[0] if result else None
+    return dict(result[0]) if result else None
 
 
 def program_db_read_by_ids(program_ids):
@@ -22,25 +30,23 @@ def program_db_read_by_ids(program_ids):
         return []
     placeholders = ",".join("?" for _ in program_ids)
     query = f"SELECT * FROM programs WHERE id IN ({placeholders});"
-    return db.execute_query(query, program_ids)
+    result = db.execute_query(query, program_ids)
+    return [dict(row) for row in result] if result else []
 
 
 def program_db_insert(program_data):
-    query = """
-    INSERT INTO programs (
-        name, type, department_id
-    )
-    VALUES (?, ?, ?);
-    """
-    cursor = db.execute_query(query, program_data)
-    return cursor.lastrowid if cursor else None
+    columns = ["name", "type", "department_id"]
+    query = get_insert_returning_query("programs", columns)
+    cursor_or_result = db.execute_query(query, program_data)
+    return handle_insert_result(cursor_or_result, cursor_or_result)
 
 
 def program_db_update(program_id, program_data):
-    query = """
+    archived_condition = get_archived_condition(False)
+    query = f"""
     UPDATE programs
     SET name = ?, type = ?, department_id = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND is_archived = 0;
+    WHERE id = ? AND {archived_condition};
     """
     values = program_data + (program_id,)
     cursor = db.execute_query(query, values)
@@ -48,10 +54,12 @@ def program_db_update(program_id, program_data):
 
 
 def program_db_archive(program_id):
-    query = """
+    archived_condition_false = get_archived_condition(False)
+    archived_true = get_boolean_true()
+    query = f"""
     UPDATE programs
-    SET is_archived = 1, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND is_archived = 0;
+    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (program_id,))
     return cursor.rowcount if cursor else 0

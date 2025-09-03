@@ -7,7 +7,6 @@ from app.models import (
     assignment_db_archive,
 )
 from app.utils import (
-    assignment_row_to_dict,
     assignment_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -19,12 +18,16 @@ def get_all_assignments(active_only):
     results = assignment_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch assignments.")
-    return [assignment_row_to_dict(assignment) for assignment in results]
+    return results
 
 
 def get_assignment_by_id(assignment_id: int):
     assignment = assignment_db_read_by_id(assignment_id)
-    return assignment_row_to_dict(assignment) if assignment else None
+    return assignment if assignment else None
+
+
+def assignment_row_to_dict(row):
+    return row if isinstance(row, dict) else row
 
 
 def create_new_assignments(data):

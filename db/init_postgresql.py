@@ -158,6 +158,10 @@ def populate_sample_data():
             assignments_pg,
         )
 
+        db.execute_query(
+            "SELECT setval('assignments_id_seq', (SELECT MAX(id) FROM assignments));"
+        )
+
         # Insert course_schedule (convert boolean)
         course_schedule_pg = [
             tuple(bool(v) if i == 7 else v for i, v in enumerate(row))

@@ -142,32 +142,25 @@ def enrollment_dict_to_row(data):
 
 
 def assignment_row_to_dict(row):
-    return {
-        "id": row[0],
-        "instructor_id": row[1],
-        "course_id": row[2],
-        "created_at": row[3],
-        "updated_at": row[4],
-        "is_archived": row[5],
-    }
-
-
-def assignment_dict_to_row(data):
-    return (
-        data.get("instructor_id"),
-        data.get("course_id"),
-    )
-
-
-def assignment_row_to_dict(row):
-    return {
-        "id": row[0],
-        "instructor_id": row[1],
-        "course_id": row[2],
-        "created_at": row[3],
-        "updated_at": row[4],
-        "is_archived": row[5],
-    }
+    # Support both dict (PostgreSQL) and tuple/list (SQLite)
+    if isinstance(row, dict):
+        return {
+            "id": row["id"],
+            "instructor_id": row["instructor_id"],
+            "course_id": row["course_id"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "is_archived": row["is_archived"],
+        }
+    else:
+        return {
+            "id": row[0],
+            "instructor_id": row[1],
+            "course_id": row[2],
+            "created_at": row[3],
+            "updated_at": row[4],
+            "is_archived": row[5],
+        }
 
 
 def assignment_dict_to_row(data):

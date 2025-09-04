@@ -392,7 +392,9 @@ class TestCourseScheduleModel:
             # SQLite returns cursor with lastrowid
             mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
             mock_execute.return_value = mock_cursor
-            params = valid_course_schedule_row[1:5]  # Exclude id, created_at, updated_at, is_archived
+            params = valid_course_schedule_row[
+                1:5
+            ]  # Exclude id, created_at, updated_at, is_archived
 
         result = course_schedule_db_insert(params)
 

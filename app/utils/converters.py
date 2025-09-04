@@ -181,14 +181,14 @@ def term_dict_to_row(data):
 
 def course_schedule_row_to_dict(row):
     return {
-        "id": row[0],
-        "course_id": row[1],
-        "day": row[2],
-        "time": row[3],
-        "room": row[4],
-        "created_at": row[5],
-        "updated_at": row[6],
-        "is_archived": row[7],
+        "id": row["id"],
+        "course_id": row["course_id"],
+        "day": row["day"],
+        "time": row["time"],
+        "room": row.get("room"),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
+        "is_archived": row.get("is_archived"),
     }
 
 

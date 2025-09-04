@@ -7,7 +7,6 @@ from app.models import (
     course_schedule_db_archive,
 )
 from app.utils import (
-    course_schedule_row_to_dict,
     course_schedule_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -15,16 +14,20 @@ from app.utils import (
 )
 
 
+def course_schedule_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
 def get_all_course_schedules(active_only):
     results = course_schedule_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch course schedules.")
-    return [course_schedule_row_to_dict(course_schedule) for course_schedule in results]
+    return results  # Already dicts from model
 
 
 def get_course_schedule_by_id(course_schedule_id: int):
     course_schedule = course_schedule_db_read_by_id(course_schedule_id)
-    return course_schedule_row_to_dict(course_schedule) if course_schedule else None
+    return course_schedule  # Already dict from model
 
 
 def create_new_course_schedules(data):

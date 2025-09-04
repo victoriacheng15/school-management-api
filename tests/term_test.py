@@ -1,4 +1,5 @@
 import pytest
+import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -15,6 +16,9 @@ from app.services import (
     update_terms,
 )
 
+# Detect database type for tests
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
+
 # =======================
 # Fixtures
 # =======================
@@ -22,14 +26,27 @@ from app.services import (
 
 def make_term_row():
     today = date.today().isoformat()
-    return (
-        1,
-        "Fall 2025",
-        "2025-09-01",
-        "2025-12-15",
-        today,
-        today,
-    )
+
+    if DATABASE_TYPE == "postgresql":
+        # PostgreSQL returns dict-like objects
+        return {
+            "id": 1,
+            "name": "Fall 2025",
+            "start_date": "2025-09-01",
+            "end_date": "2025-12-15",
+            "created_at": today,
+            "updated_at": today,
+        }
+    else:
+        # SQLite returns tuple objects
+        return (
+            1,
+            "Fall 2025",
+            "2025-09-01",
+            "2025-12-15",
+            today,
+            today,
+        )
 
 
 def make_term_dict():
@@ -124,8 +141,24 @@ def mock_db_update():
 
 class TestTermReadService:
     def test_get_all_terms(self, mock_db_read_all, valid_term_row):
-        mock_db_read_all.return_value = [valid_term_row]
-        terms = get_all_terms()
+        # Service layer expects dicts since model layer converts tuples to dicts
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_all.return_value = [valid_term_row]
+        else:
+            # For SQLite, convert tuple fixture to dict to match model behavior
+            tuple_row = valid_term_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "start_date": tuple_row[2],
+                "end_date": tuple_row[3],
+                "created_at": tuple_row[4],
+                "updated_at": tuple_row[5],
+            }
+            mock_db_read_all.return_value = [dict_row]
+
+        terms = get_all_terms(active_only=True)
+
         assert len(terms) == 1
         assert terms[0]["name"] == "Fall 2025"
         mock_db_read_all.assert_called_once()
@@ -133,10 +166,24 @@ class TestTermReadService:
     def test_get_all_terms_none(self, mock_db_read_all):
         mock_db_read_all.return_value = None
         with pytest.raises(RuntimeError):
-            get_all_terms()
+            get_all_terms(active_only=True)
 
     def test_get_term_by_id(self, mock_db_read_one, valid_term_row):
-        mock_db_read_one.return_value = valid_term_row
+        # Service layer expects dicts since model layer converts tuples to dicts
+        if DATABASE_TYPE == "postgresql":
+            mock_db_read_one.return_value = valid_term_row
+        else:
+            tuple_row = valid_term_row
+            dict_row = {
+                "id": tuple_row[0],
+                "name": tuple_row[1],
+                "start_date": tuple_row[2],
+                "end_date": tuple_row[3],
+                "created_at": tuple_row[4],
+                "updated_at": tuple_row[5],
+            }
+            mock_db_read_one.return_value = dict_row
+
         term = get_term_by_id(1)
         assert term["name"] == "Fall 2025"
         mock_db_read_one.assert_called_once_with(1)
@@ -155,6 +202,7 @@ class TestTermCreateService:
         valid_term_create_data,
         valid_term_rows,
     ):
+        # For PostgreSQL, insert returns IDs via RETURNING; for SQLite, returns lastrowid
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_term_rows
 
@@ -229,16 +277,16 @@ class TestTermUpdateService:
 class TestTermModel:
     @patch("app.models.term.db.execute_query")
     def test_term_db_read_all(self, mock_execute):
-        mock_execute.return_value = [("mocked",)]
+        mock_execute.return_value = [{"mocked": "data"}]
         result = term_db_read_all()
-        assert result == [("mocked",)]
+        assert result == [{"mocked": "data"}]
         mock_execute.assert_called_once_with("SELECT * FROM terms;")
 
     @patch("app.models.term.db.execute_query")
     def test_term_db_read_by_id_found(self, mock_execute):
-        mock_execute.return_value = [("term_1",)]
+        mock_execute.return_value = [{"id": 1, "name": "term_1"}]
         result = term_db_read_by_id(1)
-        assert result == ("term_1",)
+        assert result == {"id": 1, "name": "term_1"}
         mock_execute.assert_called_once_with("SELECT * FROM terms WHERE id = ?;", (1,))
 
     @patch("app.models.term.db.execute_query")
@@ -256,20 +304,29 @@ class TestTermModel:
 
     @patch("app.models.term.db.execute_query")
     def test_term_db_read_by_ids_success(self, mock_execute):
-        mock_execute.return_value = [("t1",), ("t2",)]
+        mock_execute.return_value = [{"id": "t1"}, {"id": "t2"}]
         result = term_db_read_by_ids([1, 2])
 
-        assert result == [("t1",), ("t2",)]
+        assert result == [{"id": "t1"}, {"id": "t2"}]
         mock_execute.assert_called_once()
         assert "IN (?,?)" in mock_execute.call_args.args[0]
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.term.db.execute_query")
     def test_term_db_insert_success(self, mock_execute, valid_term_row):
-        mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-        mock_execute.return_value = mock_cursor
+        # For PostgreSQL, we expect dict format, for SQLite tuple format
+        if DATABASE_TYPE == "postgresql":
+            mock_execute.return_value = [{"id": 10}]
+            params = (
+                valid_term_row["name"],
+                valid_term_row["start_date"],
+                valid_term_row["end_date"],
+            )
+        else:
+            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
+            mock_execute.return_value = mock_cursor
+            params = valid_term_row[1:4]  # Exclude id, created_at, updated_at
 
-        params = valid_term_row[1:4]  # Exclude id, created_at, updated_at
         result = term_db_insert(params)
 
         assert result == 10

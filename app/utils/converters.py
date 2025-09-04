@@ -162,12 +162,12 @@ def assignment_dict_to_row(data):
 
 def term_row_to_dict(row):
     return {
-        "id": row[0],
-        "name": row[1],
-        "start_date": row[2],
-        "end_date": row[3],
-        "created_at": row[4],
-        "updated_at": row[5],
+        "id": row["id"],
+        "name": row["name"],
+        "start_date": row["start_date"],
+        "end_date": row["end_date"],
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at"),
     }
 
 

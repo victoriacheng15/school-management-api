@@ -13,16 +13,20 @@ from app.utils import (
 )
 
 
-def get_all_terms():
-    results = term_db_read_all()
+def term_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
+def get_all_terms(active_only):
+    results = term_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch terms.")
-    return [term_row_to_dict(term) for term in results]
+    return results  # Already dicts from model
 
 
 def get_term_by_id(term_id: int):
     term = term_db_read_by_id(term_id)
-    return term_row_to_dict(term) if term else None
+    return term  # Already dict from model
 
 
 def create_new_terms(data):

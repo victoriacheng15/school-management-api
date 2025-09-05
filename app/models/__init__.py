@@ -53,6 +53,7 @@ from .enrollment import (
     enrollment_db_read_by_ids,
     enrollment_db_insert,
     enrollment_db_update,
+    enrollment_db_archive,
 )
 
 from .assignment import (

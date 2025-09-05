@@ -50,6 +50,7 @@ from .enrollment import (
     get_enrollment_by_id,
     create_new_enrollments,
     update_enrollments,
+    archive_enrollments,
 )
 
 from .assignment import (

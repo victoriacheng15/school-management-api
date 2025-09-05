@@ -2,13 +2,19 @@ from db.database import Database
 from db.db_utils import (
     get_insert_returning_query,
     handle_insert_result,
+    get_archived_condition,
+    get_boolean_true,
 )
 
 db = Database()
 
 
-def enrollment_db_read_all():
-    query = "SELECT * FROM enrollments;"
+def enrollment_db_read_all(active_only=False):
+    query = "SELECT * FROM enrollments"
+    if active_only:
+        archived_condition = get_archived_condition(False)
+        query += f" WHERE {archived_condition}"
+    query += ";"
     result = db.execute_query(query)
     return [dict(row) for row in result] if result else []
 
@@ -36,11 +42,24 @@ def enrollment_db_insert(enrollment_data):
 
 
 def enrollment_db_update(enrollment_id, enrollment_data):
-    query = """
+    archived_condition = get_archived_condition(False)
+    query = f"""
     UPDATE enrollments
     SET student_id = ?, course_id = ?, grade = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?;
+    WHERE id = ? AND {archived_condition};
     """
     values = enrollment_data + (enrollment_id,)
     cursor = db.execute_query(query, values)
+    return cursor.rowcount if cursor else 0
+
+
+def enrollment_db_archive(enrollment_id):
+    archived_condition_false = get_archived_condition(False)
+    archived_true = get_boolean_true()
+    query = f"""
+    UPDATE enrollments
+    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND {archived_condition_false};
+    """
+    cursor = db.execute_query(query, (enrollment_id,))
     return cursor.rowcount if cursor else 0

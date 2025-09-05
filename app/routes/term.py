@@ -65,7 +65,8 @@ def handle_update_terms():
 @term_bp.route("/terms", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_terms():
-    results, error_data, status_code = archive_terms(request.get_json())
+    ids = request.get_json().get("ids", [])
+    results, error_data, status_code = archive_terms(ids)
 
     if error_data:
         return api_response_error(error_data, status_code)

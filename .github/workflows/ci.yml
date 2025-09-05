@@ -79,13 +79,17 @@ jobs:
             export DB_NAME=${{ secrets.DB_NAME }}
             export DB_USER=${{ secrets.DB_USER }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            python3 db/init_postgresql.py
           else
             export DATABASE_TYPE=sqlite
+            make setup-db
           fi
-          make setup-db
 
       - name: Run tests + coverage
-        run: make coverage > coverage_output.txt
+        run: |
+          echo "Running pytest with coverage..."
+          pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -q > coverage_output.txt
+          echo "Coverage command completed with exit code: $?"
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

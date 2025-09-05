@@ -316,9 +316,14 @@ class TestAssignmentModel:
         mock_execute.return_value = [{"active": "assignment"}]
         result = assignment_db_read_all(active_only=True)
         assert result == [{"active": "assignment"}]
-        mock_execute.assert_called_once_with(
-            "SELECT * FROM assignments WHERE is_archived = FALSE;"
-        )
+        if DATABASE_TYPE == "postgresql":
+            mock_execute.assert_called_once_with(
+                "SELECT * FROM assignments WHERE is_archived = FALSE;"
+            )
+        else:
+            mock_execute.assert_called_once_with(
+                "SELECT * FROM assignments WHERE is_archived = 0;"
+            )
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_read_by_id_found(self, mock_execute):

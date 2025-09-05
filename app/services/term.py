@@ -4,12 +4,14 @@ from app.models import (
     term_db_read_by_ids,
     term_db_insert,
     term_db_update,
+    term_db_archive,
 )
 from app.utils import (
     term_row_to_dict,
     term_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
+    bulk_archive_entities,
 )
 
 
@@ -55,5 +57,20 @@ def update_terms(data):
         not_found_msg="Term ID {id} not found.",
         not_updated_msg="Term ID {id} not updated.",
         failure_status_code=400,
+        success_status_code=200,
+    )
+
+
+def archive_terms(ids):
+    return bulk_archive_entities(
+        ids,
+        archive_func=term_db_archive,
+        get_existing_func=term_db_read_by_id,
+        to_dict_func=term_row_to_dict,
+        read_by_ids_func=term_db_read_by_ids,
+        no_success_msg="No terms were archived.",
+        not_found_msg="Term ID {id} not found or already archived.",
+        not_updated_msg="Term ID {id} not archived.",
+        failure_status_code=422,
         success_status_code=200,
     )

@@ -67,7 +67,8 @@ CREATE TABLE IF NOT EXISTS terms (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_archived BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Creating courses table
@@ -130,6 +131,7 @@ CREATE INDEX IF NOT EXISTS idx_instructors_department_id ON instructors(departme
 CREATE INDEX IF NOT EXISTS idx_courses_code ON courses(code);
 CREATE INDEX IF NOT EXISTS idx_courses_term_id ON courses(term_id);
 CREATE INDEX IF NOT EXISTS idx_courses_department_id ON courses(department_id);
+CREATE INDEX IF NOT EXISTS idx_terms_is_archived ON terms(is_archived);
 CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_is_archived ON enrollments(is_archived);

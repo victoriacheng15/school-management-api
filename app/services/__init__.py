@@ -43,6 +43,7 @@ from .term import (
     get_term_by_id,
     create_new_terms,
     update_terms,
+    archive_terms,
 )
 
 from .enrollment import (

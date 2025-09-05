@@ -7,10 +7,10 @@ get_resource() {
   local id=$2
   local keyword=$3
 
-  if [ -n "$id" ]; then
-    curl -s "$BASE_URL/$resource/$id" | jq
-  elif [ "$keyword" == "active" ]; then
+  if [ "$id" == "active" ]; then
     curl -s "$BASE_URL/$resource?active_only=true" | jq
+  elif [ -n "$id" ]; then
+    curl -s "$BASE_URL/$resource/$id" | jq
   else
     curl -s "$BASE_URL/$resource" | jq
   fi

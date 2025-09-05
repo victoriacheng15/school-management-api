@@ -11,6 +11,7 @@ from app.services import (
     get_enrollment_by_id,
     create_new_enrollments,
     update_enrollments,
+    archive_enrollments,
 )
 
 enrollment_bp = Blueprint("enrollment", __name__)
@@ -19,7 +20,8 @@ enrollment_bp = Blueprint("enrollment", __name__)
 @enrollment_bp.route("/enrollments", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_enrollments():
-    enrollments = get_all_enrollments()
+    active_only = request.args.get("active_only", "false").lower() == "true"
+    enrollments = get_all_enrollments(active_only=active_only)
     return api_response(enrollments, "Enrollments fetched successfully.")
 
 
@@ -61,5 +63,22 @@ def handle_update_enrollments():
         success_list=results,
         success_msg_single="Enrollment updated successfully.",
         success_msg_bulk="{} enrollments updated successfully.",
+    )
+    return jsonify(response_data), status_code
+
+
+@enrollment_bp.route("/enrollments", methods=["PATCH"])
+@handle_exceptions_write()
+def handle_archive_enrollments():
+    ids = request.get_json().get("ids", [])
+    results, error_data, status_code = archive_enrollments(ids)
+
+    if error_data:
+        return api_response_error(error_data, status_code)
+
+    response_data, status_code = build_bulk_response(
+        success_list=results,
+        success_msg_single="Enrollment archived successfully.",
+        success_msg_bulk="{} enrollments archived successfully.",
     )
     return jsonify(response_data), status_code

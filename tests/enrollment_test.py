@@ -8,12 +8,14 @@ from app.models import (
     enrollment_db_read_by_ids,
     enrollment_db_insert,
     enrollment_db_update,
+    enrollment_db_archive,
 )
 from app.services import (
     get_all_enrollments,
     get_enrollment_by_id,
     create_new_enrollments,
     update_enrollments,
+    archive_enrollments,
 )
 
 # Detect database type for tests
@@ -136,6 +138,12 @@ def mock_db_update():
         yield mock
 
 
+@pytest.fixture
+def mock_db_archive():
+    with patch("app.services.enrollment.enrollment_db_archive") as mock:
+        yield mock
+
+
 # =======================
 # Service Tests
 # =======================
@@ -160,7 +168,7 @@ class TestEnrollmentReadService:
             }
             mock_db_read_all.return_value = [dict_row]
 
-        enrollments = get_all_enrollments()
+        enrollments = get_all_enrollments(active_only=True)
         assert len(enrollments) == 1
         assert enrollments[0]["grade"] == "A"
         mock_db_read_all.assert_called_once()
@@ -168,7 +176,7 @@ class TestEnrollmentReadService:
     def test_get_all_enrollments_none(self, mock_db_read_all):
         mock_db_read_all.return_value = None
         with pytest.raises(RuntimeError):
-            get_all_enrollments()
+            get_all_enrollments(active_only=True)
 
     def test_get_enrollment_by_id(self, mock_db_read_one, valid_enrollment_row):
         # Service layer expects dicts since model layer converts tuples to dicts
@@ -276,6 +284,28 @@ class TestEnrollmentUpdateService:
         mock_db_read_many.assert_not_called()
 
 
+class TestEnrollmentArchiveService:
+    def test_archive_enrollments(self, mock_db_archive, valid_enrollment_ids):
+        mock_db_archive.side_effect = [1, 1]
+        archived, errors, status_code = archive_enrollments(valid_enrollment_ids)
+
+        assert len(archived) == 2
+        assert mock_db_archive.call_count == 2
+
+    def test_archive_enrollments_none_archived(
+        self, mock_db_archive, valid_enrollment_ids
+    ):
+        mock_db_archive.return_value = 0
+        archived, errors, status_code = archive_enrollments(valid_enrollment_ids)
+
+        assert archived == []
+
+    def test_archive_enrollments_invalid_ids(self):
+        results, errors, status = archive_enrollments(["one", 2])
+        assert status == 400
+        assert any("must be of type int" in e["message"] for e in errors)
+
+
 # =======================
 # Model Tests
 # =======================
@@ -371,6 +401,19 @@ class TestEnrollmentModel:
         result = enrollment_db_update(1, ("x",) * 3)
         assert result == 0
 
+    @patch("app.models.enrollment.db.execute_query")
+    def test_enrollment_db_archive_success(self, mock_execute):
+        mock_cursor = type("MockCursor", (), {"rowcount": 1})()
+        mock_execute.return_value = mock_cursor
+        result = enrollment_db_archive(1)
+        assert result == 1
+
+    @patch("app.models.enrollment.db.execute_query")
+    def test_enrollment_db_archive_failure(self, mock_execute):
+        mock_execute.return_value = None
+        result = enrollment_db_archive(999)
+        assert result == 0
+
 
 # =======================
 # Route Tests
@@ -391,6 +434,18 @@ class TestEnrollmentReadRoute:
         assert isinstance(data["data"], list)
         assert data["data"] == valid_enrollment_create_data
         mock_get.assert_called_once()
+
+    @patch("app.routes.enrollment.get_all_enrollments")
+    def test_handle_enrollment_db_read_all_with_active_only(
+        self, mock_get, client, valid_enrollment_create_data
+    ):
+        mock_get.return_value = valid_enrollment_create_data
+
+        resp = client.get("/enrollments?active_only=true")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert "Enrollments fetched successfully." in data["message"]
+        mock_get.assert_called_once_with(active_only=True)
 
     @patch("app.routes.enrollment.get_all_enrollments")
     def test_handle_enrollment_db_read_all_exception(self, mock_get_all, client):
@@ -545,6 +600,59 @@ class TestEnrollmentUpdateRoute:
         mock_update_enrollments.side_effect = Exception("DB failure")
 
         response = client.put("/enrollments", json=valid_enrollment_update_data)
+        data = response.get_json()
+
+        assert response.status_code == 500
+        assert "internal server error: db failure." in data["error"].lower()
+
+
+class TestEnrollmentArchiveRoute:
+    @patch("app.routes.enrollment.archive_enrollments")
+    def test_handle_archive_enrollments_success(
+        self, mock_archive_enrollments, client, valid_enrollment_ids
+    ):
+        mock_archive_enrollments.return_value = (valid_enrollment_ids, None, 200)
+
+        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        data = response.get_json()
+
+        assert response.status_code == 200
+        assert "2 enrollments archived successfully" in data["message"]
+        assert data["data"]
+
+    @patch("app.routes.enrollment.archive_enrollments")
+    def test_handle_archive_enrollments_service_error(
+        self, mock_archive_enrollments, client, valid_enrollment_ids
+    ):
+        error_data = {"message": "No enrollments were archived."}
+        error_code = 400
+        mock_archive_enrollments.return_value = ([], error_data, error_code)
+
+        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        data = response.get_json()
+
+        assert response.status_code == error_code
+        assert "No enrollments were archived." in data["message"]
+
+    @patch("app.routes.enrollment.archive_enrollments")
+    def test_handle_archive_enrollments_key_error(
+        self, mock_archive_enrollments, client, valid_enrollment_ids
+    ):
+        mock_archive_enrollments.side_effect = KeyError("ids")
+
+        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        data = response.get_json()
+
+        assert response.status_code == 400
+        assert "Missing required field" in data["error"]
+
+    @patch("app.routes.enrollment.archive_enrollments")
+    def test_handle_archive_enrollments_exception(
+        self, mock_archive_enrollments, client, valid_enrollment_ids
+    ):
+        mock_archive_enrollments.side_effect = Exception("DB failure")
+
+        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
         data = response.get_json()
 
         assert response.status_code == 500

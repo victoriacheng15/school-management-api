@@ -4,11 +4,13 @@ from app.models import (
     enrollment_db_read_by_ids,
     enrollment_db_insert,
     enrollment_db_update,
+    enrollment_db_archive,
 )
 from app.utils import (
     enrollment_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
+    bulk_archive_entities,
 )
 
 
@@ -16,8 +18,8 @@ def enrollment_row_to_dict(row):
     return row if isinstance(row, dict) else row
 
 
-def get_all_enrollments():
-    results = enrollment_db_read_all()
+def get_all_enrollments(active_only=False):
+    results = enrollment_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch enrollments.")
     return results  # already dicts from model
@@ -54,5 +56,20 @@ def update_enrollments(data):
         not_found_msg="Enrollment ID {id} not found.",
         not_updated_msg="Enrollment ID {id} not updated.",
         failure_status_code=400,
+        success_status_code=200,
+    )
+
+
+def archive_enrollments(ids):
+    return bulk_archive_entities(
+        ids,
+        archive_func=enrollment_db_archive,
+        get_existing_func=enrollment_db_read_by_id,
+        to_dict_func=enrollment_row_to_dict,
+        read_by_ids_func=enrollment_db_read_by_ids,
+        no_success_msg="No enrollments were archived.",
+        not_found_msg="Enrollment ID {id} not found or already archived.",
+        not_updated_msg="Enrollment ID {id} not archived.",
+        failure_status_code=422,
         success_status_code=200,
     )

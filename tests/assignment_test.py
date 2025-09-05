@@ -317,7 +317,7 @@ class TestAssignmentModel:
         result = assignment_db_read_all(active_only=True)
         assert result == [{"active": "assignment"}]
         mock_execute.assert_called_once_with(
-            "SELECT * FROM assignments WHERE is_archived = 0;"
+            "SELECT * FROM assignments WHERE is_archived = FALSE;"
         )
 
     @patch("app.models.assignment.db.execute_query")

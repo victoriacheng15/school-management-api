@@ -284,7 +284,7 @@ archive_assignments='{
   "ids": [3, 4]
 }'
 
-create_course_schedule='[
+create_course_schedules='[
   {
     "course_id": 1,
     "day": "Monday",
@@ -299,9 +299,10 @@ create_course_schedule='[
   }
 ]'
 
-update_course_schedule='[
+update_course_schedules='[
   {
     "id": 1,
+    "course_id": 1,
     "day": "Tuesday",
     "time": "10:00-12:00",
     "room": "Room 103"
@@ -314,7 +315,7 @@ update_course_schedule='[
   }
 ]'
 
-archive_course_schedule='{
+archive_course_schedules='{
   "ids": [3, 4]
 }'
 

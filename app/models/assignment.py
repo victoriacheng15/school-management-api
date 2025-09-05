@@ -12,7 +12,7 @@ db = Database()
 def assignment_db_read_all(active_only=False):
     query = "SELECT * FROM assignments"
     if active_only:
-        query += " WHERE is_archived = 0"
+        query += f" WHERE {get_archived_condition()}"
     query += ";"
     result = db.execute_query(query)
     # Convert all rows to regular dicts for consistency

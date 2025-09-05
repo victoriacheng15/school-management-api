@@ -15,6 +15,9 @@ reset:
 format:
 	ruff format run.py db/ tests/ app/
 
+format-md:
+	npx markdownlint-cli '**/*.md' --fix
+
 test:
 	pytest --maxfail=1 -q
 

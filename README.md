@@ -20,12 +20,16 @@ All interactions happen through REST APIs, using tools like curl, Postman, or au
 
 To gain real backend experience beyond tutorials by:
 
-- Designing clean, modular REST APIs  
-- Handling CRUD + archive logic across multiple entities  
-- Writing testable, maintainable backend logic  
-- Practicing containerization using Docker (incl. multi-stage builds)  
-- Deploying to a real platform (Render)  
-- Applying CI/CD and testing best practices  
+- Designing clean, modular REST APIs
+- Handling CRUD + archive logic across multiple entities
+- Writing testable, maintainable backend logic
+- Practicing containerization using Docker (incl. multi-stage builds)
+- Deploying to a real platform (Render)
+- Applying CI/CD and testing best practices
+- Includes automated CI/CD workflows using GitHub Actions:
+  - Code formatting and linting (Ruff)
+  - Unit tests across supported databases (SQLite and PostgreSQL)
+  - Coverage reporting with PR comments
 
 ## What It Does
 
@@ -33,7 +37,6 @@ To gain real backend experience beyond tutorials by:
 - Supports full CRUD plus archiving (soft deletes) to preserve data history  
 - Uses SQLite as an embedded database **within the Docker container** for easy, lightweight local development and testing  
 - Fully containerized with Docker (including multi-stage builds) for clean deployment  
-- Deployed on Render, demonstrating real-world backend deployment experience  
 - Includes Pytest-based tests covering routes and business logic
 
 ## 🛠️ Running Locally
@@ -68,7 +71,7 @@ make down
 make down V=1 # clear volume
 ```
 
-> By default, this uses PostgreSQL. To use Sqlite, set the environment variable `DATABASE_TYPE=postgresql` and ensure your PostgreSQL service is running (see `docker-compose.yml`).
+> By default, this uses PostgreSQL. To use Sqlite, set the environment variable `DATABASE_TYPE=sqlite` and ensure your PostgreSQL service is running (see `docker-compose.yml`).
 
 ## 🧪 Interact with the API via Bash Script
 
@@ -100,9 +103,3 @@ Supports deployment with either SQLite or PostgreSQL, depending on your environm
 | Students           | ✔   | ✔    | ✔   | ✔               |
 | Terms              | ✔   | ✔    | ✔   | ✔               |
 
-## 🚀 Deployment
-
-The API is containerized using Docker and deployed on [Render](https://render.com) using a Docker deployment method.  
-This mimics real-world deployment pipelines and helps reinforce DevOps practices.
-
-> ⚠️ The live instance is private to avoid misuse, since the API currently does not include authentication or rate limiting.

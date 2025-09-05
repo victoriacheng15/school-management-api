@@ -290,9 +290,7 @@ class TestTermArchiveService:
         assert len(archived) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_terms_none_archived(
-        self, mock_db_archive, valid_term_ids
-    ):
+    def test_archive_terms_none_archived(self, mock_db_archive, valid_term_ids):
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_terms(valid_term_ids)
 

@@ -13,7 +13,8 @@ db = Database()
 def term_db_read_all(active_only=False):
     query = "SELECT * FROM terms"
     if active_only:
-        query += " WHERE status = 'active'"
+        archived_condition = get_archived_condition(False)
+        query += f" WHERE {archived_condition}"
     query += ";"
     result = db.execute_query(query)
     # Convert rows to regular dicts for consistency with other models
@@ -53,4 +54,16 @@ def term_db_update(term_id, term_data):
     """
     values = term_data + (term_id,)
     cursor = db.execute_query(query, values)
+    return cursor.rowcount if cursor else 0
+
+
+def term_db_archive(term_id):
+    archived_condition_false = get_archived_condition(False)
+    archived_true = get_boolean_true()
+    query = f"""
+    UPDATE terms
+    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND {archived_condition_false};
+    """
+    cursor = db.execute_query(query, (term_id,))
     return cursor.rowcount if cursor else 0

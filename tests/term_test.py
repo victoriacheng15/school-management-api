@@ -8,12 +8,14 @@ from app.models import (
     term_db_read_by_ids,
     term_db_insert,
     term_db_update,
+    term_db_archive,
 )
 from app.services import (
     get_all_terms,
     get_term_by_id,
     create_new_terms,
     update_terms,
+    archive_terms,
 )
 
 # Detect database type for tests
@@ -131,6 +133,17 @@ def mock_db_create():
 @pytest.fixture
 def mock_db_update():
     with patch("app.services.term.term_db_update") as mock:
+        yield mock
+
+
+@pytest.fixture
+def valid_term_ids():
+    return [1, 2]
+
+
+@pytest.fixture
+def mock_db_archive():
+    with patch("app.services.term.term_db_archive") as mock:
         yield mock
 
 
@@ -269,6 +282,28 @@ class TestTermUpdateService:
         mock_db_read_many.assert_not_called()
 
 
+class TestTermArchiveService:
+    def test_archive_terms(self, mock_db_archive, valid_term_ids):
+        mock_db_archive.side_effect = [1, 1]
+        archived, errors, status_code = archive_terms(valid_term_ids)
+
+        assert len(archived) == 2
+        assert mock_db_archive.call_count == 2
+
+    def test_archive_terms_none_archived(
+        self, mock_db_archive, valid_term_ids
+    ):
+        mock_db_archive.return_value = 0
+        archived, errors, status_code = archive_terms(valid_term_ids)
+
+        assert archived == []
+
+    def test_archive_terms_invalid_ids(self):
+        results, errors, status = archive_terms(["one", 2])
+        assert status == 400
+        assert any("must be of type int" in e["message"] for e in errors)
+
+
 # =======================
 # Model Tests
 # =======================
@@ -354,6 +389,19 @@ class TestTermModel:
     def test_term_db_update_failure(self, mock_execute):
         mock_execute.return_value = None
         result = term_db_update(1, ("x",) * 3)
+        assert result == 0
+
+    @patch("app.models.term.db.execute_query")
+    def test_term_db_archive_success(self, mock_execute):
+        mock_cursor = type("MockCursor", (), {"rowcount": 1})()
+        mock_execute.return_value = mock_cursor
+        result = term_db_archive(1)
+        assert result == 1
+
+    @patch("app.models.term.db.execute_query")
+    def test_term_db_archive_failure(self, mock_execute):
+        mock_execute.return_value = None
+        result = term_db_archive(999)
         assert result == 0
 
 
@@ -523,6 +571,59 @@ class TestTermUpdateRoute:
         mock_update_terms.side_effect = Exception("DB failure")
 
         response = client.put("/terms", json=valid_term_update_data)
+        data = response.get_json()
+
+        assert response.status_code == 500
+        assert "internal server error: db failure." in data["error"].lower()
+
+
+class TestTermArchiveRoute:
+    @patch("app.routes.term.archive_terms")
+    def test_handle_archive_terms_success(
+        self, mock_archive_terms, client, valid_term_ids
+    ):
+        mock_archive_terms.return_value = (valid_term_ids, None, 200)
+
+        response = client.patch("/terms", json={"ids": valid_term_ids})
+        data = response.get_json()
+
+        assert response.status_code == 200
+        assert "2 terms archived successfully" in data["message"]
+        assert data["data"]
+
+    @patch("app.routes.term.archive_terms")
+    def test_handle_archive_terms_service_error(
+        self, mock_archive_terms, client, valid_term_ids
+    ):
+        error_data = {"message": "No terms were archived."}
+        error_code = 400
+        mock_archive_terms.return_value = ([], error_data, error_code)
+
+        response = client.patch("/terms", json={"ids": valid_term_ids})
+        data = response.get_json()
+
+        assert response.status_code == error_code
+        assert "No terms were archived." in data["message"]
+
+    @patch("app.routes.term.archive_terms")
+    def test_handle_archive_terms_key_error(
+        self, mock_archive_terms, client, valid_term_ids
+    ):
+        mock_archive_terms.side_effect = KeyError("ids")
+
+        response = client.patch("/terms", json={"ids": valid_term_ids})
+        data = response.get_json()
+
+        assert response.status_code == 400
+        assert "Missing required field" in data["error"]
+
+    @patch("app.routes.term.archive_terms")
+    def test_handle_archive_terms_exception(
+        self, mock_archive_terms, client, valid_term_ids
+    ):
+        mock_archive_terms.side_effect = Exception("DB failure")
+
+        response = client.patch("/terms", json={"ids": valid_term_ids})
         data = response.get_json()
 
         assert response.status_code == 500

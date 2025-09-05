@@ -45,6 +45,7 @@ from .term import (
     term_db_read_by_ids,
     term_db_insert,
     term_db_update,
+    term_db_archive,
 )
 
 from .enrollment import (

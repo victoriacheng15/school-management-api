@@ -70,6 +70,19 @@ jobs:
       - name: Install dependencies
         run: make install
 
+      - name: Ensure postgres role exists
+        if: matrix.db == 'postgres'
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -c "
+          DO \$\$ 
+          BEGIN 
+            IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='postgres') THEN 
+              CREATE ROLE postgres LOGIN SUPERUSER; 
+            END IF; 
+          END \$\$;" || true
+
       - name: Setup DB
         run: |
           if [ "${{ matrix.db }}" = "postgres" ]; then

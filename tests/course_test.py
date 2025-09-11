@@ -160,16 +160,42 @@ class TestCourseReadService:
         assert course is None
 
 
+@patch("app.models.course.db")
+@patch("app.services.course.course_dict_to_row")
 class TestCourseCreateService:
     def test_create_new_courses(
         self,
+        mock_course_dict_to_row,
+        mock_db_instance,
         mock_db_create,
         mock_db_read_many,
         valid_course_create_data,
         valid_course_rows,
     ):
+        # Mock the course_dict_to_row function
+        mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
+
+        # Handle SQLite vs PostgreSQL return type differences
+        processed_rows = []
+        for row in valid_course_rows:
+            if isinstance(row, tuple):
+                # Convert tuple to dict for SQLite compatibility
+                keys = [
+                    "id",
+                    "title",
+                    "code",
+                    "term_id",
+                    "department_id",
+                    "created_at",
+                    "updated_at",
+                    "is_archived",
+                ]
+                processed_rows.append(dict(zip(keys, row)))
+            else:
+                processed_rows.append(row)
+
         mock_db_create.side_effect = [1, 2]
-        mock_db_read_many.return_value = valid_course_rows
+        mock_db_read_many.return_value = processed_rows
 
         results, error, status_code = create_new_courses(valid_course_create_data)
 
@@ -180,8 +206,16 @@ class TestCourseCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_courses_failure(
-        self, mock_db_create, mock_db_read_many, valid_course_create_data
+        self,
+        mock_course_dict_to_row,
+        mock_db_instance,
+        mock_db_create,
+        mock_db_read_many,
+        valid_course_create_data,
     ):
+        # Mock the course_dict_to_row function
+        mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
+
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_courses(valid_course_create_data)
 
@@ -191,14 +225,40 @@ class TestCourseCreateService:
         mock_db_read_many.assert_not_called()
 
 
+@patch("app.models.course.db")
+@patch("app.services.course.course_dict_to_row")
 class TestCourseUpdateService:
     def test_update_courses(
         self,
+        mock_course_dict_to_row,
+        mock_db_instance,
         mock_db_update,
         mock_db_read_many,
+        mock_db_read_one,
         valid_course_update_data,
         valid_course_row,
     ):
+        # Mock the course_dict_to_row function
+        mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
+
+        # Handle SQLite vs PostgreSQL return type differences
+        if isinstance(valid_course_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = [
+                "id",
+                "title",
+                "code",
+                "term_id",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
+            mock_existing_dict = dict(zip(keys, valid_course_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_course_row
+
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_course_row]
 
@@ -211,8 +271,36 @@ class TestCourseUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_courses_no_success(
-        self, mock_db_update, mock_db_read_many, valid_course_update_data
+        self,
+        mock_course_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        valid_course_update_data,
+        valid_course_row,
     ):
+        # Mock the course_dict_to_row function
+        mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
+
+        # Handle SQLite vs PostgreSQL return type differences
+        if isinstance(valid_course_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = [
+                "id",
+                "title",
+                "code",
+                "term_id",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
+            mock_existing_dict = dict(zip(keys, valid_course_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_course_row
+
         mock_db_update.return_value = 0
         results, error, status_code = update_courses(valid_course_update_data)
 
@@ -223,7 +311,13 @@ class TestCourseUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_courses_missing_id(
-        self, mock_db_update, mock_db_read_many, course_missing_id
+        self,
+        mock_course_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        course_missing_id,
     ):
         results, error, status_code = update_courses(course_missing_id)
 
@@ -234,21 +328,48 @@ class TestCourseUpdateService:
         mock_db_read_many.assert_not_called()
 
 
+@patch("app.models.course.db")
 class TestCourseArchiveService:
-    def test_archive_courses(self, mock_db_archive, valid_course_ids):
+    def test_archive_courses(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_course_ids,
+        valid_course_row,
+    ):
+        # Mock that courses exist
+        mock_db_read_one.return_value = valid_course_row  # Mock get_existing_func
+        mock_db_read_many.return_value = [
+            valid_course_row,
+            valid_course_row,
+        ]  # Mock read_by_ids_func
         mock_db_archive.side_effect = [1, 1]
         archived = archive_courses(valid_course_ids)
 
         assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_courses_none_archived(self, mock_db_archive, valid_course_ids):
+    def test_archive_courses_none_archived(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_course_ids,
+        valid_course_row,
+    ):
+        # Mock that courses exist
+        mock_db_read_one.return_value = valid_course_row  # Mock get_existing_func
         mock_db_archive.return_value = 0
         archived = archive_courses(valid_course_ids)
 
         assert archived[0] == []
 
-    def test_archive_courses_invalid_ids(self):
+    def test_archive_courses_invalid_ids(
+        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many
+    ):
         results, errors, status = archive_courses(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

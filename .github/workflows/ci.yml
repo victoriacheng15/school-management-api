@@ -8,7 +8,6 @@ on:
 
 env:
   PYTHON_VERSION: "3.10"
-  DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
 
 jobs:
   format:
@@ -47,21 +46,6 @@ jobs:
       matrix:
         db: [sqlite, postgres]
 
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c
@@ -71,37 +55,11 @@ jobs:
       - name: Install dependencies
         run: make install
 
-      - name: Ensure postgres role exists
-        if: matrix.db == 'postgres'
-        env:
-          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -c "
-          DO \$\$ 
-          BEGIN 
-            IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='postgres') THEN 
-              CREATE ROLE postgres LOGIN SUPERUSER; 
-            END IF; 
-          END \$\$;" || true
-
-      - name: Setup DB
-        run: |
-          if [ "${{ matrix.db }}" = "postgres" ]; then
-            export DATABASE_TYPE=postgresql
-            export DB_HOST=${{ secrets.DB_HOST }}
-            export DB_PORT=5432
-            export DB_NAME=${{ secrets.DB_NAME }}
-            export DB_USER=${{ secrets.DB_USER }}
-            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            python3 db/init_postgresql.py
-          else
-            export DATABASE_TYPE=sqlite
-            make setup-db
-          fi
-
       - name: Run tests + coverage
+        env:
+          DATABASE_TYPE: ${{ matrix.db == 'postgres' && 'postgresql' || 'sqlite' }}
         run: |
-          echo "Running pytest with coverage..."
+          echo "Running pytest with coverage for ${{ matrix.db }}..."
           pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -q > coverage_output.txt
           echo "Coverage command completed with exit code: $?"
 

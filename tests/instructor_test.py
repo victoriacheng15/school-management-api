@@ -228,14 +228,30 @@ class TestInstructorReadService:
         assert instructor is None
 
 
+@patch("app.models.instructor.db")
+@patch("app.services.instructor.instructor_dict_to_row")
 class TestInstructorCreateService:
     def test_create_new_instructors(
         self,
+        mock_instructor_dict_to_row,
+        mock_db_instance,
         mock_db_create,
         mock_db_read_many,
         valid_instructor_create_data,
         valid_instructor_rows,
     ):
+        # Mock the instructor_dict_to_row function
+        mock_instructor_dict_to_row.return_value = (
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            "123 Main St",
+            "Anytown",
+            "Full-Time",
+            "active",
+            1,
+        )
+
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_instructor_rows
 
@@ -250,8 +266,25 @@ class TestInstructorCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_instructors_failure(
-        self, mock_db_create, mock_db_read_many, valid_instructor_create_data
+        self,
+        mock_instructor_dict_to_row,
+        mock_db_instance,
+        mock_db_create,
+        mock_db_read_many,
+        valid_instructor_create_data,
     ):
+        # Mock the instructor_dict_to_row function
+        mock_instructor_dict_to_row.return_value = (
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            "123 Main St",
+            "Anytown",
+            "Full-Time",
+            "active",
+            1,
+        )
+
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_instructors(
             valid_instructor_create_data
@@ -263,14 +296,53 @@ class TestInstructorCreateService:
         mock_db_read_many.assert_not_called()
 
 
+@patch("app.models.instructor.db")
+@patch("app.services.instructor.instructor_dict_to_row")
 class TestInstructorUpdateService:
     def test_update_instructors(
         self,
+        mock_instructor_dict_to_row,
+        mock_db_instance,
         mock_db_update,
         mock_db_read_many,
+        mock_db_read_one,
         valid_instructor_update_data,
         valid_instructor_row,
     ):
+        # Mock the instructor_dict_to_row function
+        mock_instructor_dict_to_row.return_value = (
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            "123 Main St",
+            "Anytown",
+            "Full-Time",
+            "active",
+            1,
+        )
+
+        # Handle SQLite vs PostgreSQL return type differences
+        if isinstance(valid_instructor_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = [
+                "id",
+                "first_name",
+                "last_name",
+                "email",
+                "address",
+                "province",
+                "employment",
+                "status",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
+            mock_existing_dict = dict(zip(keys, valid_instructor_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_instructor_row
+
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_instructor_row]
 
@@ -283,8 +355,49 @@ class TestInstructorUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_instructors_no_success(
-        self, mock_db_update, mock_db_read_many, valid_instructor_update_data
+        self,
+        mock_instructor_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        valid_instructor_update_data,
+        valid_instructor_row,
     ):
+        # Mock the instructor_dict_to_row function
+        mock_instructor_dict_to_row.return_value = (
+            "John",
+            "Doe",
+            "johndoe@example.com",
+            "123 Main St",
+            "Anytown",
+            "Full-Time",
+            "active",
+            1,
+        )
+
+        # Handle SQLite vs PostgreSQL return type differences
+        if isinstance(valid_instructor_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = [
+                "id",
+                "first_name",
+                "last_name",
+                "email",
+                "address",
+                "province",
+                "employment",
+                "status",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
+            mock_existing_dict = dict(zip(keys, valid_instructor_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_instructor_row
+
         mock_db_update.return_value = 0
         results, error, status_code = update_instructors(valid_instructor_update_data)
 
@@ -295,7 +408,13 @@ class TestInstructorUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_instructors_missing_id(
-        self, mock_db_update, mock_db_read_many, instructor_missing_id
+        self,
+        mock_instructor_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        instructor_missing_id,
     ):
         results, error, status_code = update_instructors(instructor_missing_id)
 
@@ -306,8 +425,44 @@ class TestInstructorUpdateService:
         mock_db_read_many.assert_not_called()
 
 
+@patch("app.models.instructor.db")
 class TestInstructorArchiveService:
-    def test_archive_instructors(self, mock_db_archive, valid_instructor_ids):
+    def test_archive_instructors(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_instructor_ids,
+        valid_instructor_row,
+    ):
+        # Mock that instructors exist
+        if isinstance(valid_instructor_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = [
+                "id",
+                "first_name",
+                "last_name",
+                "email",
+                "address",
+                "province",
+                "employment",
+                "status",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
+            mock_existing_dict = dict(zip(keys, valid_instructor_row))
+            mock_db_read_one.return_value = mock_existing_dict
+            mock_db_read_many.return_value = [mock_existing_dict, mock_existing_dict]
+        else:
+            mock_db_read_one.return_value = valid_instructor_row
+            mock_db_read_many.return_value = [
+                valid_instructor_row,
+                valid_instructor_row,
+            ]
+
         mock_db_archive.side_effect = [1, 1]
         archived, errors, status_code = archive_instructors(valid_instructor_ids)
 
@@ -315,14 +470,44 @@ class TestInstructorArchiveService:
         assert mock_db_archive.call_count == 2
 
     def test_archive_instructors_none_archived(
-        self, mock_db_archive, valid_instructor_ids
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_instructor_ids,
+        valid_instructor_row,
     ):
+        # Mock that instructors exist
+        if isinstance(valid_instructor_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = [
+                "id",
+                "first_name",
+                "last_name",
+                "email",
+                "address",
+                "province",
+                "employment",
+                "status",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
+            mock_existing_dict = dict(zip(keys, valid_instructor_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_instructor_row
+
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_instructors(valid_instructor_ids)
 
         assert archived == []
 
-    def test_archive_instructors_invalid_ids(self):
+    def test_archive_instructors_invalid_ids(
+        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many
+    ):
         results, errors, status = archive_instructors(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

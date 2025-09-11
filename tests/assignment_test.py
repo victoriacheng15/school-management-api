@@ -234,15 +234,37 @@ class TestAssignmentCreateService:
 
 
 class TestAssignmentUpdateService:
+    @patch("app.models.assignment.db")  # Mock the db instance  
+    @patch("app.services.assignment.assignment_dict_to_row")
     def test_update_assignments(
         self,
+        mock_dict_to_row,
+        mock_db_instance,
         mock_db_update,
         mock_db_read_many,
+        mock_db_read_one,
         valid_assignment_update_data,
         valid_assignment_row,
     ):
+        # This test is fully mocked and does not require a real DB connection
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_assignment_row]
+        
+        # For SQLite, we need to ensure row is converted to dict properly
+        if isinstance(valid_assignment_row, tuple):
+            mock_existing_dict = {
+                "id": valid_assignment_row[0],
+                "instructor_id": valid_assignment_row[1],
+                "course_id": valid_assignment_row[2],
+                "created_at": valid_assignment_row[3],
+                "updated_at": valid_assignment_row[4],
+                "is_archived": bool(valid_assignment_row[5]),
+            }
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_assignment_row
+            
+        mock_dict_to_row.return_value = (1, 1)  # Mock conversion
 
         results, error, status_code = update_assignments(valid_assignment_update_data)
 
@@ -252,20 +274,54 @@ class TestAssignmentUpdateService:
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_called_once_with([1])
 
+    @patch("app.models.assignment.db")  # Mock the db instance  
+    @patch("app.services.assignment.assignment_dict_to_row")
     def test_update_assignments_no_success(
-        self, mock_db_update, mock_db_read_many, valid_assignment_update_data
+        self,
+        mock_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        valid_assignment_update_data,
+        valid_assignment_row,
     ):
-        mock_db_update.return_value = 0
+        mock_db_update.return_value = 0  # Simulate no update
+        
+        # For SQLite, we need to ensure row is converted to dict properly
+        if isinstance(valid_assignment_row, tuple):
+            mock_existing_dict = {
+                "id": valid_assignment_row[0],
+                "instructor_id": valid_assignment_row[1],
+                "course_id": valid_assignment_row[2],
+                "created_at": valid_assignment_row[3],
+                "updated_at": valid_assignment_row[4],
+                "is_archived": bool(valid_assignment_row[5]),
+            }
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_assignment_row
+            
+        mock_dict_to_row.return_value = (1, 1)  # Mock conversion
+        
         results, error, status_code = update_assignments(valid_assignment_update_data)
 
         assert results == []
         assert error == [{"message": "Assignment ID 1 not updated."}]
         assert status_code == 400
-        mock_db_update.assert_called_once()
+        assert mock_db_update.call_count == 1
         mock_db_read_many.assert_not_called()
 
+    @patch("app.models.assignment.db")  # Mock the db instance  
+    @patch("app.services.assignment.assignment_dict_to_row")
     def test_update_assignments_missing_id(
-        self, mock_db_update, mock_db_read_many, assignment_missing_id
+        self,
+        mock_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        assignment_missing_id,
     ):
         results, error, status_code = update_assignments(assignment_missing_id)
 
@@ -277,17 +333,36 @@ class TestAssignmentUpdateService:
 
 
 class TestAssignmentArchiveService:
-    def test_archive_assignments(self, mock_db_archive, valid_assignment_ids):
+    @patch("app.models.assignment.db")  # Mock the db instance
+    def test_archive_assignments(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_assignment_ids,
+        valid_assignment_row,
+    ):
         mock_db_archive.side_effect = [1, 1]
+        mock_db_read_one.return_value = valid_assignment_row  # Mock get_existing_func
+        mock_db_read_many.return_value = [valid_assignment_row, valid_assignment_row]  # Mock read_by_ids_func
         archived = archive_assignments(valid_assignment_ids)
 
         assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
+    @patch("app.models.assignment.db")  # Mock the db instance
     def test_archive_assignments_none_archived(
-        self, mock_db_archive, valid_assignment_ids
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_assignment_ids,
+        valid_assignment_row,
     ):
         mock_db_archive.return_value = 0
+        mock_db_read_one.return_value = valid_assignment_row  # Mock get_existing_func
         archived = archive_assignments(valid_assignment_ids)
 
         assert archived[0] == []

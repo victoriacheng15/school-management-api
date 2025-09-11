@@ -180,14 +180,21 @@ class TestDepartmentReadService:
         assert department is None
 
 
+@patch("app.models.department.db")
+@patch("app.services.department.department_dict_to_row")
 class TestDepartmentCreateService:
     def test_create_new_departments(
         self,
+        mock_department_dict_to_row,
+        mock_db_instance,
         mock_db_create,
         mock_db_read_many,
         valid_department_create_data,
         valid_department_rows,
     ):
+        # Mock the department_dict_to_row function
+        mock_department_dict_to_row.return_value = ("Computer Science",)
+        
         mock_db_create.side_effect = [1, 2]
         # return rows in the format the service expects (dicts)
         if DATABASE_TYPE == "postgresql":
@@ -218,8 +225,11 @@ class TestDepartmentCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_departments_failure(
-        self, mock_db_create, mock_db_read_many, valid_department_create_data
+        self, mock_department_dict_to_row, mock_db_instance, mock_db_create, mock_db_read_many, valid_department_create_data
     ):
+        # Mock the department_dict_to_row function
+        mock_department_dict_to_row.return_value = ("Computer Science",)
+        
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_departments(
             valid_department_create_data
@@ -231,14 +241,31 @@ class TestDepartmentCreateService:
         mock_db_read_many.assert_not_called()
 
 
+@patch("app.models.department.db")
+@patch("app.services.department.department_dict_to_row")
 class TestDepartmentUpdateService:
     def test_update_departments(
         self,
+        mock_department_dict_to_row,
+        mock_db_instance,
         mock_db_update,
         mock_db_read_many,
+        mock_db_read_one,
         valid_department_update_data,
         valid_department_row,
     ):
+        # Mock the department_dict_to_row function
+        mock_department_dict_to_row.return_value = ("Computer Science",)
+        
+        # Handle SQLite vs PostgreSQL return type differences
+        if isinstance(valid_department_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
+            mock_existing_dict = dict(zip(keys, valid_department_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_department_row
+        
         mock_db_update.return_value = 1
         if DATABASE_TYPE == "postgresql":
             mock_db_read_many.return_value = [valid_department_row]
@@ -263,8 +290,20 @@ class TestDepartmentUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_departments_no_success(
-        self, mock_db_update, mock_db_read_many, valid_department_update_data
+        self, mock_department_dict_to_row, mock_db_instance, mock_db_update, mock_db_read_many, mock_db_read_one, valid_department_update_data, valid_department_row
     ):
+        # Mock the department_dict_to_row function
+        mock_department_dict_to_row.return_value = ("Computer Science",)
+        
+        # Handle SQLite vs PostgreSQL return type differences
+        if isinstance(valid_department_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
+            mock_existing_dict = dict(zip(keys, valid_department_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_department_row
+        
         mock_db_update.return_value = 0
         results, error, status_code = update_departments(valid_department_update_data)
 
@@ -275,7 +314,7 @@ class TestDepartmentUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_departments_missing_id(
-        self, mock_db_update, mock_db_read_many, department_missing_id
+        self, mock_department_dict_to_row, mock_db_instance, mock_db_update, mock_db_read_many, mock_db_read_one, department_missing_id
     ):
         results, error, status_code = update_departments(department_missing_id)
 
@@ -286,8 +325,20 @@ class TestDepartmentUpdateService:
         mock_db_read_many.assert_not_called()
 
 
+@patch("app.models.department.db")
 class TestDepartmentArchiveService:
-    def test_archive_departments(self, mock_db_archive, valid_department_ids):
+    def test_archive_departments(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_department_ids, valid_department_row):
+        # Mock that departments exist
+        if isinstance(valid_department_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
+            mock_existing_dict = dict(zip(keys, valid_department_row))
+            mock_db_read_one.return_value = mock_existing_dict
+            mock_db_read_many.return_value = [mock_existing_dict, mock_existing_dict]
+        else:
+            mock_db_read_one.return_value = valid_department_row
+            mock_db_read_many.return_value = [valid_department_row, valid_department_row]
+        
         mock_db_archive.side_effect = [1, 1]
         archived, errors, status_code = archive_departments(valid_department_ids)
 
@@ -295,14 +346,23 @@ class TestDepartmentArchiveService:
         assert mock_db_archive.call_count == 2
 
     def test_archive_departments_none_archived(
-        self, mock_db_archive, valid_department_ids
+        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_department_ids, valid_department_row
     ):
+        # Mock that departments exist
+        if isinstance(valid_department_row, tuple):
+            # Convert tuple to dict for SQLite compatibility
+            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
+            mock_existing_dict = dict(zip(keys, valid_department_row))
+            mock_db_read_one.return_value = mock_existing_dict
+        else:
+            mock_db_read_one.return_value = valid_department_row
+        
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_departments(valid_department_ids)
 
         assert archived == []
 
-    def test_archive_departments_invalid_ids(self):
+    def test_archive_departments_invalid_ids(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many):
         results, errors, status = archive_departments(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

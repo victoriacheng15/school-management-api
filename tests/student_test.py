@@ -258,12 +258,14 @@ class TestStudentCreateService:
     ):
         # Mock the converter function
         mock_student_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'lastrowid': None})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"lastrowid": None}
+        )()
+
         mock_db_create.side_effect = [1, 2]
-        
+
         # Handle SQLite vs PostgreSQL compatibility for read_many
         if DATABASE_TYPE == "postgresql":
             mock_db_read_many.return_value = valid_student_rows
@@ -272,12 +274,22 @@ class TestStudentCreateService:
             dict_rows = []
             for row in valid_student_rows:
                 dict_row = {
-                    "id": row[0], "first_name": row[1], "last_name": row[2],
-                    "email": row[3], "address": row[4], "city": row[5],
-                    "province": row[6], "country": row[7], "address_type": row[8],
-                    "status": row[9], "is_full_time": bool(row[10]), 
-                    "is_archived": bool(row[11]), "program_id": row[12],
-                    "created_at": row[13], "updated_at": row[14], "archived_by": row[15]
+                    "id": row[0],
+                    "first_name": row[1],
+                    "last_name": row[2],
+                    "email": row[3],
+                    "address": row[4],
+                    "city": row[5],
+                    "province": row[6],
+                    "country": row[7],
+                    "address_type": row[8],
+                    "status": row[9],
+                    "is_full_time": bool(row[10]),
+                    "is_archived": bool(row[11]),
+                    "program_id": row[12],
+                    "created_at": row[13],
+                    "updated_at": row[14],
+                    "archived_by": row[15],
                 }
                 dict_rows.append(dict_row)
             mock_db_read_many.return_value = dict_rows
@@ -291,19 +303,21 @@ class TestStudentCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_students_failure(
-        self, 
+        self,
         mock_student_dict_to_row,
         mock_db_instance,
-        mock_db_create, 
-        mock_db_read_many, 
-        valid_student_create_data
+        mock_db_create,
+        mock_db_read_many,
+        valid_student_create_data,
     ):
         # Mock the converter function
         mock_student_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'lastrowid': None})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"lastrowid": None}
+        )()
+
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_students(valid_student_create_data)
 
@@ -328,12 +342,14 @@ class TestStudentUpdateService:
     ):
         # Mock the converter function
         mock_student_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 1})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 1}
+        )()
+
         mock_db_update.return_value = 1
-        
+
         # Handle SQLite vs PostgreSQL compatibility for read_one (used by bulk operations)
         if DATABASE_TYPE == "postgresql":
             mock_db_read_one.return_value = valid_student_row
@@ -342,12 +358,22 @@ class TestStudentUpdateService:
             # Convert tuple row to dict format for service layer
             row = valid_student_row
             dict_row = {
-                "id": row[0], "first_name": row[1], "last_name": row[2],
-                "email": row[3], "address": row[4], "city": row[5],
-                "province": row[6], "country": row[7], "address_type": row[8],
-                "status": row[9], "is_full_time": bool(row[10]), 
-                "is_archived": bool(row[11]), "program_id": row[12],
-                "created_at": row[13], "updated_at": row[14], "archived_by": row[15]
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "address": row[4],
+                "city": row[5],
+                "province": row[6],
+                "country": row[7],
+                "address_type": row[8],
+                "status": row[9],
+                "is_full_time": bool(row[10]),
+                "is_archived": bool(row[11]),
+                "program_id": row[12],
+                "created_at": row[13],
+                "updated_at": row[14],
+                "archived_by": row[15],
             }
             mock_db_read_one.return_value = dict_row
             mock_db_read_many.return_value = [dict_row]
@@ -361,26 +387,28 @@ class TestStudentUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_students_no_success(
-        self, 
+        self,
         mock_student_dict_to_row,
         mock_db_instance,
-        mock_db_update, 
-        mock_db_read_many, 
+        mock_db_update,
+        mock_db_read_many,
         mock_db_read_one,
-        valid_student_update_data
+        valid_student_update_data,
     ):
         # Mock the converter function
         mock_student_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         # Mock existing record lookup (bulk operations check if record exists first)
         if DATABASE_TYPE == "postgresql":
             mock_db_read_one.return_value = {"id": 1}  # Record exists
         else:
             mock_db_read_one.return_value = {"id": 1}  # Record exists
-        
+
         mock_db_update.return_value = 0
         results, error, status_code = update_students(valid_student_update_data)
 
@@ -391,20 +419,22 @@ class TestStudentUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_students_missing_id(
-        self, 
+        self,
         mock_student_dict_to_row,
         mock_db_instance,
-        mock_db_update, 
-        mock_db_read_many, 
+        mock_db_update,
+        mock_db_read_many,
         mock_db_read_one,
-        student_missing_id
+        student_missing_id,
     ):
         # Mock the converter function
         mock_student_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         results, error, status_code = update_students(student_missing_id)
 
         assert results == []
@@ -416,32 +446,50 @@ class TestStudentUpdateService:
 
 @patch("app.models.student.db")
 class TestStudentArchiveService:
-    def test_archive_students(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_student_ids):
+    def test_archive_students(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_student_ids,
+    ):
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 1})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 1}
+        )()
+
         # Mock existing record lookup (bulk operations check if record exists first)
         mock_db_read_one.return_value = {"id": 1}  # Record exists
-        
+
         # Mock reading archived records at the end
         mock_db_read_many.return_value = [{"id": 1}, {"id": 2}]
-        
+
         mock_db_archive.side_effect = [1, 1]
         archived = archive_students(valid_student_ids)
 
         assert len(archived[0]) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_students_none_archived(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_student_ids):
+    def test_archive_students_none_archived(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_student_ids,
+    ):
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         # Mock existing record lookup (bulk operations check if record exists first)
         mock_db_read_one.return_value = {"id": 1}  # Record exists
-        
+
         # Mock reading archived records at the end (empty since none archived)
         mock_db_read_many.return_value = []
-        
+
         mock_db_archive.return_value = 0
         archived = archive_students(valid_student_ids)
 
@@ -449,8 +497,10 @@ class TestStudentArchiveService:
 
     def test_archive_students_invalid_ids(self, mock_db_instance):
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         results, errors, status = archive_students(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

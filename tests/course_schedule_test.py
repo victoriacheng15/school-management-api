@@ -246,7 +246,7 @@ class TestCourseScheduleCreateService:
 
 
 class TestCourseScheduleUpdateService:
-    @patch("app.models.course_schedule.db")  # Mock the db instance  
+    @patch("app.models.course_schedule.db")  # Mock the db instance
     @patch("app.services.course_schedule.course_schedule_dict_to_row")
     def test_update_course_schedules(
         self,
@@ -261,7 +261,7 @@ class TestCourseScheduleUpdateService:
         # This test is fully mocked and does not require a real DB connection
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_course_schedule_row]
-        
+
         # For SQLite, we need to ensure row is converted to dict properly
         if isinstance(valid_course_schedule_row, tuple):
             mock_existing_dict = {
@@ -277,8 +277,13 @@ class TestCourseScheduleUpdateService:
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_course_schedule_row
-            
-        mock_dict_to_row.return_value = (1, "Monday", "10:00", "Room 101")  # Mock conversion
+
+        mock_dict_to_row.return_value = (
+            1,
+            "Monday",
+            "10:00",
+            "Room 101",
+        )  # Mock conversion
 
         results, error, status_code = update_course_schedules(
             valid_course_schedule_update_data
@@ -290,7 +295,7 @@ class TestCourseScheduleUpdateService:
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_called_once_with([1])
 
-    @patch("app.models.course_schedule.db")  # Mock the db instance  
+    @patch("app.models.course_schedule.db")  # Mock the db instance
     @patch("app.services.course_schedule.course_schedule_dict_to_row")
     def test_update_course_schedules_no_success(
         self,
@@ -303,7 +308,7 @@ class TestCourseScheduleUpdateService:
         valid_course_schedule_row,
     ):
         mock_db_update.return_value = 0  # Simulate no update
-        
+
         # For SQLite, we need to ensure row is converted to dict properly
         if isinstance(valid_course_schedule_row, tuple):
             mock_existing_dict = {
@@ -319,9 +324,14 @@ class TestCourseScheduleUpdateService:
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_course_schedule_row
-            
-        mock_dict_to_row.return_value = (1, "Monday", "10:00", "Room 101")  # Mock conversion
-        
+
+        mock_dict_to_row.return_value = (
+            1,
+            "Monday",
+            "10:00",
+            "Room 101",
+        )  # Mock conversion
+
         results, error, status_code = update_course_schedules(
             valid_course_schedule_update_data
         )
@@ -332,7 +342,7 @@ class TestCourseScheduleUpdateService:
         assert mock_db_update.call_count == 1
         mock_db_read_many.assert_not_called()
 
-    @patch("app.models.course_schedule.db")  # Mock the db instance  
+    @patch("app.models.course_schedule.db")  # Mock the db instance
     @patch("app.services.course_schedule.course_schedule_dict_to_row")
     def test_update_course_schedules_missing_id(
         self,
@@ -366,8 +376,13 @@ class TestCourseScheduleArchiveService:
         valid_course_schedule_row,
     ):
         mock_db_archive.side_effect = [1, 1]
-        mock_db_read_one.return_value = valid_course_schedule_row  # Mock get_existing_func
-        mock_db_read_many.return_value = [valid_course_schedule_row, valid_course_schedule_row]  # Mock read_by_ids_func
+        mock_db_read_one.return_value = (
+            valid_course_schedule_row  # Mock get_existing_func
+        )
+        mock_db_read_many.return_value = [
+            valid_course_schedule_row,
+            valid_course_schedule_row,
+        ]  # Mock read_by_ids_func
         archived = archive_course_schedules(valid_course_schedule_ids)
 
         assert len(archived[0]) == 2
@@ -384,7 +399,9 @@ class TestCourseScheduleArchiveService:
         valid_course_schedule_row,
     ):
         mock_db_archive.return_value = 0
-        mock_db_read_one.return_value = valid_course_schedule_row  # Mock get_existing_func
+        mock_db_read_one.return_value = (
+            valid_course_schedule_row  # Mock get_existing_func
+        )
         archived = archive_course_schedules(valid_course_schedule_ids)
 
         assert archived[0] == []

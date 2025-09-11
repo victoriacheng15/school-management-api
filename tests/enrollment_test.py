@@ -220,7 +220,7 @@ class TestEnrollmentCreateService:
     ):
         # Mock the enrollment_dict_to_row function
         mock_enrollment_dict_to_row.return_value = (1, 1, "A")
-        
+
         mock_db_create.side_effect = [1, 2]
         mock_db_read_many.return_value = valid_enrollment_rows
 
@@ -235,11 +235,16 @@ class TestEnrollmentCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_enrollments_failure(
-        self, mock_enrollment_dict_to_row, mock_db_instance, mock_db_create, mock_db_read_many, valid_enrollment_create_data
+        self,
+        mock_enrollment_dict_to_row,
+        mock_db_instance,
+        mock_db_create,
+        mock_db_read_many,
+        valid_enrollment_create_data,
     ):
         # Mock the enrollment_dict_to_row function
         mock_enrollment_dict_to_row.return_value = (1, 1, "A")
-        
+
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_enrollments(
             valid_enrollment_create_data
@@ -266,16 +271,24 @@ class TestEnrollmentUpdateService:
     ):
         # Mock the enrollment_dict_to_row function
         mock_enrollment_dict_to_row.return_value = (1, 1, "A")
-        
+
         # Handle SQLite vs PostgreSQL return type differences
         if isinstance(valid_enrollment_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "student_id", "course_id", "grade", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "student_id",
+                "course_id",
+                "grade",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_enrollment_row))
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_enrollment_row
-        
+
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_enrollment_row]
 
@@ -288,20 +301,35 @@ class TestEnrollmentUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_enrollments_no_success(
-        self, mock_enrollment_dict_to_row, mock_db_instance, mock_db_update, mock_db_read_many, mock_db_read_one, valid_enrollment_update_data, valid_enrollment_row
+        self,
+        mock_enrollment_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        valid_enrollment_update_data,
+        valid_enrollment_row,
     ):
         # Mock the enrollment_dict_to_row function
         mock_enrollment_dict_to_row.return_value = (1, 1, "A")
-        
+
         # Handle SQLite vs PostgreSQL return type differences
         if isinstance(valid_enrollment_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "student_id", "course_id", "grade", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "student_id",
+                "course_id",
+                "grade",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_enrollment_row))
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_enrollment_row
-        
+
         mock_db_update.return_value = 0
         results, error, status_code = update_enrollments(valid_enrollment_update_data)
 
@@ -312,7 +340,13 @@ class TestEnrollmentUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_enrollments_missing_id(
-        self, mock_enrollment_dict_to_row, mock_db_instance, mock_db_update, mock_db_read_many, mock_db_read_one, enrollment_missing_id
+        self,
+        mock_enrollment_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_many,
+        mock_db_read_one,
+        enrollment_missing_id,
     ):
         results, error, status_code = update_enrollments(enrollment_missing_id)
 
@@ -325,18 +359,37 @@ class TestEnrollmentUpdateService:
 
 @patch("app.models.enrollment.db")
 class TestEnrollmentArchiveService:
-    def test_archive_enrollments(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_enrollment_ids, valid_enrollment_row):
+    def test_archive_enrollments(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_enrollment_ids,
+        valid_enrollment_row,
+    ):
         # Mock that enrollments exist
         if isinstance(valid_enrollment_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "student_id", "course_id", "grade", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "student_id",
+                "course_id",
+                "grade",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_enrollment_row))
             mock_db_read_one.return_value = mock_existing_dict
             mock_db_read_many.return_value = [mock_existing_dict, mock_existing_dict]
         else:
             mock_db_read_one.return_value = valid_enrollment_row
-            mock_db_read_many.return_value = [valid_enrollment_row, valid_enrollment_row]
-        
+            mock_db_read_many.return_value = [
+                valid_enrollment_row,
+                valid_enrollment_row,
+            ]
+
         mock_db_archive.side_effect = [1, 1]
         archived, errors, status_code = archive_enrollments(valid_enrollment_ids)
 
@@ -344,23 +397,39 @@ class TestEnrollmentArchiveService:
         assert mock_db_archive.call_count == 2
 
     def test_archive_enrollments_none_archived(
-        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_enrollment_ids, valid_enrollment_row
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_enrollment_ids,
+        valid_enrollment_row,
     ):
         # Mock that enrollments exist
         if isinstance(valid_enrollment_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "student_id", "course_id", "grade", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "student_id",
+                "course_id",
+                "grade",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_enrollment_row))
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_enrollment_row
-        
+
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_enrollments(valid_enrollment_ids)
 
         assert archived == []
 
-    def test_archive_enrollments_invalid_ids(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many):
+    def test_archive_enrollments_invalid_ids(
+        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many
+    ):
         results, errors, status = archive_enrollments(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

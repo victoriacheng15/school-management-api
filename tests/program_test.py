@@ -216,7 +216,7 @@ class TestProgramCreateService:
     ):
         # Mock the program_dict_to_row function
         mock_program_dict_to_row.return_value = ("Computer Science", "bachelor", 1)
-        
+
         mock_db_create.side_effect = [1, 2]
         # Return rows in the format the service expects (dicts)
         if DATABASE_TYPE == "postgresql":
@@ -246,11 +246,16 @@ class TestProgramCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_programs_failure(
-        self, mock_program_dict_to_row, mock_db_instance, mock_db_create, mock_db_read_many, valid_program_create_data
+        self,
+        mock_program_dict_to_row,
+        mock_db_instance,
+        mock_db_create,
+        mock_db_read_many,
+        valid_program_create_data,
     ):
         # Mock the program_dict_to_row function
         mock_program_dict_to_row.return_value = ("Computer Science", "bachelor", 1)
-        
+
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_programs(valid_program_create_data)
 
@@ -275,16 +280,24 @@ class TestProgramUpdateService:
     ):
         # Mock the program_dict_to_row function
         mock_program_dict_to_row.return_value = ("Computer Science", "bachelor", 1)
-        
+
         # Handle SQLite vs PostgreSQL return type differences
         if isinstance(valid_program_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "type", "department_id", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "name",
+                "type",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_program_row))
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_program_row
-        
+
         mock_db_update.return_value = 1
         # For SQLite, convert tuple fixture to dict to match model behavior
         if DATABASE_TYPE == "postgresql":
@@ -311,20 +324,35 @@ class TestProgramUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_programs_no_success(
-        self, mock_program_dict_to_row, mock_db_instance, mock_db_update, mock_db_read_one, mock_db_read_many, valid_program_update_data, valid_program_row
+        self,
+        mock_program_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_program_update_data,
+        valid_program_row,
     ):
         # Mock the program_dict_to_row function
         mock_program_dict_to_row.return_value = ("Computer Science", "bachelor", 1)
-        
+
         # Handle SQLite vs PostgreSQL return type differences
         if isinstance(valid_program_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "type", "department_id", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "name",
+                "type",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_program_row))
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_program_row
-        
+
         mock_db_update.return_value = 0
         results, error, status_code = update_programs(valid_program_update_data)
 
@@ -335,7 +363,13 @@ class TestProgramUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_programs_missing_id(
-        self, mock_program_dict_to_row, mock_db_instance, mock_db_update, mock_db_read_one, mock_db_read_many, program_missing_id
+        self,
+        mock_program_dict_to_row,
+        mock_db_instance,
+        mock_db_update,
+        mock_db_read_one,
+        mock_db_read_many,
+        program_missing_id,
     ):
         results, error, status_code = update_programs(program_missing_id)
 
@@ -386,24 +420,40 @@ class TestProgramArchiveService:
         assert mock_db_archive.call_count == 2
 
     def test_archive_programs_none_archived(
-        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_program_ids, valid_program_row
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_program_ids,
+        valid_program_row,
     ):
         # Handle SQLite vs PostgreSQL return type differences
         if isinstance(valid_program_row, tuple):
             # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "type", "department_id", "created_at", "updated_at", "is_archived"]
+            keys = [
+                "id",
+                "name",
+                "type",
+                "department_id",
+                "created_at",
+                "updated_at",
+                "is_archived",
+            ]
             mock_existing_dict = dict(zip(keys, valid_program_row))
             mock_db_read_one.return_value = mock_existing_dict
         else:
             mock_db_read_one.return_value = valid_program_row
-        
+
         mock_db_archive.return_value = 0
         results, errors, status = archive_programs(valid_program_ids)
 
         assert results == []
         assert len(errors) == 2
 
-    def test_archive_programs_invalid_ids(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many):
+    def test_archive_programs_invalid_ids(
+        self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many
+    ):
         results, errors, status = archive_programs(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

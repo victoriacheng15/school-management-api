@@ -221,13 +221,15 @@ class TestTermCreateService:
     ):
         # Mock the converter function
         mock_term_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'lastrowid': None})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"lastrowid": None}
+        )()
+
         # For PostgreSQL, insert returns IDs via RETURNING; for SQLite, returns lastrowid
         mock_db_create.side_effect = [1, 2]
-        
+
         # Handle SQLite vs PostgreSQL compatibility for read_many
         if DATABASE_TYPE == "postgresql":
             mock_db_read_many.return_value = valid_term_rows
@@ -255,19 +257,21 @@ class TestTermCreateService:
         mock_db_read_many.assert_called_once_with([1, 2])
 
     def test_create_new_terms_failure(
-        self, 
+        self,
         mock_term_dict_to_row,
         mock_db_instance,
-        mock_db_create, 
-        mock_db_read_many, 
-        valid_term_create_data
+        mock_db_create,
+        mock_db_read_many,
+        valid_term_create_data,
     ):
         # Mock the converter function
         mock_term_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'lastrowid': None})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"lastrowid": None}
+        )()
+
         mock_db_create.side_effect = [None, None]
         results, error, status_code = create_new_terms(valid_term_create_data)
 
@@ -292,12 +296,14 @@ class TestTermUpdateService:
     ):
         # Mock the converter function
         mock_term_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 1})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 1}
+        )()
+
         mock_db_update.return_value = 1
-        
+
         # Handle SQLite vs PostgreSQL compatibility for read_one (used by bulk operations)
         if DATABASE_TYPE == "postgresql":
             mock_db_read_one.return_value = valid_term_row
@@ -325,23 +331,25 @@ class TestTermUpdateService:
         mock_db_read_many.assert_called_once_with([1])
 
     def test_update_terms_no_success(
-        self, 
+        self,
         mock_term_dict_to_row,
         mock_db_instance,
-        mock_db_update, 
-        mock_db_read_many, 
+        mock_db_update,
+        mock_db_read_many,
         mock_db_read_one,
-        valid_term_update_data
+        valid_term_update_data,
     ):
         # Mock the converter function
         mock_term_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         # Mock existing record lookup (bulk operations check if record exists first)
         mock_db_read_one.return_value = {"id": 1}  # Record exists
-        
+
         mock_db_update.return_value = 0
         results, error, status_code = update_terms(valid_term_update_data)
 
@@ -352,20 +360,22 @@ class TestTermUpdateService:
         mock_db_read_many.assert_not_called()
 
     def test_update_terms_missing_id(
-        self, 
+        self,
         mock_term_dict_to_row,
         mock_db_instance,
-        mock_db_update, 
-        mock_db_read_many, 
+        mock_db_update,
+        mock_db_read_many,
         mock_db_read_one,
-        term_missing_id
+        term_missing_id,
     ):
         # Mock the converter function
         mock_term_dict_to_row.side_effect = lambda d: tuple(d.values())
-        
+
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         results, error, status_code = update_terms(term_missing_id)
 
         assert results == []
@@ -377,32 +387,50 @@ class TestTermUpdateService:
 
 @patch("app.models.term.db")
 class TestTermArchiveService:
-    def test_archive_terms(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_term_ids):
+    def test_archive_terms(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_term_ids,
+    ):
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 1})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 1}
+        )()
+
         # Mock existing record lookup (bulk operations check if record exists first)
         mock_db_read_one.return_value = {"id": 1}  # Record exists
-        
+
         # Mock reading archived records at the end
         mock_db_read_many.return_value = [{"id": 1}, {"id": 2}]
-        
+
         mock_db_archive.side_effect = [1, 1]
         archived, errors, status_code = archive_terms(valid_term_ids)
 
         assert len(archived) == 2
         assert mock_db_archive.call_count == 2
 
-    def test_archive_terms_none_archived(self, mock_db_instance, mock_db_archive, mock_db_read_one, mock_db_read_many, valid_term_ids):
+    def test_archive_terms_none_archived(
+        self,
+        mock_db_instance,
+        mock_db_archive,
+        mock_db_read_one,
+        mock_db_read_many,
+        valid_term_ids,
+    ):
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         # Mock existing record lookup (bulk operations check if record exists first)
         mock_db_read_one.return_value = {"id": 1}  # Record exists
-        
+
         # Mock reading archived records at the end (empty since none archived)
         mock_db_read_many.return_value = []
-        
+
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_terms(valid_term_ids)
 
@@ -410,8 +438,10 @@ class TestTermArchiveService:
 
     def test_archive_terms_invalid_ids(self, mock_db_instance):
         # Mock database instance methods
-        mock_db_instance.execute_query.return_value = type('MockCursor', (), {'rowcount': 0})()
-        
+        mock_db_instance.execute_query.return_value = type(
+            "MockCursor", (), {"rowcount": 0}
+        )()
+
         results, errors, status = archive_terms(["one", 2])
         assert status == 400
         assert any("must be of type int" in e["message"] for e in errors)

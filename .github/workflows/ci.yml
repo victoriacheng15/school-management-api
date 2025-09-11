@@ -60,7 +60,7 @@ jobs:
           DATABASE_TYPE: ${{ matrix.db == 'postgres' && 'postgresql' || 'sqlite' }}
         run: |
           echo "Running pytest with coverage for ${{ matrix.db }}..."
-          pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -q > coverage_output.txt
+          pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -v | tee coverage_output.txt
           echo "Coverage command completed with exit code: $?"
 
       - name: Upload coverage artifact
@@ -104,11 +104,19 @@ jobs:
             if (( $(echo "$COVERAGE_PERCENTAGE >= $COVERAGE_THRESHOLD" | bc -l) )); then
               STATUS="🟢 Pass"
             fi
+            
+            # Convert db name to more descriptive format
+            if [ "$db" = "sqlite" ]; then
+              DB_NAME="SQLite"
+            else
+              DB_NAME="PostgreSQL"
+            fi
+            
             COMMENT_BODY=$(cat <<EOF
-            ### Code Coverage Summary for $db
-            | Metric | Value | Status |
-            |---|---|---|
-            | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |
+            ### Code Coverage Summary for $DB_NAME
+            | Database | Metric | Value | Status |
+            |---|---|---|---|
+            | $DB_NAME | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |
             _Threshold: ${COVERAGE_THRESHOLD}%_
             EOF
             )

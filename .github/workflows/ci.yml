@@ -8,7 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.10"
-  DATABASE_URL: postgresql://postgres:password@localhost:5432/${{ secrets.DB_NAME }}
+  DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
 
 jobs:
   format:

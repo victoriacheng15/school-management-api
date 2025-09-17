@@ -38,8 +38,12 @@ class Database:
         if self.conn is None:
             try:
                 self.conn = psycopg2.connect(**self.db_config)
-                self.cursor = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-                logger.info(f"Successfully connected to PostgreSQL database: {self.db_config['database']}")
+                self.cursor = self.conn.cursor(
+                    cursor_factory=psycopg2.extras.RealDictCursor
+                )
+                logger.info(
+                    f"Successfully connected to PostgreSQL database: {self.db_config['database']}"
+                )
             except psycopg2.Error as e:
                 logger.error(f"Error connecting to database: {e}")
                 raise
@@ -69,7 +73,10 @@ class Database:
                 query = query.replace("?", "%s")
             self.cursor.execute(query, params)
             logger.info(f"Executed query: {query}")
-            if query.strip().lower().startswith("select") or "returning" in query.lower():
+            if (
+                query.strip().lower().startswith("select")
+                or "returning" in query.lower()
+            ):
                 return self.cursor.fetchall()
             else:
                 self.conn.commit()
@@ -122,4 +129,8 @@ class Database:
         """
         Get the ID of the last inserted row (PostgreSQL only).
         """
-        return self.cursor.fetchone()[0] if self.cursor and self.cursor.description else None
+        return (
+            self.cursor.fetchone()[0]
+            if self.cursor and self.cursor.description
+            else None
+        )

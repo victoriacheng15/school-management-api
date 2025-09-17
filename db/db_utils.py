@@ -1,4 +1,3 @@
-
 """
 Database utilities for PostgreSQL only
 """
@@ -6,10 +5,10 @@ Database utilities for PostgreSQL only
 import os
 
 
-
 def get_boolean_true():
     """Get the boolean TRUE value for PostgreSQL"""
     return "TRUE"
+
 
 def get_boolean_false():
     """Get the boolean FALSE value for PostgreSQL"""

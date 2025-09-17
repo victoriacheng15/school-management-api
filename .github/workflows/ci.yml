@@ -61,7 +61,7 @@ jobs:
       - name: Upload coverage artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: coverage-postgres
+          name: coverage
           path: coverage_output.txt
 
   coverage-report:
@@ -70,13 +70,12 @@ jobs:
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
 
-      - name: Download Postgres coverage
+      - name: Download coverage
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
         with:
-          name: coverage-postgres
-          # download-artifact always creates a directory at the destination path.
-          # Use a directory and then reference the actual file inside it.
-          path: ./coverage-postgres
+          name: coverage
+          # download-artifact creates a directory at the destination path.
+          path: ./coverage
 
       - name: Post PR comments
         if: github.event_name == 'pull_request'
@@ -84,7 +83,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           COVERAGE_THRESHOLD: 80
         run: |
-          COVERAGE_FILE="./coverage-postgres/coverage_output.txt"
+          COVERAGE_FILE="./coverage/coverage_output.txt"
           if [ ! -f "$COVERAGE_FILE" ]; then
             echo "No coverage file found at $COVERAGE_FILE"
             ls -la ./coverage-postgres || true
@@ -101,8 +100,18 @@ jobs:
             STATUS="🟢 Pass"
           fi
           
-          # Create comment body with proper escaping
-          COMMENT_BODY="### Code Coverage Summary for PostgreSQL\n\n| Database | Metric | Value | Status |\n|---|---|---|---|\n| PostgreSQL | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |\n\n_Threshold: ${COVERAGE_THRESHOLD}%_"
-          
+          # Build the comment body using a here-doc so markdown newlines are preserved
+          COMMENT_BODY=$(cat <<EOF
+          ### Code Coverage Summary
+
+           | Metric | Value | Status |
+           |---|---|---|
+           | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |
+
+           _Threshold: ${COVERAGE_THRESHOLD}%_
+          EOF
+          )
+
+          # Post the comment using the multiline variable
           gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" --edit-last --create-if-none
 

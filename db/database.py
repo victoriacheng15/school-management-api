@@ -2,6 +2,12 @@ import psycopg2
 import psycopg2.extras
 import logging
 import os
+from dotenv import load_dotenv
+
+# Ensure environment variables from .env are loaded as early as possible so
+# Database() instances pick them up no matter the import order elsewhere in
+# the application or in tests.
+load_dotenv()
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",

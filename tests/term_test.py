@@ -186,7 +186,7 @@ class TestTermCreateService:
             "MockCursor", (), {"lastrowid": None}
         )()
 
-        # For PostgreSQL, insert returns IDs via RETURNING; for SQLite, returns lastrowid
+        # PostgreSQL insert returns IDs via RETURNING
         mock_db_create.side_effect = [1, 2]
 
         # Handle PostgreSQL format for read_many

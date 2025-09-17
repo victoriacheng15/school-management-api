@@ -2,7 +2,7 @@
 
 A hands-on project to explore backend development by building a Flask-based REST API for managing school-related data — including students, courses, instructors, and programs. This project is part of my learning journey to better understand how backend systems are structured and how data flows through them.
 
-It's built with Flask, SQLite/PostgreSQL, Docker, and includes automated testing, following principles of backend architecture and modern DevOps workflows — with zero frontend.
+It's built with Flask, PostgreSQL, Docker, and includes automated testing, following principles of backend architecture and modern DevOps workflows — with zero frontend.
 
 All interactions happen through REST APIs, using tools like curl, Postman, or automated test scripts.
 
@@ -14,7 +14,7 @@ All interactions happen through REST APIs, using tools like curl, Postman, or au
 
 ## Tech Stack
 
-![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![Sqlite](https://img.shields.io/badge/SQLite-003B57.svg?style=for-the-badge&logo=SQLite&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
 
 ## Why I Built This
 
@@ -28,14 +28,14 @@ To gain real backend experience beyond tutorials by:
 - Applying CI/CD and testing best practices
 - Includes automated CI/CD workflows using GitHub Actions:
   - Code formatting and linting (Ruff)
-  - Unit tests across supported databases (SQLite and PostgreSQL)
+  - Unit tests with PostgreSQL database
   - Coverage reporting with PR comments
 
 ## What It Does
 
 - Provides RESTful endpoints for core school entities like students, instructors, courses, and enrollments  
 - Supports full CRUD plus archiving (soft deletes) to preserve data history  
-- Uses SQLite as an embedded database **within the Docker container** for easy, lightweight local development and testing  
+- Uses PostgreSQL as the database for robust data management and production-ready deployment
 - Fully containerized with Docker (including multi-stage builds) for clean deployment  
 - Includes Pytest-based tests covering routes and business logic
 
@@ -71,7 +71,7 @@ make down
 make down V=1 # clear volume
 ```
 
-> By default, this uses PostgreSQL. To use Sqlite, set the environment variable `DATABASE_TYPE=sqlite` and ensure your PostgreSQL service is running (see `docker-compose.yml`).
+> This application uses PostgreSQL as the database. Ensure your PostgreSQL service is running (see `docker-compose.yml`).
 
 ## 🧪 Interact with the API via Bash Script
 
@@ -89,7 +89,7 @@ A helper script `api_client.sh` is included to simplify sending requests to the 
 
 ### API Highlights
 
-Supports deployment with either SQLite or PostgreSQL, depending on your environment and needs.
+Uses PostgreSQL for robust data management and production-ready deployment.
 
 | Resource           | GET | POST | PUT | PATCH (Archive) |
 |--------------------|-----|------|-----|-----------------|
@@ -102,4 +102,3 @@ Supports deployment with either SQLite or PostgreSQL, depending on your environm
 | Programs           | ✔   | ✔    | ✔   | ✔               |
 | Students           | ✔   | ✔    | ✔   | ✔               |
 | Terms              | ✔   | ✔    | ✔   | ✔               |
-

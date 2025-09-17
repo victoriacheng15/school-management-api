@@ -217,21 +217,8 @@ class TestCourseScheduleUpdateService:
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_course_schedule_row]
 
-        # For SQLite, we need to ensure row is converted to dict properly
-        if isinstance(valid_course_schedule_row, tuple):
-            mock_existing_dict = {
-                "id": valid_course_schedule_row[0],
-                "course_id": valid_course_schedule_row[1],
-                "day": valid_course_schedule_row[2],
-                "time": valid_course_schedule_row[3],
-                "room": valid_course_schedule_row[4],
-                "created_at": valid_course_schedule_row[5],
-                "updated_at": valid_course_schedule_row[6],
-                "is_archived": bool(valid_course_schedule_row[7]),
-            }
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_course_schedule_row
+        # All data is now dict format for PostgreSQL
+        mock_db_read_one.return_value = valid_course_schedule_row
 
         mock_dict_to_row.return_value = (
             1,
@@ -264,21 +251,8 @@ class TestCourseScheduleUpdateService:
     ):
         mock_db_update.return_value = 0  # Simulate no update
 
-        # For SQLite, we need to ensure row is converted to dict properly
-        if isinstance(valid_course_schedule_row, tuple):
-            mock_existing_dict = {
-                "id": valid_course_schedule_row[0],
-                "course_id": valid_course_schedule_row[1],
-                "day": valid_course_schedule_row[2],
-                "time": valid_course_schedule_row[3],
-                "room": valid_course_schedule_row[4],
-                "created_at": valid_course_schedule_row[5],
-                "updated_at": valid_course_schedule_row[6],
-                "is_archived": bool(valid_course_schedule_row[7]),
-            }
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_course_schedule_row
+        # All data is now dict format for PostgreSQL
+        mock_db_read_one.return_value = valid_course_schedule_row
 
         mock_dict_to_row.return_value = (
             1,

@@ -97,3 +97,4 @@ jobs:
           COMMENT_BODY="### Code Coverage Summary for PostgreSQL\n\n| Database | Metric | Value | Status |\n|---|---|---|---|\n| PostgreSQL | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |\n\n_Threshold: ${COVERAGE_THRESHOLD}%_"
           
           gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" --edit-last --create-if-none
+

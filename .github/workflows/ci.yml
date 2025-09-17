@@ -119,6 +119,6 @@ jobs:
             | $DB_NAME | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |
             _Threshold: ${COVERAGE_THRESHOLD}%_
             EOF
-            )
+            
             gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" --edit-last --create-if-none
           done

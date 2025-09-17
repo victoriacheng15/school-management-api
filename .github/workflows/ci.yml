@@ -42,9 +42,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: format
-    strategy:
-      matrix:
-        db: [sqlite, postgres]
 
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -56,17 +53,15 @@ jobs:
         run: make install
 
       - name: Run tests + coverage
-        env:
-          DATABASE_TYPE: ${{ matrix.db == 'postgres' && 'postgresql' || 'sqlite' }}
         run: |
-          echo "Running pytest with coverage for ${{ matrix.db }}..."
+          echo "Running pytest with coverage for PostgreSQL..."
           pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -v | tee coverage_output.txt
           echo "Coverage command completed with exit code: $?"
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: coverage-${{ matrix.db }}
+          name: coverage-postgres
           path: coverage_output.txt
 
   coverage-report:
@@ -74,12 +69,6 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-
-      - name: Download SQLite coverage
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
-        with:
-          name: coverage-sqlite
-          path: ./coverage-sqlite.txt
 
       - name: Download Postgres coverage
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
@@ -93,32 +82,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           COVERAGE_THRESHOLD: 80
         run: |
-          for db in sqlite postgres; do
-            COVERAGE_LINE=$(grep -E "TOTAL.*[0-9]+%" coverage-${db}.txt || true)
-            if [ -z "$COVERAGE_LINE" ]; then
-              echo "No coverage data for $db."
-              continue
-            fi
-            COVERAGE_PERCENTAGE=$(echo "$COVERAGE_LINE" | awk '{print substr($NF, 1, length($NF)-1)}')
-            STATUS="🔴 Fail"
-            if (( $(echo "$COVERAGE_PERCENTAGE >= $COVERAGE_THRESHOLD" | bc -l) )); then
-              STATUS="🟢 Pass"
-            fi
-            
-            # Convert db name to more descriptive format
-            if [ "$db" = "sqlite" ]; then
-              DB_NAME="SQLite"
-            else
-              DB_NAME="PostgreSQL"
-            fi
-            
-            COMMENT_BODY=$(cat <<EOF
-            ### Code Coverage Summary for $DB_NAME
-            | Database | Metric | Value | Status |
-            |---|---|---|---|
-            | $DB_NAME | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |
-            _Threshold: ${COVERAGE_THRESHOLD}%_
-            EOF
-            
-            gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" --edit-last --create-if-none
-          done
+          COVERAGE_LINE=$(grep -E "TOTAL.*[0-9]+%" coverage-postgres.txt || true)
+          if [ -z "$COVERAGE_LINE" ]; then
+            echo "No coverage data for PostgreSQL."
+            exit 1
+          fi
+          COVERAGE_PERCENTAGE=$(echo "$COVERAGE_LINE" | awk '{print substr($NF, 1, length($NF)-1)}')
+          STATUS="🔴 Fail"
+          if (( $(echo "$COVERAGE_PERCENTAGE >= $COVERAGE_THRESHOLD" | bc -l) )); then
+            STATUS="🟢 Pass"
+          fi
+          
+          # Create comment body with proper escaping
+          COMMENT_BODY="### Code Coverage Summary for PostgreSQL\n\n| Database | Metric | Value | Status |\n|---|---|---|---|\n| PostgreSQL | Overall Coverage | ${COVERAGE_PERCENTAGE}% | ${STATUS} |\n\n_Threshold: ${COVERAGE_THRESHOLD}%_"
+          
+          gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT_BODY" --edit-last --create-if-none
+

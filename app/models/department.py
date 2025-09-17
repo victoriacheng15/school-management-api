@@ -21,7 +21,7 @@ def department_db_read_all(active_only=False):
 
 
 def department_db_read_by_id(department_id):
-    query = "SELECT * FROM departments WHERE id = ?;"
+    query = "SELECT * FROM departments WHERE id = %s;"
     result = db.execute_query(query, (department_id,))
     return dict(result[0]) if result else None
 
@@ -29,7 +29,7 @@ def department_db_read_by_id(department_id):
 def department_db_read_by_ids(department_ids):
     if not department_ids:
         return []
-    placeholders = ",".join("?" for _ in department_ids)
+    placeholders = ",".join("%s" for _ in department_ids)
     query = f"SELECT * FROM departments WHERE id IN ({placeholders});"
     result = db.execute_query(query, department_ids)
     return [dict(row) for row in result] if result else []
@@ -39,15 +39,15 @@ def department_db_insert(department_data):
     columns = ["name"]
     query = get_insert_returning_query("departments", columns)
     cursor_or_result = db.execute_query(query, department_data)
-    return handle_insert_result(cursor_or_result, cursor_or_result)
+    return handle_insert_result(cursor_or_result)
 
 
 def department_db_update(department_id, department_data):
     archived_condition = get_archived_condition(False)
     query = f"""
     UPDATE departments
-    SET name = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND {archived_condition};
+    SET name = %s, updated_at = CURRENT_TIMESTAMP
+    WHERE id = %s AND {archived_condition};
     """
     values = department_data + (department_id,)
     cursor = db.execute_query(query, values)
@@ -60,7 +60,7 @@ def department_db_archive(department_id):
     query = f"""
     UPDATE departments
     SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND {archived_condition_false};
+    WHERE id = %s AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (department_id,))
     return cursor.rowcount if cursor else 0

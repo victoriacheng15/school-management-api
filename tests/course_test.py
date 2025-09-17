@@ -24,7 +24,6 @@ from app.services import (
 
 def make_course_row():
     today = date.today().isoformat()
-    # return as dict to simulate PostgreSQL row behavior
     return {
         "id": 1,
         "title": "Introduction to Programming",
@@ -33,7 +32,7 @@ def make_course_row():
         "department_id": 1,
         "created_at": today,
         "updated_at": today,
-        "is_archived": 0,
+        "is_archived": False,
     }
 
 
@@ -175,27 +174,8 @@ class TestCourseCreateService:
         # Mock the course_dict_to_row function
         mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
 
-        # Handle SQLite vs PostgreSQL return type differences
-        processed_rows = []
-        for row in valid_course_rows:
-            if isinstance(row, tuple):
-                # Convert tuple to dict for SQLite compatibility
-                keys = [
-                    "id",
-                    "title",
-                    "code",
-                    "term_id",
-                    "department_id",
-                    "created_at",
-                    "updated_at",
-                    "is_archived",
-                ]
-                processed_rows.append(dict(zip(keys, row)))
-            else:
-                processed_rows.append(row)
-
         mock_db_create.side_effect = [1, 2]
-        mock_db_read_many.return_value = processed_rows
+        mock_db_read_many.return_value = valid_course_rows
 
         results, error, status_code = create_new_courses(valid_course_create_data)
 
@@ -241,23 +221,7 @@ class TestCourseUpdateService:
         # Mock the course_dict_to_row function
         mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
 
-        # Handle SQLite vs PostgreSQL return type differences
-        if isinstance(valid_course_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = [
-                "id",
-                "title",
-                "code",
-                "term_id",
-                "department_id",
-                "created_at",
-                "updated_at",
-                "is_archived",
-            ]
-            mock_existing_dict = dict(zip(keys, valid_course_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_course_row
+        mock_db_read_one.return_value = valid_course_row
 
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_course_row]
@@ -283,23 +247,7 @@ class TestCourseUpdateService:
         # Mock the course_dict_to_row function
         mock_course_dict_to_row.return_value = ("title", "code", 1, 1)
 
-        # Handle SQLite vs PostgreSQL return type differences
-        if isinstance(valid_course_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = [
-                "id",
-                "title",
-                "code",
-                "term_id",
-                "department_id",
-                "created_at",
-                "updated_at",
-                "is_archived",
-            ]
-            mock_existing_dict = dict(zip(keys, valid_course_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_course_row
+        mock_db_read_one.return_value = valid_course_row
 
         mock_db_update.return_value = 0
         results, error, status_code = update_courses(valid_course_update_data)
@@ -402,7 +350,7 @@ class TestCourseModel:
         result = course_db_read_by_id(1)
         assert result == {"id": 1, "title": "x"}
         mock_execute.assert_called_once_with(
-            "SELECT * FROM courses WHERE id = ?;", (1,)
+            "SELECT * FROM courses WHERE id = %s;", (1,)
         )
 
     @patch("app.models.course.db.execute_query")
@@ -425,13 +373,12 @@ class TestCourseModel:
 
         assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
-        assert "IN (?,?)" in mock_execute.call_args.args[0]
+        assert "IN (%s,%s)" in mock_execute.call_args.args[0]
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.course.db.execute_query")
-    @patch("db.db_utils.is_postgresql", return_value=True)
-    def test_course_db_insert_success(self, mock_is_pg, mock_execute, valid_course_row):
-        # simulate PostgreSQL RETURNING result (list of dicts)
+    def test_course_db_insert_success(self, mock_execute, valid_course_row):
+        # PostgreSQL RETURNING result (list of dicts)
         mock_execute.return_value = [{"id": 10}]
 
         params = (

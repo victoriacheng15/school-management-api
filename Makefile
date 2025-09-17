@@ -1,16 +1,10 @@
-.PHONY: freeze install setup-db reset format test coverage up down
+.PHONY: freeze install format test coverage up down
 
 freeze:
 	pip freeze > requirements.txt
 
 install:
 	pip install -r requirements.txt
-
-setup-db:
-	python3 db/init_db.py && python3 db/populate_db.py
-
-reset:
-	rm db/school.db && make setup-db
 
 format:
 	ruff format run.py db/ tests/ app/

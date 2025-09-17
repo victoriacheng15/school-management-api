@@ -18,9 +18,6 @@ from app.services import (
     archive_terms,
 )
 
-# Detect database type for tests
-DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
-
 # =======================
 # Fixtures
 # =======================
@@ -28,27 +25,14 @@ DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
 
 def make_term_row():
     today = date.today().isoformat()
-
-    if DATABASE_TYPE == "postgresql":
-        # PostgreSQL returns dict-like objects
-        return {
-            "id": 1,
-            "name": "Fall 2025",
-            "start_date": "2025-09-01",
-            "end_date": "2025-12-15",
-            "created_at": today,
-            "updated_at": today,
-        }
-    else:
-        # SQLite returns tuple objects
-        return (
-            1,
-            "Fall 2025",
-            "2025-09-01",
-            "2025-12-15",
-            today,
-            today,
-        )
+    return {
+        "id": 1,
+        "name": "Fall 2025",
+        "start_date": "2025-09-01",
+        "end_date": "2025-12-15",
+        "created_at": today,
+        "updated_at": today,
+    }
 
 
 def make_term_dict():
@@ -155,20 +139,7 @@ def mock_db_archive():
 class TestTermReadService:
     def test_get_all_terms(self, mock_db_read_all, valid_term_row):
         # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_all.return_value = [valid_term_row]
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_term_row
-            dict_row = {
-                "id": tuple_row[0],
-                "name": tuple_row[1],
-                "start_date": tuple_row[2],
-                "end_date": tuple_row[3],
-                "created_at": tuple_row[4],
-                "updated_at": tuple_row[5],
-            }
-            mock_db_read_all.return_value = [dict_row]
+        mock_db_read_all.return_value = [valid_term_row]
 
         terms = get_all_terms(active_only=True)
 
@@ -183,19 +154,7 @@ class TestTermReadService:
 
     def test_get_term_by_id(self, mock_db_read_one, valid_term_row):
         # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_term_row
-        else:
-            tuple_row = valid_term_row
-            dict_row = {
-                "id": tuple_row[0],
-                "name": tuple_row[1],
-                "start_date": tuple_row[2],
-                "end_date": tuple_row[3],
-                "created_at": tuple_row[4],
-                "updated_at": tuple_row[5],
-            }
-            mock_db_read_one.return_value = dict_row
+        mock_db_read_one.return_value = valid_term_row
 
         term = get_term_by_id(1)
         assert term["name"] == "Fall 2025"
@@ -227,26 +186,11 @@ class TestTermCreateService:
             "MockCursor", (), {"lastrowid": None}
         )()
 
-        # For PostgreSQL, insert returns IDs via RETURNING; for SQLite, returns lastrowid
+        # PostgreSQL insert returns IDs via RETURNING
         mock_db_create.side_effect = [1, 2]
 
-        # Handle SQLite vs PostgreSQL compatibility for read_many
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_many.return_value = valid_term_rows
-        else:
-            # Convert tuple rows to dict format for service layer
-            dict_rows = []
-            for row in valid_term_rows:
-                dict_row = {
-                    "id": row[0],
-                    "name": row[1],
-                    "start_date": row[2],
-                    "end_date": row[3],
-                    "created_at": row[4],
-                    "updated_at": row[5],
-                }
-                dict_rows.append(dict_row)
-            mock_db_read_many.return_value = dict_rows
+        # Handle PostgreSQL format for read_many
+        mock_db_read_many.return_value = valid_term_rows
 
         results, error, status_code = create_new_terms(valid_term_create_data)
 
@@ -304,23 +248,9 @@ class TestTermUpdateService:
 
         mock_db_update.return_value = 1
 
-        # Handle SQLite vs PostgreSQL compatibility for read_one (used by bulk operations)
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_term_row
-            mock_db_read_many.return_value = [valid_term_row]
-        else:
-            # Convert tuple row to dict format for service layer
-            row = valid_term_row
-            dict_row = {
-                "id": row[0],
-                "name": row[1],
-                "start_date": row[2],
-                "end_date": row[3],
-                "created_at": row[4],
-                "updated_at": row[5],
-            }
-            mock_db_read_one.return_value = dict_row
-            mock_db_read_many.return_value = [dict_row]
+        # Handle PostgreSQL format for read_one (used by bulk operations)
+        mock_db_read_one.return_value = valid_term_row
+        mock_db_read_many.return_value = [valid_term_row]
 
         results, error, status_code = update_terms(valid_term_update_data)
 
@@ -465,7 +395,7 @@ class TestTermModel:
         mock_execute.return_value = [{"id": 1, "name": "term_1"}]
         result = term_db_read_by_id(1)
         assert result == {"id": 1, "name": "term_1"}
-        mock_execute.assert_called_once_with("SELECT * FROM terms WHERE id = ?;", (1,))
+        mock_execute.assert_called_once_with("SELECT * FROM terms WHERE id = %s;", (1,))
 
     @patch("app.models.term.db.execute_query")
     def test_term_db_read_by_id_not_found(self, mock_execute):
@@ -487,23 +417,18 @@ class TestTermModel:
 
         assert result == [{"id": "t1"}, {"id": "t2"}]
         mock_execute.assert_called_once()
-        assert "IN (?,?)" in mock_execute.call_args.args[0]
+        assert "IN (%s,%s)" in mock_execute.call_args.args[0]
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.term.db.execute_query")
     def test_term_db_insert_success(self, mock_execute, valid_term_row):
-        # For PostgreSQL, we expect dict format, for SQLite tuple format
-        if DATABASE_TYPE == "postgresql":
-            mock_execute.return_value = [{"id": 10}]
-            params = (
-                valid_term_row["name"],
-                valid_term_row["start_date"],
-                valid_term_row["end_date"],
-            )
-        else:
-            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-            mock_execute.return_value = mock_cursor
-            params = valid_term_row[1:4]  # Exclude id, created_at, updated_at
+        # For PostgreSQL, we expect dict format
+        mock_execute.return_value = [{"id": 10}]
+        params = (
+            valid_term_row["name"],
+            valid_term_row["start_date"],
+            valid_term_row["end_date"],
+        )
 
         result = term_db_insert(params)
 

@@ -1,5 +1,4 @@
 import pytest
-import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -18,9 +17,6 @@ from app.services import (
     archive_enrollments,
 )
 
-# Detect database type for tests
-DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
-
 # =======================
 # Fixtures
 # =======================
@@ -28,29 +24,15 @@ DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
 
 def make_enrollment_row():
     today = date.today().isoformat()
-
-    if DATABASE_TYPE == "postgresql":
-        # PostgreSQL returns dict-like objects
-        return {
-            "id": 1,
-            "student_id": 1,
-            "course_id": 1,
-            "grade": "A",
-            "created_at": today,
-            "updated_at": today,
-            "is_archived": False,
-        }
-    else:
-        # SQLite returns tuple objects
-        return (
-            1,
-            1,
-            1,
-            "A",
-            today,
-            today,
-            0,
-        )
+    return {
+        "id": 1,
+        "student_id": 1,
+        "course_id": 1,
+        "grade": "A",
+        "created_at": today,
+        "updated_at": today,
+        "is_archived": False,
+    }
 
 
 def make_enrollment_dict():
@@ -151,22 +133,7 @@ def mock_db_archive():
 
 class TestEnrollmentReadService:
     def test_get_all_enrollments(self, mock_db_read_all, valid_enrollment_row):
-        # For SQLite, convert tuple fixture to dict to match model behavior
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_all.return_value = [valid_enrollment_row]
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_enrollment_row
-            dict_row = {
-                "id": tuple_row[0],
-                "student_id": tuple_row[1],
-                "course_id": tuple_row[2],
-                "grade": tuple_row[3],
-                "created_at": tuple_row[4],
-                "updated_at": tuple_row[5],
-                "is_archived": bool(tuple_row[6]),
-            }
-            mock_db_read_all.return_value = [dict_row]
+        mock_db_read_all.return_value = [valid_enrollment_row]
 
         enrollments = get_all_enrollments(active_only=True)
         assert len(enrollments) == 1
@@ -179,22 +146,7 @@ class TestEnrollmentReadService:
             get_all_enrollments(active_only=True)
 
     def test_get_enrollment_by_id(self, mock_db_read_one, valid_enrollment_row):
-        # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_enrollment_row
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_enrollment_row
-            dict_row = {
-                "id": tuple_row[0],
-                "student_id": tuple_row[1],
-                "course_id": tuple_row[2],
-                "grade": tuple_row[3],
-                "created_at": tuple_row[4],
-                "updated_at": tuple_row[5],
-                "is_archived": bool(tuple_row[6]),
-            }
-            mock_db_read_one.return_value = dict_row
+        mock_db_read_one.return_value = valid_enrollment_row
 
         enrollment = get_enrollment_by_id(1)
         assert enrollment["grade"] == "A"
@@ -272,22 +224,7 @@ class TestEnrollmentUpdateService:
         # Mock the enrollment_dict_to_row function
         mock_enrollment_dict_to_row.return_value = (1, 1, "A")
 
-        # Handle SQLite vs PostgreSQL return type differences
-        if isinstance(valid_enrollment_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = [
-                "id",
-                "student_id",
-                "course_id",
-                "grade",
-                "created_at",
-                "updated_at",
-                "is_archived",
-            ]
-            mock_existing_dict = dict(zip(keys, valid_enrollment_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_enrollment_row
+        mock_db_read_one.return_value = valid_enrollment_row
 
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_enrollment_row]
@@ -313,22 +250,7 @@ class TestEnrollmentUpdateService:
         # Mock the enrollment_dict_to_row function
         mock_enrollment_dict_to_row.return_value = (1, 1, "A")
 
-        # Handle SQLite vs PostgreSQL return type differences
-        if isinstance(valid_enrollment_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = [
-                "id",
-                "student_id",
-                "course_id",
-                "grade",
-                "created_at",
-                "updated_at",
-                "is_archived",
-            ]
-            mock_existing_dict = dict(zip(keys, valid_enrollment_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_enrollment_row
+        mock_db_read_one.return_value = valid_enrollment_row
 
         mock_db_update.return_value = 0
         results, error, status_code = update_enrollments(valid_enrollment_update_data)
@@ -369,26 +291,11 @@ class TestEnrollmentArchiveService:
         valid_enrollment_row,
     ):
         # Mock that enrollments exist
-        if isinstance(valid_enrollment_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = [
-                "id",
-                "student_id",
-                "course_id",
-                "grade",
-                "created_at",
-                "updated_at",
-                "is_archived",
-            ]
-            mock_existing_dict = dict(zip(keys, valid_enrollment_row))
-            mock_db_read_one.return_value = mock_existing_dict
-            mock_db_read_many.return_value = [mock_existing_dict, mock_existing_dict]
-        else:
-            mock_db_read_one.return_value = valid_enrollment_row
-            mock_db_read_many.return_value = [
-                valid_enrollment_row,
-                valid_enrollment_row,
-            ]
+        mock_db_read_one.return_value = valid_enrollment_row
+        mock_db_read_many.return_value = [
+            valid_enrollment_row,
+            valid_enrollment_row,
+        ]
 
         mock_db_archive.side_effect = [1, 1]
         archived, errors, status_code = archive_enrollments(valid_enrollment_ids)
@@ -406,21 +313,7 @@ class TestEnrollmentArchiveService:
         valid_enrollment_row,
     ):
         # Mock that enrollments exist
-        if isinstance(valid_enrollment_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = [
-                "id",
-                "student_id",
-                "course_id",
-                "grade",
-                "created_at",
-                "updated_at",
-                "is_archived",
-            ]
-            mock_existing_dict = dict(zip(keys, valid_enrollment_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_enrollment_row
+        mock_db_read_one.return_value = valid_enrollment_row
 
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_enrollments(valid_enrollment_ids)
@@ -453,9 +346,9 @@ class TestEnrollmentModel:
         mock_execute.return_value = [{"enrollment_1": "data"}]
         result = enrollment_db_read_by_id(1)
         assert result == {"enrollment_1": "data"}
-        # The model uses SQLite syntax (?), database layer converts internally
+        # The model uses PostgreSQL syntax (%s)
         mock_execute.assert_called_once_with(
-            "SELECT * FROM enrollments WHERE id = ?;", (1,)
+            "SELECT * FROM enrollments WHERE id = %s;", (1,)
         )
 
     @patch("app.models.enrollment.db.execute_query")
@@ -479,27 +372,20 @@ class TestEnrollmentModel:
         assert result == [{"e1": "data"}, {"e2": "data"}]
         mock_execute.assert_called_once()
 
-        # The model uses SQLite syntax (?), database layer converts internally
+        # The model uses PostgreSQL syntax (%s)
         query_call = mock_execute.call_args.args[0]
-        assert "IN (?,?)" in query_call
+        assert "IN (%s,%s)" in query_call
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.enrollment.db.execute_query")
     def test_enrollment_db_insert_success(self, mock_execute, valid_enrollment_row):
-        # For PostgreSQL, we expect dict format, for SQLite tuple format
-        if DATABASE_TYPE == "postgresql":
-            # PostgreSQL returns the inserted row with RETURNING clause
-            mock_execute.return_value = [{"id": 10}]
-            params = (
-                valid_enrollment_row["student_id"],
-                valid_enrollment_row["course_id"],
-                valid_enrollment_row["grade"],
-            )
-        else:
-            # SQLite returns cursor with lastrowid
-            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-            mock_execute.return_value = mock_cursor
-            params = valid_enrollment_row[1:4]  # student_id, course_id, grade
+        # PostgreSQL returns the inserted row with RETURNING clause
+        mock_execute.return_value = [{"id": 10}]
+        params = (
+            valid_enrollment_row["student_id"],
+            valid_enrollment_row["course_id"],
+            valid_enrollment_row["grade"],
+        )
 
         result = enrollment_db_insert(params)
 

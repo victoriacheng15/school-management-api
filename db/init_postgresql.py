@@ -134,7 +134,7 @@ def populate_sample_data():
         )
 
         # Insert students (convert Python bools to PostgreSQL bools, force is_archived to False)
-        # Map sample data to match SQLite schema structure
+        # Map sample data to database schema structure
         students_pg = [
             tuple(
                 list(row[:10])  # First 10 fields (id through status)

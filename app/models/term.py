@@ -22,7 +22,7 @@ def term_db_read_all(active_only=False):
 
 
 def term_db_read_by_id(term_id):
-    query = "SELECT * FROM terms WHERE id = ?;"
+    query = "SELECT * FROM terms WHERE id = %s;"
     result = db.execute_query(query, (term_id,))
     if result:
         return dict(result[0])
@@ -32,7 +32,7 @@ def term_db_read_by_id(term_id):
 def term_db_read_by_ids(term_ids):
     if not term_ids:
         return []
-    placeholders = ",".join("?" for _ in term_ids)
+    placeholders = ",".join("%s" for _ in term_ids)
     query = f"SELECT * FROM terms WHERE id IN ({placeholders});"
     result = db.execute_query(query, term_ids)
     return [dict(row) for row in result] if result else []
@@ -42,15 +42,15 @@ def term_db_insert(term_data):
     columns = ["name", "start_date", "end_date"]
     query = get_insert_returning_query("terms", columns)
     cursor_or_result = db.execute_query(query, term_data)
-    return handle_insert_result(cursor_or_result, cursor_or_result)
+    return handle_insert_result(cursor_or_result)
 
 
 def term_db_update(term_id, term_data):
     archived_condition = get_archived_condition(False)
     query = f"""
     UPDATE terms
-    SET name = ?, start_date = ?, end_date = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND {archived_condition};
+    SET name = %s, start_date = %s, end_date = %s, updated_at = CURRENT_TIMESTAMP
+    WHERE id = %s AND {archived_condition};
     """
     values = term_data + (term_id,)
     cursor = db.execute_query(query, values)
@@ -63,7 +63,7 @@ def term_db_archive(term_id):
     query = f"""
     UPDATE terms
     SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND {archived_condition_false};
+    WHERE id = %s AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (term_id,))
     return cursor.rowcount if cursor else 0

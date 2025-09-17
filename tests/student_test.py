@@ -1,5 +1,4 @@
 import pytest
-import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -18,9 +17,6 @@ from app.services import (
     archive_students,
 )
 
-# Detect database type for tests
-DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
-
 # =======================
 # Fixtures
 # =======================
@@ -28,47 +24,24 @@ DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
 
 def make_student_row():
     today = date.today().isoformat()
-
-    if DATABASE_TYPE == "postgresql":
-        # PostgreSQL returns dict-like objects
-        return {
-            "id": 1,
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "johndoe@example.com",
-            "address": "123 Main St",
-            "city": "Anytown",
-            "province": "ON",
-            "country": "Canada",
-            "address_type": "local",
-            "status": "active",
-            "is_full_time": False,
-            "is_archived": False,
-            "program_id": 1,
-            "created_at": today,
-            "updated_at": today,
-            "archived_by": 0,
-        }
-    else:
-        # SQLite returns tuple objects
-        return (
-            1,
-            "John",
-            "Doe",
-            "johndoe@example.com",
-            "123 Main St",
-            "Anytown",
-            "ON",
-            "Canada",
-            "local",
-            "active",
-            0,
-            0,
-            1,
-            today,
-            today,
-            0,
-        )
+    return {
+        "id": 1,
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "johndoe@example.com",
+        "address": "123 Main St",
+        "city": "Anytown",
+        "province": "ON",
+        "country": "Canada",
+        "address_type": "local",
+        "status": "active",
+        "is_full_time": False,
+        "is_archived": False,
+        "program_id": 1,
+        "created_at": today,
+        "updated_at": today,
+        "archived_by": 0,
+    }
 
 
 def make_student_dict():
@@ -171,31 +144,7 @@ def mock_db_archive():
 
 class TestStudentReadService:
     def test_get_all_students(self, mock_db_read_all, valid_student_row):
-        # For SQLite, convert tuple fixture to dict to match model behavior
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_all.return_value = [valid_student_row]
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_student_row
-            dict_row = {
-                "id": tuple_row[0],
-                "first_name": tuple_row[1],
-                "last_name": tuple_row[2],
-                "email": tuple_row[3],
-                "address": tuple_row[4],
-                "city": tuple_row[5],
-                "province": tuple_row[6],
-                "country": tuple_row[7],
-                "address_type": tuple_row[8],
-                "status": tuple_row[9],
-                "is_full_time": bool(tuple_row[10]),
-                "is_archived": bool(tuple_row[11]),
-                "program_id": tuple_row[12],
-                "created_at": tuple_row[13],
-                "updated_at": tuple_row[14],
-                "archived_by": tuple_row[15],
-            }
-            mock_db_read_all.return_value = [dict_row]
+        mock_db_read_all.return_value = [valid_student_row]
 
         students = get_all_students(active_only=True)
         assert len(students) == 1
@@ -208,31 +157,7 @@ class TestStudentReadService:
             get_all_students(active_only=True)
 
     def test_get_student_by_id(self, mock_db_read_one, valid_student_row):
-        # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_student_row
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_student_row
-            dict_row = {
-                "id": tuple_row[0],
-                "first_name": tuple_row[1],
-                "last_name": tuple_row[2],
-                "email": tuple_row[3],
-                "address": tuple_row[4],
-                "city": tuple_row[5],
-                "province": tuple_row[6],
-                "country": tuple_row[7],
-                "address_type": tuple_row[8],
-                "status": tuple_row[9],
-                "is_full_time": bool(tuple_row[10]),
-                "is_archived": bool(tuple_row[11]),
-                "program_id": tuple_row[12],
-                "created_at": tuple_row[13],
-                "updated_at": tuple_row[14],
-                "archived_by": tuple_row[15],
-            }
-            mock_db_read_one.return_value = dict_row
+        mock_db_read_one.return_value = valid_student_row
 
         student = get_student_by_id(1)
         assert student["first_name"] == "John"
@@ -265,34 +190,7 @@ class TestStudentCreateService:
         )()
 
         mock_db_create.side_effect = [1, 2]
-
-        # Handle SQLite vs PostgreSQL compatibility for read_many
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_many.return_value = valid_student_rows
-        else:
-            # Convert tuple rows to dict format for service layer
-            dict_rows = []
-            for row in valid_student_rows:
-                dict_row = {
-                    "id": row[0],
-                    "first_name": row[1],
-                    "last_name": row[2],
-                    "email": row[3],
-                    "address": row[4],
-                    "city": row[5],
-                    "province": row[6],
-                    "country": row[7],
-                    "address_type": row[8],
-                    "status": row[9],
-                    "is_full_time": bool(row[10]),
-                    "is_archived": bool(row[11]),
-                    "program_id": row[12],
-                    "created_at": row[13],
-                    "updated_at": row[14],
-                    "archived_by": row[15],
-                }
-                dict_rows.append(dict_row)
-            mock_db_read_many.return_value = dict_rows
+        mock_db_read_many.return_value = valid_student_rows
 
         results, error, status_code = create_new_students(valid_student_create_data)
 
@@ -349,34 +247,8 @@ class TestStudentUpdateService:
         )()
 
         mock_db_update.return_value = 1
-
-        # Handle SQLite vs PostgreSQL compatibility for read_one (used by bulk operations)
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_student_row
-            mock_db_read_many.return_value = [valid_student_row]
-        else:
-            # Convert tuple row to dict format for service layer
-            row = valid_student_row
-            dict_row = {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "address": row[4],
-                "city": row[5],
-                "province": row[6],
-                "country": row[7],
-                "address_type": row[8],
-                "status": row[9],
-                "is_full_time": bool(row[10]),
-                "is_archived": bool(row[11]),
-                "program_id": row[12],
-                "created_at": row[13],
-                "updated_at": row[14],
-                "archived_by": row[15],
-            }
-            mock_db_read_one.return_value = dict_row
-            mock_db_read_many.return_value = [dict_row]
+        mock_db_read_one.return_value = valid_student_row
+        mock_db_read_many.return_value = [valid_student_row]
 
         results, error, status_code = update_students(valid_student_update_data)
 
@@ -403,11 +275,7 @@ class TestStudentUpdateService:
             "MockCursor", (), {"rowcount": 0}
         )()
 
-        # Mock existing record lookup (bulk operations check if record exists first)
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = {"id": 1}  # Record exists
-        else:
-            mock_db_read_one.return_value = {"id": 1}  # Record exists
+        mock_db_read_one.return_value = {"id": 1}  # Record exists
 
         mock_db_update.return_value = 0
         results, error, status_code = update_students(valid_student_update_data)
@@ -533,9 +401,8 @@ class TestStudentModel:
         mock_execute.return_value = [{"id": 1, "first_name": "John"}]
         result = student_db_read_by_id(1)
         assert result == {"id": 1, "first_name": "John"}
-        # The model uses SQLite syntax (?), database layer converts internally
         mock_execute.assert_called_once_with(
-            "SELECT * FROM students WHERE id = ?;", (1,)
+            "SELECT * FROM students WHERE id = %s;", (1,)
         )
 
     @patch("app.models.student.db.execute_query")
@@ -559,36 +426,27 @@ class TestStudentModel:
         assert result == [{"id": 1}, {"id": 2}]
         mock_execute.assert_called_once()
 
-        # The model uses SQLite syntax (?), database layer converts internally
         query_call = mock_execute.call_args.args[0]
-        assert "IN (?,?)" in query_call
+        assert "IN (%s,%s)" in query_call
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.student.db.execute_query")
     def test_student_db_insert_success(self, mock_execute, valid_student_row):
-        # For PostgreSQL, we expect dict format, for SQLite tuple format
-        if DATABASE_TYPE == "postgresql":
-            # PostgreSQL returns the inserted row with RETURNING clause
-            mock_execute.return_value = [{"id": 10}]
-            params = (
-                valid_student_row["first_name"],
-                valid_student_row["last_name"],
-                valid_student_row["email"],
-                valid_student_row["address"],
-                valid_student_row["city"],
-                valid_student_row["province"],
-                valid_student_row["country"],
-                valid_student_row["address_type"],
-                valid_student_row["status"],
-                valid_student_row["is_full_time"],
-                valid_student_row["is_archived"],
-                valid_student_row["program_id"],
-            )
-        else:
-            # SQLite returns cursor with lastrowid
-            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-            mock_execute.return_value = mock_cursor
-            params = valid_student_row
+        mock_execute.return_value = [{"id": 10}]
+        params = (
+            valid_student_row["first_name"],
+            valid_student_row["last_name"],
+            valid_student_row["email"],
+            valid_student_row["address"],
+            valid_student_row["city"],
+            valid_student_row["province"],
+            valid_student_row["country"],
+            valid_student_row["address_type"],
+            valid_student_row["status"],
+            valid_student_row["is_full_time"],
+            valid_student_row["is_archived"],
+            valid_student_row["program_id"],
+        )
 
         result = student_db_insert(params)
 

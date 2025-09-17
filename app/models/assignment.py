@@ -40,7 +40,7 @@ def assignment_db_insert(assignment_data):
     columns = ["instructor_id", "course_id"]
     query = get_insert_returning_query("assignments", columns)
     cursor_or_result = db.execute_query(query, assignment_data)
-    return handle_insert_result(cursor_or_result, cursor_or_result)
+    return handle_insert_result(cursor_or_result)
 
 
 def assignment_db_update(assignment_id, assignment_data):

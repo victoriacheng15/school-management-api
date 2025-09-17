@@ -1,5 +1,5 @@
 -- PostgreSQL Schema for School Management System
--- This schema is compatible with PostgreSQL and replaces SQLite-specific syntax
+-- PostgreSQL database schema for the school management system
 
 -- Creating departments table (created first due to foreign key dependencies)
 CREATE TABLE IF NOT EXISTS departments (

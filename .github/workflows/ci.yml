@@ -74,7 +74,9 @@ jobs:
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
         with:
           name: coverage-postgres
-          path: ./coverage-postgres.txt
+          # download-artifact always creates a directory at the destination path.
+          # Use a directory and then reference the actual file inside it.
+          path: ./coverage-postgres
 
       - name: Post PR comments
         if: github.event_name == 'pull_request'
@@ -82,9 +84,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           COVERAGE_THRESHOLD: 80
         run: |
-          COVERAGE_LINE=$(grep -E "TOTAL.*[0-9]+%" coverage-postgres.txt || true)
+          COVERAGE_FILE="./coverage-postgres/coverage_output.txt"
+          if [ ! -f "$COVERAGE_FILE" ]; then
+            echo "No coverage file found at $COVERAGE_FILE"
+            ls -la ./coverage-postgres || true
+            exit 1
+          fi
+          COVERAGE_LINE=$(grep -E "TOTAL.*[0-9]+%" "$COVERAGE_FILE" || true)
           if [ -z "$COVERAGE_LINE" ]; then
-            echo "No coverage data for PostgreSQL."
+            echo "No coverage data for PostgreSQL in $COVERAGE_FILE."
             exit 1
           fi
           COVERAGE_PERCENTAGE=$(echo "$COVERAGE_LINE" | awk '{print substr($NF, 1, length($NF)-1)}')

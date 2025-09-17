@@ -1,5 +1,4 @@
 import pytest
-import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -18,9 +17,6 @@ from app.services import (
     archive_departments,
 )
 
-# Detect database type for tests
-DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
-
 # =======================
 # Fixtures
 # =======================
@@ -28,18 +24,13 @@ DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
 
 def make_department_row():
     today = date.today().isoformat()
-
-    if DATABASE_TYPE == "postgresql":
-        return {
-            "id": 1,
-            "name": "Computer Science",
-            "created_at": today,
-            "updated_at": today,
-            "is_archived": False,
-        }
-    else:
-        # SQLite tuple layout: (id, name, created_at, updated_at, is_archived)
-        return (1, "Computer Science", today, today, 0)
+    return {
+        "id": 1,
+        "name": "Computer Science",
+        "created_at": today,
+        "updated_at": today,
+        "is_archived": False,
+    }
 
 
 def make_department_dict():
@@ -132,19 +123,7 @@ def mock_db_archive():
 
 class TestDepartmentReadService:
     def test_get_all_departments(self, mock_db_read_all, valid_department_row):
-        # For SQLite, convert tuple fixture to dict to match model behavior
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_all.return_value = [valid_department_row]
-        else:
-            tuple_row = valid_department_row
-            dict_row = {
-                "id": tuple_row[0],
-                "name": tuple_row[1],
-                "created_at": tuple_row[2],
-                "updated_at": tuple_row[3],
-                "is_archived": bool(tuple_row[4]),
-            }
-            mock_db_read_all.return_value = [dict_row]
+        mock_db_read_all.return_value = [valid_department_row]
 
         departments = get_all_departments(active_only=True)
         assert len(departments) == 1
@@ -157,18 +136,7 @@ class TestDepartmentReadService:
             get_all_departments(active_only=True)
 
     def test_get_department_by_id(self, mock_db_read_one, valid_department_row):
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_department_row
-        else:
-            tuple_row = valid_department_row
-            dict_row = {
-                "id": tuple_row[0],
-                "name": tuple_row[1],
-                "created_at": tuple_row[2],
-                "updated_at": tuple_row[3],
-                "is_archived": bool(tuple_row[4]),
-            }
-            mock_db_read_one.return_value = dict_row
+        mock_db_read_one.return_value = valid_department_row
 
         department = get_department_by_id(1)
         assert department["name"] == "Computer Science"
@@ -196,23 +164,7 @@ class TestDepartmentCreateService:
         mock_department_dict_to_row.return_value = ("Computer Science",)
 
         mock_db_create.side_effect = [1, 2]
-        # return rows in the format the service expects (dicts)
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_many.return_value = valid_department_rows
-        else:
-            # convert tuple fixtures to dicts for the service
-            dict_rows = []
-            for row in valid_department_rows:
-                dict_rows.append(
-                    {
-                        "id": row[0],
-                        "name": row[1],
-                        "created_at": row[2],
-                        "updated_at": row[3],
-                        "is_archived": bool(row[4]),
-                    }
-                )
-            mock_db_read_many.return_value = dict_rows
+        mock_db_read_many.return_value = valid_department_rows
 
         results, error, status_code = create_new_departments(
             valid_department_create_data
@@ -262,29 +214,10 @@ class TestDepartmentUpdateService:
         # Mock the department_dict_to_row function
         mock_department_dict_to_row.return_value = ("Computer Science",)
 
-        # Handle SQLite vs PostgreSQL return type differences
-        if isinstance(valid_department_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
-            mock_existing_dict = dict(zip(keys, valid_department_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_department_row
+        mock_db_read_one.return_value = valid_department_row
 
         mock_db_update.return_value = 1
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_many.return_value = [valid_department_row]
-        else:
-            tuple_row = valid_department_row
-            mock_db_read_many.return_value = [
-                {
-                    "id": tuple_row[0],
-                    "name": tuple_row[1],
-                    "created_at": tuple_row[2],
-                    "updated_at": tuple_row[3],
-                    "is_archived": bool(tuple_row[4]),
-                }
-            ]
+        mock_db_read_many.return_value = [valid_department_row]
 
         results, error, status_code = update_departments(valid_department_update_data)
 
@@ -307,14 +240,7 @@ class TestDepartmentUpdateService:
         # Mock the department_dict_to_row function
         mock_department_dict_to_row.return_value = ("Computer Science",)
 
-        # Handle SQLite vs PostgreSQL return type differences
-        if isinstance(valid_department_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
-            mock_existing_dict = dict(zip(keys, valid_department_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_department_row
+        mock_db_read_one.return_value = valid_department_row
 
         mock_db_update.return_value = 0
         results, error, status_code = update_departments(valid_department_update_data)
@@ -355,18 +281,11 @@ class TestDepartmentArchiveService:
         valid_department_row,
     ):
         # Mock that departments exist
-        if isinstance(valid_department_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
-            mock_existing_dict = dict(zip(keys, valid_department_row))
-            mock_db_read_one.return_value = mock_existing_dict
-            mock_db_read_many.return_value = [mock_existing_dict, mock_existing_dict]
-        else:
-            mock_db_read_one.return_value = valid_department_row
-            mock_db_read_many.return_value = [
-                valid_department_row,
-                valid_department_row,
-            ]
+        mock_db_read_one.return_value = valid_department_row
+        mock_db_read_many.return_value = [
+            valid_department_row,
+            valid_department_row,
+        ]
 
         mock_db_archive.side_effect = [1, 1]
         archived, errors, status_code = archive_departments(valid_department_ids)
@@ -384,13 +303,7 @@ class TestDepartmentArchiveService:
         valid_department_row,
     ):
         # Mock that departments exist
-        if isinstance(valid_department_row, tuple):
-            # Convert tuple to dict for SQLite compatibility
-            keys = ["id", "name", "created_at", "updated_at", "is_archived"]
-            mock_existing_dict = dict(zip(keys, valid_department_row))
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_department_row
+        mock_db_read_one.return_value = valid_department_row
 
         mock_db_archive.return_value = 0
         archived, errors, status_code = archive_departments(valid_department_ids)
@@ -431,7 +344,7 @@ class TestDepartmentModel:
         result = department_db_read_by_id(1)
         assert result == {"id": 1, "name": "x"}
         mock_execute.assert_called_once_with(
-            "SELECT * FROM departments WHERE id = ?;", (1,)
+            "SELECT * FROM departments WHERE id = %s;", (1,)
         )
 
     @patch("app.models.department.db.execute_query")
@@ -456,19 +369,14 @@ class TestDepartmentModel:
         mock_execute.assert_called_once()
 
         query_call = mock_execute.call_args.args[0]
-        assert "IN (?,?)" in query_call
+        assert "IN (%s,%s)" in query_call
         assert mock_execute.call_args.args[1] == [1, 2]
 
     @patch("app.models.department.db.execute_query")
     def test_department_db_insert_success(self, mock_execute, valid_department_row):
-        # For PostgreSQL, we expect dict format, for SQLite tuple format
-        if DATABASE_TYPE == "postgresql":
-            mock_execute.return_value = [{"id": 10}]
-            params = (valid_department_row["name"],)
-        else:
-            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-            mock_execute.return_value = mock_cursor
-            params = valid_department_row
+        # PostgreSQL returns dict format
+        mock_execute.return_value = [{"id": 10}]
+        params = (valid_department_row["name"],)
 
         result = department_db_insert(params)
 

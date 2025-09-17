@@ -23,30 +23,16 @@ from app.services import (
 # =======================
 
 
-# Detect database type for tests
-DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").lower()
-
-
 def make_assignment_row():
     today = date.today().isoformat()
-    if DATABASE_TYPE == "postgresql":
-        return {
-            "id": 1,
-            "instructor_id": 1,
-            "course_id": 1,
-            "created_at": today,
-            "updated_at": today,
-            "is_archived": False,
-        }
-    else:
-        return (
-            1,
-            1,
-            1,
-            today,
-            today,
-            0,
-        )
+    return {
+        "id": 1,
+        "instructor_id": 1,
+        "course_id": 1,
+        "created_at": today,
+        "updated_at": today,
+        "is_archived": False,
+    }
 
 
 def make_assignment_dict():
@@ -145,22 +131,7 @@ def mock_db_archive():
 
 class TestAssignmentReadService:
     def test_get_all_assignments(self, mock_db_read_all, valid_assignment_row):
-        # For SQLite, convert tuple fixture to dict to match model behavior
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_all.return_value = [valid_assignment_row]
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_assignment_row
-            dict_row = {
-                "id": tuple_row[0],
-                "instructor_id": tuple_row[1],
-                "course_id": tuple_row[2],
-                "created_at": tuple_row[3],
-                "updated_at": tuple_row[4],
-                "is_archived": bool(tuple_row[5]),
-            }
-            mock_db_read_all.return_value = [dict_row]
-
+        mock_db_read_all.return_value = [valid_assignment_row]
         assignments = get_all_assignments(active_only=True)
         assert len(assignments) == 1
         assert assignments[0]["instructor_id"] == 1
@@ -172,22 +143,7 @@ class TestAssignmentReadService:
             get_all_assignments(active_only=True)
 
     def test_get_assignment_by_id(self, mock_db_read_one, valid_assignment_row):
-        # Service layer expects dicts since model layer converts tuples to dicts
-        if DATABASE_TYPE == "postgresql":
-            mock_db_read_one.return_value = valid_assignment_row
-        else:
-            # For SQLite, convert tuple fixture to dict to match model behavior
-            tuple_row = valid_assignment_row
-            dict_row = {
-                "id": tuple_row[0],
-                "instructor_id": tuple_row[1],
-                "course_id": tuple_row[2],
-                "created_at": tuple_row[3],
-                "updated_at": tuple_row[4],
-                "is_archived": bool(tuple_row[5]),
-            }
-            mock_db_read_one.return_value = dict_row
-
+        mock_db_read_one.return_value = valid_assignment_row
         assignment = get_assignment_by_id(1)
         assert assignment["instructor_id"] == 1
         mock_db_read_one.assert_called_once_with(1)
@@ -250,19 +206,7 @@ class TestAssignmentUpdateService:
         mock_db_update.return_value = 1
         mock_db_read_many.return_value = [valid_assignment_row]
 
-        # For SQLite, we need to ensure row is converted to dict properly
-        if isinstance(valid_assignment_row, tuple):
-            mock_existing_dict = {
-                "id": valid_assignment_row[0],
-                "instructor_id": valid_assignment_row[1],
-                "course_id": valid_assignment_row[2],
-                "created_at": valid_assignment_row[3],
-                "updated_at": valid_assignment_row[4],
-                "is_archived": bool(valid_assignment_row[5]),
-            }
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_assignment_row
+        mock_db_read_one.return_value = valid_assignment_row
 
         mock_dict_to_row.return_value = (1, 1)  # Mock conversion
 
@@ -288,19 +232,7 @@ class TestAssignmentUpdateService:
     ):
         mock_db_update.return_value = 0  # Simulate no update
 
-        # For SQLite, we need to ensure row is converted to dict properly
-        if isinstance(valid_assignment_row, tuple):
-            mock_existing_dict = {
-                "id": valid_assignment_row[0],
-                "instructor_id": valid_assignment_row[1],
-                "course_id": valid_assignment_row[2],
-                "created_at": valid_assignment_row[3],
-                "updated_at": valid_assignment_row[4],
-                "is_archived": bool(valid_assignment_row[5]),
-            }
-            mock_db_read_one.return_value = mock_existing_dict
-        else:
-            mock_db_read_one.return_value = valid_assignment_row
+        mock_db_read_one.return_value = valid_assignment_row
 
         mock_dict_to_row.return_value = (1, 1)  # Mock conversion
 
@@ -394,14 +326,9 @@ class TestAssignmentModel:
         mock_execute.return_value = [{"active": "assignment"}]
         result = assignment_db_read_all(active_only=True)
         assert result == [{"active": "assignment"}]
-        if DATABASE_TYPE == "postgresql":
-            mock_execute.assert_called_once_with(
-                "SELECT * FROM assignments WHERE is_archived = FALSE;"
-            )
-        else:
-            mock_execute.assert_called_once_with(
-                "SELECT * FROM assignments WHERE is_archived = 0;"
-            )
+        mock_execute.assert_called_once_with(
+            "SELECT * FROM assignments WHERE is_archived = FALSE;"
+        )
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_read_by_id_found(self, mock_execute):
@@ -439,17 +366,12 @@ class TestAssignmentModel:
 
     @patch("app.models.assignment.db.execute_query")
     def test_assignment_db_insert_success(self, mock_execute, valid_assignment_row):
-        # For PostgreSQL, we expect dict format, for SQLite tuple format
-        if DATABASE_TYPE == "postgresql":
-            mock_execute.return_value = [{"id": 10}]
-            params = (
-                valid_assignment_row["instructor_id"],
-                valid_assignment_row["course_id"],
-            )
-        else:
-            mock_cursor = type("MockCursor", (), {"lastrowid": 10})()
-            mock_execute.return_value = mock_cursor
-            params = valid_assignment_row
+        # PostgreSQL returns dict format with RETURNING clause
+        mock_execute.return_value = [{"id": 10}]
+        params = (
+            valid_assignment_row["instructor_id"],
+            valid_assignment_row["course_id"],
+        )
 
         result = assignment_db_insert(params)
 

@@ -73,42 +73,40 @@ sequenceDiagram
 ## Folder Structure
 
 ```plaintext
+```plaintext
 project/
 ├── run.py                      # Flask app entry point
 ├── app/                        # Main application package
 │   ├── __init__.py             # App factory, extensions initialization
-│   ├── routes/                 # Controller layer (API endpoints)
-│   │   ├── student.py
-│   │   ├── instructor.py
-│   │   └── ...
+│   ├── models/                 # Data models (schemas, dataclasses)
+│   ├── routes/                 # API endpoints (controllers)
 │   ├── services/               # Business logic layer
-│   │   ├── student.py
-│   │   ├── instructor.py
-│   │   └── ...
-│   ├── models/                 # Data models (dataclasses or schemas)
-│   │   ├── student.py
-│   │   ├── instructor.py
-│   │   └── ...
 │   ├── utils/                  # Reusable helpers
-│   │   ├── conversions.py
-│   │   └── ...
-├── db/                        # Database layer (SQL helpers, connections)
-├── tests/                     # Unit and integration tests
-│   ├── test_students.py
-│   └── ...
-├── docs/                      # Project documentation
-├── requirements.txt           # Python dependencies
-├── Dockerfile                 # Docker image build instructions
-├── Dockerfile.multi-stage     # Multi-stage Docker build for smaller images
-├── entrypoint.sh              # Docker container entrypoint script
-└── Makefile                   # Convenience commands (build, run, test)
+├── db/                         # Database layer
+│   ├── data.py                 # Initial data population
+│   ├── database.py             # Main DB connection logic
+│   ├── db_utils.py             # Helper functions for DB
+│   ├── init_postgresql.py      # DB initialization script
+│   ├── schema_postgresql.sql   # DB schema
+├── scripts/                    # Scripts to run and automate project tasks
+├── tests/                      # Unit tests
+├── docs/                       # Project documentation
+├── requirements.txt            # Python dependencies
+├── Dockerfile                  # Single-stage Docker build
+├── Dockerfile.multi-stage      # Multi-stage Docker build
+├── entrypoint.sh               # Docker container entrypoint script
+├── Makefile                    # Convenience commands (build, run, test)
+├── api_client.sh               # API testing helper script
+├── checklist.md                # Project checklist
+└── .github/
+    └── workflows/
+        └── ci.yml              # CI workflow for format, test, coverage
+        └── markdownlint.yml    # CI workflow for format markdown files
 ```
 
-## Tools Used
-
 - Flask – API framework
-- SQLite – Lightweight DB
+- PostgreSQL (Docker container) – Local development
+- Azure Database for PostgreSQL – Cloud database (production)
 - Docker – Containerization
 - Gunicorn – WSGI server
 - GitHub Actions – CI for format, test, coverage, and markdown linting
-- Render – Deployment platform

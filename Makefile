@@ -1,4 +1,4 @@
-.PHONY: freeze install format test coverage up down
+.PHONY: freeze install format format-md test coverage up down single multi
 
 freeze:
 	pip freeze > requirements.txt
@@ -25,3 +25,10 @@ up:
 # make down V=1 -> remove volume
 down:
 	docker compose down$(if $(V), -v)
+
+# for testing the time it takes to build each Dockerfile
+single:
+	docker build --network=host -f Dockerfile -t single-api .
+
+multi:
+	docker build --network=host -f Dockerfile.multi-stage -t multi-api .

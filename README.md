@@ -14,7 +14,7 @@ All interactions happen through REST APIs, using tools like curl, Postman, or au
 
 ## Tech Stack
 
-![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Azure](https://img.shields.io/badge/Azure-007FFF.svg?style=for-the-badge&logo=Azure&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
 
 ## Why I Built This
 
@@ -24,20 +24,21 @@ To gain real backend experience beyond tutorials by:
 - Handling CRUD + archive logic across multiple entities
 - Writing testable, maintainable backend logic
 - Practicing containerization using Docker (incl. multi-stage builds)
-- Deploying to a real platform (Render)
-- Applying CI/CD and testing best practices
+- Implementing automated CI/CD pipelines for code quality and testing
+- Expanding to use Azure Database for PostgreSQL for production/cloud experience
+- Utilizing Dockerized PostgreSQL for local development and testing
 - Includes automated CI/CD workflows using GitHub Actions:
   - Code formatting and linting (Ruff)
-  - Unit tests with PostgreSQL database
+  - Unit tests
   - Coverage reporting with PR comments
 
 ## What It Does
 
-- Provides RESTful endpoints for core school entities like students, instructors, courses, and enrollments  
-- Supports full CRUD plus archiving (soft deletes) to preserve data history  
-- Uses PostgreSQL as the database for robust data management and production-ready deployment
-- Fully containerized with Docker (including multi-stage builds) for clean deployment  
-- Includes Pytest-based tests covering routes and business logic
+- Provides RESTful endpoints for core school entities (students, instructors, courses, enrollments, etc.)
+- Supports full CRUD operations plus archiving (soft deletes) to preserve data history
+- Uses PostgreSQL for robust, production-ready data management (local via Docker, cloud via Azure)
+- Is fully containerized for easy deployment
+- Includes automated tests for routes and business logic
 
 ## 🛠️ Running Locally
 
@@ -71,8 +72,6 @@ make down
 make down V=1 # clear volume
 ```
 
-> This application uses PostgreSQL as the database. Ensure your PostgreSQL service is running (see `docker-compose.yml`).
-
 ## 🧪 Interact with the API via Bash Script
 
 A helper script `api_client.sh` is included to simplify sending requests to the API without needing Postman or typing full `curl` commands.
@@ -91,14 +90,14 @@ A helper script `api_client.sh` is included to simplify sending requests to the 
 
 Uses PostgreSQL for robust data management and production-ready deployment.
 
-| Resource           | GET | POST | PUT | PATCH (Archive) |
-|--------------------|-----|------|-----|-----------------|
-| Assignments        | ✔   | ✔    | ✔   | ✔               |
-| Course Schedule    | ✔   | ✔    | ✔   | ✔               |
-| Courses            | ✔   | ✔    | ✔   | ✔               |
-| Departments        | ✔   | ✔    | ✔   | ✔               |
-| Enrollments        | ✔   | ✔    | ✔   | ✔               |
-| Instructors        | ✔   | ✔    | ✔   | ✔               |
-| Programs           | ✔   | ✔    | ✔   | ✔               |
-| Students           | ✔   | ✔    | ✔   | ✔               |
-| Terms              | ✔   | ✔    | ✔   | ✔               |
+| Resource           | GET (Read) | POST (Create) | PUT (Update) | PATCH (Archive) |
+|--------------------|------------|---------------|--------------|-----------------|
+| Assignments        | ✔          | ✔             | ✔            | ✔               |
+| Course Schedule    | ✔          | ✔             | ✔            | ✔               |
+| Courses            | ✔          | ✔             | ✔            | ✔               |
+| Departments        | ✔          | ✔             | ✔            | ✔               |
+| Enrollments        | ✔          | ✔             | ✔            | ✔               |
+| Instructors        | ✔          | ✔             | ✔            | ✔               |
+| Programs           | ✔          | ✔             | ✔            | ✔               |
+| Students           | ✔          | ✔             | ✔            | ✔               |
+| Terms              | ✔          | ✔             | ✔            | ✔               |

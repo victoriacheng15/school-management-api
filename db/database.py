@@ -25,15 +25,60 @@ logger = logging.getLogger(__name__)
 class Database:
     def __init__(self):
         """
-        Initialize the Database class for PostgreSQL only.
+        Initialize the Database class for PostgreSQL.
+        Automatically switches between local and Azure database based on FLASK_ENV.
         """
-        self.db_config = {
-            "host": os.getenv("DB_HOST", "localhost"),
-            "port": os.getenv("DB_PORT", "5432"),
-            "database": os.getenv("DB_NAME", "school"),
-            "user": os.getenv("DB_USER", "schooluser"),
-            "password": os.getenv("DB_PASSWORD", "schoolpass"),
-        }
+        flask_env = os.getenv("FLASK_ENV", "development")
+
+        if flask_env == "production":
+            # Azure Database configuration - require all environment variables
+            required_vars = [
+                "AZURE_PG_HOST",
+                "AZURE_PG_NAME",
+                "AZURE_PG_USER",
+                "AZURE_PG_PASSWORD",
+            ]
+            missing_vars = [var for var in required_vars if not os.getenv(var)]
+
+            if missing_vars:
+                error_msg = f"Missing required Azure database environment variables: {', '.join(missing_vars)}"
+                error_msg += "\nPlease set these variables in your .env file for production environment."
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            self.db_config = {
+                "host": os.getenv("AZURE_PG_HOST"),
+                "port": os.getenv("AZURE_PG_PORT", "5432"),
+                "database": os.getenv("AZURE_PG_NAME"),
+                "user": os.getenv("AZURE_PG_USER"),
+                "password": os.getenv("AZURE_PG_PASSWORD"),
+            }
+
+            logger.info("Using Azure Database for PostgreSQL (production)")
+        else:
+            # Local Database configuration (development) - require all environment variables
+            required_vars = [
+                "LOCAL_DB_HOST",
+                "LOCAL_DB_NAME",
+                "LOCAL_DB_USER",
+                "LOCAL_DB_PASSWORD",
+            ]
+            missing_vars = [var for var in required_vars if not os.getenv(var)]
+
+            if missing_vars:
+                error_msg = f"Missing required local database environment variables: {', '.join(missing_vars)}"
+                error_msg += "\nPlease set these variables in your .env file for development environment."
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            self.db_config = {
+                "host": os.getenv("LOCAL_DB_HOST"),
+                "port": os.getenv("LOCAL_DB_PORT", "5432"),
+                "database": os.getenv("LOCAL_DB_NAME"),
+                "user": os.getenv("LOCAL_DB_USER"),
+                "password": os.getenv("LOCAL_DB_PASSWORD"),
+            }
+            logger.info("Using Local Database (development)")
         self.conn = None
         self.cursor = None
 

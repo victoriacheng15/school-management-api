@@ -1,14 +1,12 @@
-FROM python:3.13-alpine
+FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN apk add --no-cache make bash curl jq
-
-COPY requirements.txt /app/
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+COPY . .
 
 RUN chmod +x /app/entrypoint.sh
 

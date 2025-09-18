@@ -19,4 +19,4 @@ fi
 
 # Start the Flask application using Gunicorn
 echo "Starting Flask application..."
-exec gunicorn --bind 0.0.0.0:5000 run:app
+exec gunicorn --workers 1 --bind 0.0.0.0:5000 run:app

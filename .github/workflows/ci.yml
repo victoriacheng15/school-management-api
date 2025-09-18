@@ -42,6 +42,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: format
+    env:
+      LOCAL_DB_HOST: ${{ secrets.LOCAL_DB_HOST }}
+      LOCAL_DB_NAME: ${{ secrets.LOCAL_DB_NAME }}
+      LOCAL_DB_USER: ${{ secrets.LOCAL_DB_USER }}
+      LOCAL_DB_PASSWORD: ${{ secrets.LOCAL_DB_PASSWORD }}
 
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -54,8 +59,8 @@ jobs:
 
       - name: Run tests + coverage
         run: |
-          echo "Running pytest with coverage for PostgreSQL..."
-          pytest --cov=app --cov-report=html --cov-report=term-missing --maxfail=1 -v | tee coverage_output.txt
+          echo "Running pytest with coverage..."
+          make coverage | tee coverage_output.txt
           echo "Coverage command completed with exit code: $?"
 
       - name: Upload coverage artifact
@@ -86,14 +91,17 @@ jobs:
           COVERAGE_FILE="./coverage/coverage_output.txt"
           if [ ! -f "$COVERAGE_FILE" ]; then
             echo "No coverage file found at $COVERAGE_FILE"
-            ls -la ./coverage-postgres || true
+            ls -la ./coverage/ || true
             exit 1
           fi
+
           COVERAGE_LINE=$(grep -E "TOTAL.*[0-9]+%" "$COVERAGE_FILE" || true)
           if [ -z "$COVERAGE_LINE" ]; then
-            echo "No coverage data for PostgreSQL in $COVERAGE_FILE."
+            echo "No coverage data found in $COVERAGE_FILE."
+            cat "$COVERAGE_FILE" || echo "Could not read coverage file"
             exit 1
           fi
+
           COVERAGE_PERCENTAGE=$(echo "$COVERAGE_LINE" | awk '{print substr($NF, 1, length($NF)-1)}')
           STATUS="🔴 Fail"
           if (( $(echo "$COVERAGE_PERCENTAGE >= $COVERAGE_THRESHOLD" | bc -l) )); then

@@ -7,12 +7,12 @@ Here is a section of what I learned from this project:
 During the development of this Flask API, I compared the build process between **single-stage** and **multi-stage** Dockerfiles. Here are some of the findings:
 
 - Single-stage build:
-  - Time taken: Approximately 0.50s
+  - Time taken: Approximately 1.67s
   - Process:
     - All dependencies, including build tools and caches, are installed into the same image.
     - The final image size is larger due to the inclusion of build tools and extra files.
 - Multi-Stage Build
-  - Time Taken: Approximately 0.32s
+  - Time Taken: Approximately 1.08s
   - Process:
     - Dependencies are installed in a separate builder stage, and only the necessary files (like the app and required libraries) are copied into the final image.
     - The final image is smaller and cleaner, containing only the essential runtime environment.

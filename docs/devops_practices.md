@@ -6,7 +6,7 @@ This repository implements automated code quality and documentation checks using
 
 ### CI Workflow: Format, Test, and Coverage
 
-The CI workflow automatically formats, tests, and measures code coverage for pull requests targeting the `main` branch.
+The CI workflow automatically formats code, runs tests, and posts coverage results for pull requests targeting the `main` branch.
 
 **Trigger Conditions:**
 
@@ -19,27 +19,25 @@ The workflow runs the following jobs in sequence:
 
 1. **`format`**:
     - Checks out the code.
-    - Sets up Python 3.12.
+    - Sets up Python 3.10.
     - Installs dependencies (`make install`).
     - Formats code using Ruff (`make format`).
-    - Commits and pushes any changes.
+    - Commits and pushes any changes if formatting was needed.
 
 2. **`test`**:
     - Waits for the `format` job to succeed.
     - Checks out the code.
-    - Sets up Python 3.12.
+    - Sets up Python 3.10.
     - Installs dependencies (`make install`).
-    - Sets up the database (`make setup-db`).
-    - Runs tests (`make test`).
+    - Sets database environment variables from GitHub secrets.
+    - Runs tests and coverage (`make coverage`).
+    - Uploads the coverage results as an artifact.
 
-3. **`coverage`**:
+3. **`coverage-report`**:
     - Waits for the `test` job to succeed.
     - Checks out the code.
-    - Sets up Python 3.12.
-    - Installs dependencies (`make install`).
-    - Sets up the database (`make setup-db`).
-    - Calculates test coverage (`make coverage`).
-    - Posts a coverage summary to the pull request.
+    - Downloads the coverage artifact.
+    - Posts a coverage summary as a comment on the pull request.
 
 ### Documentation Linting with Markdownlint
 

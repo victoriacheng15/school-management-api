@@ -29,18 +29,23 @@ class Database:
         Automatically switches between local and Azure database based on FLASK_ENV.
         """
         flask_env = os.getenv("FLASK_ENV", "development")
-        
+
         if flask_env == "production":
             # Azure Database configuration - require all environment variables
-            required_vars = ["AZURE_PG_HOST", "AZURE_PG_NAME", "AZURE_PG_USER", "AZURE_PG_PASSWORD"]
+            required_vars = [
+                "AZURE_PG_HOST",
+                "AZURE_PG_NAME",
+                "AZURE_PG_USER",
+                "AZURE_PG_PASSWORD",
+            ]
             missing_vars = [var for var in required_vars if not os.getenv(var)]
-            
+
             if missing_vars:
                 error_msg = f"Missing required Azure database environment variables: {', '.join(missing_vars)}"
                 error_msg += "\nPlease set these variables in your .env file for production environment."
                 logger.error(error_msg)
                 raise ValueError(error_msg)
-            
+
             self.db_config = {
                 "host": os.getenv("AZURE_PG_HOST"),
                 "port": os.getenv("AZURE_PG_PORT", "5432"),
@@ -52,15 +57,20 @@ class Database:
             logger.info("Using Azure Database for PostgreSQL (production)")
         else:
             # Local Database configuration (development) - require all environment variables
-            required_vars = ["LOCAL_DB_HOST", "LOCAL_DB_NAME", "LOCAL_DB_USER", "LOCAL_DB_PASSWORD"]
+            required_vars = [
+                "LOCAL_DB_HOST",
+                "LOCAL_DB_NAME",
+                "LOCAL_DB_USER",
+                "LOCAL_DB_PASSWORD",
+            ]
             missing_vars = [var for var in required_vars if not os.getenv(var)]
-            
+
             if missing_vars:
                 error_msg = f"Missing required local database environment variables: {', '.join(missing_vars)}"
                 error_msg += "\nPlease set these variables in your .env file for development environment."
                 logger.error(error_msg)
                 raise ValueError(error_msg)
-            
+
             self.db_config = {
                 "host": os.getenv("LOCAL_DB_HOST"),
                 "port": os.getenv("LOCAL_DB_PORT", "5432"),

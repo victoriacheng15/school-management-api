@@ -13,6 +13,7 @@ DB_CONFIG = {
     "sslmode": "require",
 }
 
+
 def drop_all_tables():
     print("Connecting to Azure PostgreSQL DB...")
     conn = psycopg2.connect(**DB_CONFIG)
@@ -33,6 +34,7 @@ def drop_all_tables():
     cur.close()
     conn.close()
     print("✅ All tables dropped.")
+
 
 if __name__ == "__main__":
     drop_all_tables()

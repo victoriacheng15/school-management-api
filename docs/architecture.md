@@ -6,11 +6,22 @@ This project is a RESTful API built with Flask for managing a school database sy
 
 The architecture follows a layered approach, separating routing, business logic, and database access.
 
+## Technology Stack
+
+- Flask – API framework
+- PostgreSQL (Docker container) – Local development
+- Azure Database for PostgreSQL – Cloud database (production)
+- Azure Container Registry (ACR) – Container image storage
+- Azure Web App – Frontend/client application
+- Docker – Containerization
+- Gunicorn – WSGI server
+- GitHub Actions – CI for format, test, coverage, and markdown linting
+
 ## Component Diagram
 
 ```mermaid
 flowchart TD
-    ClientTool["Client (curl / Postman)"]
+    ClientTool["Client (Azure Web App / curl / Postman)"]
 
     subgraph "API Layer"
         Routes["Flask Routes (routes/)"]
@@ -26,7 +37,8 @@ flowchart TD
 
     subgraph "Data Access Layer"
         DB["Raw SQL Access (db/)"]
-        SQLite["SQLite DB (school.db)"]
+        LocalPG["PostgreSQL (Docker Compose)"]
+        AzurePG["Azure Database for PostgreSQL"]
     end
 
     ClientTool --> Routes
@@ -34,7 +46,8 @@ flowchart TD
     Routes --> Utils
     Services --> Utils
     Services --> DB
-    DB --> SQLite
+    DB --> LocalPG
+    DB --> AzurePG
 ```
 
 ## Key Components
@@ -42,8 +55,8 @@ flowchart TD
 - Client: Any tool or user agent—like Postman, curl, or a web browser—used to send HTTP requests to the API.
 - Flask API Routes: Defines HTTP endpoints (e.g., /students, /courses) that handle requests, parse inputs, and send responses.
 - Service Layer: Contains business logic such as data validation, processing rules, and orchestration between routes and the database layer.
-- Database Layer: Responsible for executing raw SQL queries or ORM operations to interact with the SQLite database.
-- SQLite: The persistent database that stores all application data according to your defined schema.
+- Database Layer: Responsible for executing raw SQL queries or ORM operations to interact with the PostgreSQL database (local via Docker Compose, production via Azure Database for PostgreSQL).
+- PostgreSQL: The persistent database that stores all application data according to your defined schema. Local development uses Docker Compose, while production uses Azure Database for PostgreSQL.
 
 ## Request Flow
 
@@ -53,14 +66,14 @@ sequenceDiagram
     participant Flask as "Flask Route"
     participant Service as "StudentService"
     participant DB as "DB Layer"
-    participant SQLite as "SQLite DB"
+    participant PostgreSQL as "PostgreSQL (Local/Azure)"
 
     Client->>Flask: POST /students
     Flask->>Service: validate & process data
     alt Data valid
         Service->>DB: insert student
-        DB->>SQLite: INSERT INTO students (...)
-        SQLite-->>DB: OK
+        DB->>PostgreSQL: INSERT INTO students (...)
+        PostgreSQL-->>DB: OK
         DB-->>Service: success
         Service-->>Flask: return 201 Created
         Flask-->>Client: 201 Created + JSON success response
@@ -69,6 +82,32 @@ sequenceDiagram
         Flask-->>Client: Error response (400, 500, etc.) + JSON error message
     end
 ```
+
+**Note**: This request flow pattern applies to all CRUD operations with the following variations:
+
+**HTTP Methods and Endpoints:**
+
+- `GET /students` (read all)
+- `GET /students/{id}` (read by ID)
+- `POST /students` (create)
+- `PUT /students` (update)
+- `PATCH /students` (archive/soft delete)
+
+**SQL Operations:**
+
+- `INSERT INTO students (...)` (create)
+- `SELECT * FROM students WHERE id = ?` (read)
+- `UPDATE students SET ... WHERE id = ?` (update/patch)
+- `DELETE FROM students WHERE id = ?` (delete)
+
+**Response Status Codes:**
+
+- `201 Created` (POST - successful creation)
+- `200 OK` (GET, PUT, PATCH, DELETE - successful operations)
+- `400 Bad Request` (invalid data or missing required fields)
+- `404 Not Found` (when resource doesn't exist)
+- `422 Unprocessable Entity` (archive operations when resource not found)
+- `500 Internal Server Error` (unexpected server errors)
 
 ## Folder Structure
 
@@ -103,10 +142,3 @@ project/
         └── ci.yml              # CI workflow for format, test, coverage
         └── markdownlint.yml    # CI workflow for format markdown files
 ```
-
-- Flask – API framework
-- PostgreSQL (Docker container) – Local development
-- Azure Database for PostgreSQL – Cloud database (production)
-- Docker – Containerization
-- Gunicorn – WSGI server
-- GitHub Actions – CI for format, test, coverage, and markdown linting

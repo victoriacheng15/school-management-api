@@ -54,7 +54,12 @@ class Database:
         if Database._db_config is None:
             if _is_production():
                 # Azure Database configuration
-                required_vars = ["AZURE_PG_HOST", "AZURE_PG_NAME", "AZURE_PG_USER", "AZURE_PG_PASSWORD"]
+                required_vars = [
+                    "AZURE_PG_HOST",
+                    "AZURE_PG_NAME",
+                    "AZURE_PG_USER",
+                    "AZURE_PG_PASSWORD",
+                ]
                 _check_required_env_vars(required_vars, "Azure")
 
                 Database._db_config = {
@@ -72,7 +77,12 @@ class Database:
                     Database._logged_azure = True
             else:
                 # Local Database configuration
-                required_vars = ["LOCAL_DB_HOST", "LOCAL_DB_NAME", "LOCAL_DB_USER", "LOCAL_DB_PASSWORD"]
+                required_vars = [
+                    "LOCAL_DB_HOST",
+                    "LOCAL_DB_NAME",
+                    "LOCAL_DB_USER",
+                    "LOCAL_DB_PASSWORD",
+                ]
                 _check_required_env_vars(required_vars, "local")
 
                 Database._db_config = {
@@ -93,7 +103,7 @@ class Database:
                 Database._pool = pool.SimpleConnectionPool(
                     1,  # minimum connections
                     3,  # maximum connections (reduced for memory constraints)
-                    **Database._db_config
+                    **Database._db_config,
                 )
                 logger.info("Database connection pool created (1-3 connections)")
             except Exception as e:

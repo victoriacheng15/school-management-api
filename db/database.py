@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
+    # Class-level flags to track if we've already logged the database type
+    _logged_azure = False
+    _logged_local = False
+    
     def __init__(self):
         """
         Initialize the Database class for PostgreSQL.
@@ -52,9 +56,13 @@ class Database:
                 "database": os.getenv("AZURE_PG_NAME"),
                 "user": os.getenv("AZURE_PG_USER"),
                 "password": os.getenv("AZURE_PG_PASSWORD"),
+                "sslmode": os.getenv("AZURE_PG_SSLMODE", "require")
             }
 
-            logger.info("Using Azure Database for PostgreSQL (production)")
+            # Only log once per application lifecycle to prevent excessive logging
+            if not Database._logged_azure:
+                logger.info("Using Azure Database for PostgreSQL (production)")
+                Database._logged_azure = True
         else:
             # Local Database configuration (development) - require all environment variables
             required_vars = [
@@ -78,7 +86,12 @@ class Database:
                 "user": os.getenv("LOCAL_DB_USER"),
                 "password": os.getenv("LOCAL_DB_PASSWORD"),
             }
-            logger.info("Using Local Database (development)")
+            
+            # Only log once per application lifecycle to prevent excessive logging
+            if not Database._logged_local:
+                logger.info("Using Local Database (development)")
+                Database._logged_local = True
+                
         self.conn = None
         self.cursor = None
 
@@ -92,9 +105,11 @@ class Database:
                 self.cursor = self.conn.cursor(
                     cursor_factory=psycopg2.extras.RealDictCursor
                 )
-                logger.info(
-                    f"Successfully connected to PostgreSQL database: {self.db_config['database']}"
-                )
+                # Reduce connection logging in production to minimize log volume
+                if os.getenv("FLASK_ENV", "development") == "development":
+                    logger.info(
+                        f"Successfully connected to PostgreSQL database: {self.db_config['database']}"
+                    )
             except psycopg2.Error as e:
                 logger.error(f"Error connecting to database: {e}")
                 raise
@@ -107,7 +122,9 @@ class Database:
             try:
                 self.conn.commit()
                 self.conn.close()
-                logger.info(f"Connection to {self.db_config['database']} closed.")
+                # Reduce connection logging in production to minimize log volume
+                if os.getenv("FLASK_ENV", "development") == "development":
+                    logger.info(f"Connection to {self.db_config['database']} closed.")
             except psycopg2.Error as e:
                 logger.error(f"Error closing the connection: {e}")
             finally:
@@ -123,7 +140,11 @@ class Database:
             if "?" in query:
                 query = query.replace("?", "%s")
             self.cursor.execute(query, params)
-            logger.info(f"Executed query: {query}")
+            
+            # Only log queries in development to reduce log volume in production
+            if os.getenv("FLASK_ENV", "development") == "development":
+                logger.info(f"Executed query: {query}")
+                
             if (
                 query.strip().lower().startswith("select")
                 or "returning" in query.lower()
@@ -151,7 +172,11 @@ class Database:
                 query = query.replace("?", "%s")
             self.cursor.executemany(query, param_list)
             self.conn.commit()
-            logger.info(f"Executed many: {query}")
+            
+            # Only log in development to reduce log volume in production
+            if os.getenv("FLASK_ENV", "development") == "development":
+                logger.info(f"Executed many: {query}")
+                
             return self.cursor
         except psycopg2.Error as e:
             logger.error(f"Error executing many: {e}")
@@ -170,7 +195,11 @@ class Database:
                 if statement:
                     self.cursor.execute(statement)
             self.conn.commit()
-            logger.info(f"Executed script with multiple SQL commands.")
+            
+            # Only log in development to reduce log volume in production
+            if os.getenv("FLASK_ENV", "development") == "development":
+                logger.info(f"Executed script with multiple SQL commands.")
+                
         except psycopg2.Error as e:
             logger.error(f"Error executing script: {e}")
         finally:

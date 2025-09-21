@@ -1,12 +1,12 @@
 #!/bin/sh
 
-
-# Set FLASK_ENV to production if not already set
-export FLASK_ENV=production
-
-if [ "$FLASK_ENV" = "production" ]; then
+# Force production environment for Azure deployments
+# Check if we're running in Azure Web App or if FLASK_ENV is explicitly set to production
+if [ "$WEBSITE_SITE_NAME" != "" ] || [ "$FLASK_ENV" = "production" ]; then
+  export FLASK_ENV=production
   echo "Production environment detected. Skipping database initialization."
 else
+  export FLASK_ENV=development
   echo "Development environment detected. Initializing local database..."
   echo "Waiting for PostgreSQL to be available..."
   until python3 -c "import socket; socket.create_connection(('postgres', 5432), timeout=1)" 2>/dev/null; do

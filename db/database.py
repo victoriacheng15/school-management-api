@@ -26,7 +26,7 @@ class Database:
     # Class-level flags to track if we've already logged the database type
     _logged_azure = False
     _logged_local = False
-    
+
     def __init__(self):
         """
         Initialize the Database class for PostgreSQL.
@@ -56,7 +56,7 @@ class Database:
                 "database": os.getenv("AZURE_PG_NAME"),
                 "user": os.getenv("AZURE_PG_USER"),
                 "password": os.getenv("AZURE_PG_PASSWORD"),
-                "sslmode": os.getenv("AZURE_PG_SSLMODE", "require")
+                "sslmode": os.getenv("AZURE_PG_SSLMODE", "require"),
             }
 
             # Only log once per application lifecycle to prevent excessive logging
@@ -86,12 +86,12 @@ class Database:
                 "user": os.getenv("LOCAL_DB_USER"),
                 "password": os.getenv("LOCAL_DB_PASSWORD"),
             }
-            
+
             # Only log once per application lifecycle to prevent excessive logging
             if not Database._logged_local:
                 logger.info("Using Local Database (development)")
                 Database._logged_local = True
-                
+
         self.conn = None
         self.cursor = None
 
@@ -140,11 +140,11 @@ class Database:
             if "?" in query:
                 query = query.replace("?", "%s")
             self.cursor.execute(query, params)
-            
+
             # Only log queries in development to reduce log volume in production
             if os.getenv("FLASK_ENV", "development") == "development":
                 logger.info(f"Executed query: {query}")
-                
+
             if (
                 query.strip().lower().startswith("select")
                 or "returning" in query.lower()
@@ -172,11 +172,11 @@ class Database:
                 query = query.replace("?", "%s")
             self.cursor.executemany(query, param_list)
             self.conn.commit()
-            
+
             # Only log in development to reduce log volume in production
             if os.getenv("FLASK_ENV", "development") == "development":
                 logger.info(f"Executed many: {query}")
-                
+
             return self.cursor
         except psycopg2.Error as e:
             logger.error(f"Error executing many: {e}")
@@ -195,11 +195,11 @@ class Database:
                 if statement:
                     self.cursor.execute(statement)
             self.conn.commit()
-            
+
             # Only log in development to reduce log volume in production
             if os.getenv("FLASK_ENV", "development") == "development":
                 logger.info(f"Executed script with multiple SQL commands.")
-                
+
         except psycopg2.Error as e:
             logger.error(f"Error executing script: {e}")
         finally:

@@ -11,7 +11,7 @@ os.environ["LOCAL_DB_USER"] = "postgres"
 os.environ["LOCAL_DB_PASSWORD"] = "postgres"
 
 # Create a global patcher that starts before imports
-mock_pool_patcher = patch('psycopg2.pool.SimpleConnectionPool')
+mock_pool_patcher = patch("psycopg2.pool.SimpleConnectionPool")
 mock_pool = mock_pool_patcher.start()
 
 # Create a mock pool instance

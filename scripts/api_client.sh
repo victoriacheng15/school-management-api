@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-BASE_URL="http://127.0.0.1:5000"
+# BASE_URL="http://127.0.0.1:5000"
+BASE_URL="https://school-api-demo-eyhkgnd7dtf2fkh7.canadacentral-01.azurewebsites.net/"
 
 get_resource() {
   local resource=$1

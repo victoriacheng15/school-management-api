@@ -2,19 +2,35 @@
 
 A hands-on project to explore backend development by building a Flask-based REST API for managing school-related data — including students, courses, instructors, and programs. This project is part of my learning journey to better understand how backend systems are structured and how data flows through them.
 
-It's built with Flask, PostgreSQL, Docker, and includes automated testing, following principles of backend architecture and modern DevOps workflows — with zero frontend.
+## 📺 Demo
 
-All interactions happen through REST APIs, using tools like curl, Postman, or automated test scripts.
+Check out the YouTube demo to see the API in action:
+
+👉 [Watch the Demo](https://youtube.com/shorts/7JlKnhOzrFE)
+
+**About this video:**
+
+This video demonstrates a Flask REST API deployed on an Azure Web App using Docker, with Azure Container Registry (ACR) for image storage and Azure Database for PostgreSQL for data storage.
+
+**The demo covers:**
+
+- Architecture overview
+- Request/response flow
+- Example API calls (read, create, update, archive) on instructors
+
+A simple walkthrough of deploying and testing a school database API on Azure.
+
+---
+
+## Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Azure](https://img.shields.io/badge/Azure-007FFF.svg?style=for-the-badge&logo=Azure&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
 
 ## Documentation & Notes
 
 - [Architecture Overview](docs/architecture.md)  
 - [DevOps Practices](docs/devops_practices.md)  
 - [Learning Notes](docs/learning_note.md)  
-
-## Tech Stack
-
-![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Azure](https://img.shields.io/badge/Azure-007FFF.svg?style=for-the-badge&logo=Azure&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
 
 ## Why I Built This
 
@@ -40,37 +56,67 @@ To gain real backend experience beyond tutorials by:
 - Is fully containerized for easy deployment
 - Includes automated tests for routes and business logic
 
-## 🛠️ Running Locally
+## Environments Overview
 
-To run this project locally, use Docker Compose for a fast and consistent setup:
+This project supports three main environments for development and deployment:
 
-### Prerequisites
+- **Local Development:**
+  - Run the Flask API directly on your machine using your own Python environment and a local PostgreSQL instance (optional).
+  - Fastest for debugging and iterating on code.
 
-- Docker
-- `make` (built into most Unix-based systems)
-- PostgreSQL (optional, if you want to use Postgres locally)
+- **Dockerized PostgreSQL (Recommended for Local Dev):**
+  - Use Docker Compose to spin up both the Flask API and a PostgreSQL database in containers.
+  - Ensures consistency and easy setup—no need to install PostgreSQL locally.
+  - Ideal for development and testing.
 
-### � Quick Start with Docker Compose
+- **Production (Azure Database for PostgreSQL):**
+  - Deploy the Flask API to production and connect to a managed Azure Database for PostgreSQL instance.
+  - Provides cloud reliability, backups, and scalability for real-world use.
 
-- **Build and start the containers:**
+See below for how to run and configure each environment.
 
-```sh
-make up
-```
+All interactions happen through REST APIs, using tools like curl, Postman, or automated test scripts. There is no frontend.
 
-- **Running the script to see if data is returned or not**
+## 🛠️ Running & Configuring Environments
 
-```sh
-./api_client.sh read students
-```
+### 1. Local Development (Direct)
 
-- **Stop and clean up Docker resources:**
+- Install Python and dependencies from `requirements.txt`.
+- (Optional) Install PostgreSQL locally and update your environment variables to point to your local DB.
+- Run the Flask app directly for fast iteration.
 
-```sh
-make down
-# or 
-make down V=1 # clear volume
-```
+### 2. Local Development (Dockerized PostgreSQL)
+
+- **Recommended:** Use Docker Compose for a consistent, isolated environment.
+- Prerequisites: Docker, `make` (most Unix-based systems).
+- Start everything with:
+
+  ```sh
+  make up
+  ```
+
+- Interact with the API (example):
+
+  ```sh
+  ./api_client.sh read students
+  ```
+
+- Stop and clean up Docker resources:
+
+  ```sh
+  make down
+  # or
+  make down V=1 # clear volume
+  ```
+
+### 3. Production (Azure Database for PostgreSQL)
+
+- Deploy the Flask API to your production environment (e.g., Azure App Service, VM, or container).
+- Provision an Azure Database for PostgreSQL instance.
+- Update your environment variables to point to the Azure DB connection string.
+- Run migrations/init scripts as needed (see `scripts/init_azure_db.sh`).
+
+---
 
 ## 🧪 Interact with the API via Bash Script
 

@@ -2,7 +2,6 @@
 
 This repository implements automated code quality and documentation checks using GitHub Actions workflows. The system enforces consistent formatting and style across the codebase.
 
-
 ## Workflows
 
 ### CI Workflow: Format, Test, and Coverage

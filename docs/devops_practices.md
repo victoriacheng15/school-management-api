@@ -13,31 +13,11 @@ The CI workflow automatically formats code, runs tests, and posts coverage resul
 - On pull requests targeting the `main` branch.
 - When changes are made to files in: `run.py`, `db/`, `app/`, or `tests/`.
 
-**Workflow Jobs:**
+**Workflow Steps:**
 
-The workflow runs the following jobs in sequence:
-
-1. **`format`**:
-    - Checks out the code.
-    - Sets up Python 3.10.
-    - Installs dependencies (`make install`).
-    - Formats code using Ruff (`make format`).
-    - Commits and pushes any changes if formatting was needed.
-
-2. **`test`**:
-    - Waits for the `format` job to succeed.
-    - Checks out the code.
-    - Sets up Python 3.10.
-    - Installs dependencies (`make install`).
-    - Sets database environment variables from GitHub secrets.
-    - Runs tests and coverage (`make coverage`).
-    - Uploads the coverage results as an artifact.
-
-3. **`coverage-report`**:
-    - Waits for the `test` job to succeed.
-    - Checks out the code.
-    - Downloads the coverage artifact.
-    - Posts a coverage summary as a comment on the pull request.
+1. **Check Formatting:** Reports any Python code formatting issues found using Ruff.
+2. **Run Tests:** Executes the test suite with `pytest` and calculates code coverage.
+3. **Post Coverage Report:** Uploads the coverage results and posts a summary comment on the pull request.
 
 ### Docker Image Build & Publish to GHCR
 
@@ -50,7 +30,7 @@ This workflow builds the Docker image using the multi-stage Dockerfile and pushe
 
 **Workflow Steps:**
 
-1. **Checkout code:** Retrieves repository content using `actions/checkout@v5`.
+1. **Checkout code:** Checks out the code.
 2. **Authenticate to GHCR:** Logs in to GitHub Container Registry using the built-in `GITHUB_TOKEN`.
 3. **Build Docker image:** Builds the image from `Dockerfile.multi-stage` and tags it as `ghcr.io/victoriacheng15/school-api:latest`.
 4. **Push image:** Pushes the tagged image to GHCR for use in deployments.
@@ -67,9 +47,9 @@ The **Markdownlint Workflow** ensures consistent documentation formatting using 
 
 **Workflow Steps:**
 
-1. **Checkout code:** Retrieves repository content using `actions/checkout@v4`.
+1. **Checkout code:** Checks out the code.
 2. **Install linter:** Globally installs `markdownlint-cli` via npm.
-3. **Run linting:** Executes automatic fixes on all Markdown files in `docs/`.
+3. **Run linting:** Reports any markdown style issues found in `docs/`.
 
 ## Development Practices
 
@@ -78,9 +58,9 @@ The **Markdownlint Workflow** ensures consistent documentation formatting using 
 1. Create feature branches from `main`.
 2. Open pull requests for all changes.
 3. Automated checks will:
-    - Format Python files.
+    - Check Python code formatting.
     - Run tests and calculate code coverage.
-    - Lint and fix Markdown documentation in `docs/`.
+    - Lint Markdown documentation in `docs/`.
 4. Address any unresolved linting issues or test failures before merging.
 
 ### Quality Enforcement
@@ -88,4 +68,3 @@ The **Markdownlint Workflow** ensures consistent documentation formatting using 
 - Python files maintain consistent style via Ruff.
 - All code is automatically tested, and coverage is reported.
 - Documentation adheres to Markdown best practices.
-- All fixes are applied automatically when possible.

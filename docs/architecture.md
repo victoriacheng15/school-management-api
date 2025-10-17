@@ -98,7 +98,6 @@ sequenceDiagram
 - `INSERT INTO students (...)` (create)
 - `SELECT * FROM students WHERE id = ?` (read)
 - `UPDATE students SET ... WHERE id = ?` (update/patch)
-- `DELETE FROM students WHERE id = ?` (delete)
 
 **Response Status Codes:**
 
@@ -108,6 +107,53 @@ sequenceDiagram
 - `404 Not Found` (when resource doesn't exist)
 - `422 Unprocessable Entity` (archive operations when resource not found)
 - `500 Internal Server Error` (unexpected server errors)
+
+## Class Diagram (Generic)
+
+This diagram illustrates the typical class structure and interactions for a single resource (e.g., "Assignment"). It shows how a request flows from the routing layer down to the database.
+
+- **Route**: Handles HTTP requests, calls the appropriate service method, and formats the response. Maps to files in `app/routes/`.
+- **Service**: Contains the core business logic and orchestrates data operations. Maps to files in `app/services/`.
+- **Model**: Acts as a data access layer, directly responsible for database queries. Maps to files in `app/models/`.
+- **DB**: A singleton class that manages the database connection pool and executes raw SQL queries. Maps to `db/database.py`.
+
+```mermaid
+classDiagram
+    class Route {
+        +GET /resource
+        +GET /resource/(id)
+        +POST /resource
+        +PUT /resource
+        +PATCH /resource
+    }
+
+    class Service {
+        +get_all()
+        +get_by_id(id)
+        +create(data)
+        +update(data)
+        +archive(ids)
+    }
+
+    class Model {
+        +read_all()
+        +read_by_id(id)
+        +read_by_ids(ids)
+        +insert(data)
+        +update(id, data)
+        +archive(id)
+    }
+
+    class DB {
+        +execute_query(query, params)
+        +execute_many(query, param_list)
+        +execute_script(script)
+    }
+
+    Route --|> Service : Calls
+    Service --|> Model : Uses
+    Model --|> DB : Executes queries via
+```
 
 ## Folder Structure
 

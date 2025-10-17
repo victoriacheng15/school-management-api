@@ -2,6 +2,7 @@
 
 This repository implements automated code quality and documentation checks using GitHub Actions workflows. The system enforces consistent formatting and style across the codebase.
 
+
 ## Workflows
 
 ### CI Workflow: Format, Test, and Coverage
@@ -38,6 +39,22 @@ The workflow runs the following jobs in sequence:
     - Checks out the code.
     - Downloads the coverage artifact.
     - Posts a coverage summary as a comment on the pull request.
+
+### Docker Image Build & Publish to GHCR
+
+This workflow builds the Docker image using the multi-stage Dockerfile and pushes it to GitHub Container Registry (GHCR) on every push to `main` or when manually triggered.
+
+**Trigger Conditions:**
+
+- On push to the `main` branch.
+- Manual trigger via GitHub Actions UI (`workflow_dispatch`).
+
+**Workflow Steps:**
+
+1. **Checkout code:** Retrieves repository content using `actions/checkout@v5`.
+2. **Authenticate to GHCR:** Logs in to GitHub Container Registry using the built-in `GITHUB_TOKEN`.
+3. **Build Docker image:** Builds the image from `Dockerfile.multi-stage` and tags it as `ghcr.io/victoriacheng15/school-api:latest`.
+4. **Push image:** Pushes the tagged image to GHCR for use in deployments.
 
 ### Documentation Linting with Markdownlint
 

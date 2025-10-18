@@ -15,7 +15,6 @@ from app.utils import (
 
 
 def course_row_to_dict(row):
-    # models now normalize rows to dicts; passthrough for compatibility
     return row if isinstance(row, dict) else row
 
 
@@ -23,12 +22,12 @@ def get_all_courses(active_only):
     results = course_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch courses.")
-    return results  # already dicts from model
+    return results
 
 
 def get_course_by_id(course_id: int):
     course = course_db_read_by_id(course_id)
-    return course  # already dict from model
+    return course
 
 
 def create_new_courses(data):

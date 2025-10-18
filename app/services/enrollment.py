@@ -18,16 +18,16 @@ def enrollment_row_to_dict(row):
     return row if isinstance(row, dict) else row
 
 
-def get_all_enrollments(active_only=False):
+def get_all_enrollments(active_only):
     results = enrollment_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch enrollments.")
-    return results  # already dicts from model
+    return results
 
 
 def get_enrollment_by_id(enrollment_id: int):
     enrollment = enrollment_db_read_by_id(enrollment_id)
-    return enrollment  # already dict from model
+    return enrollment
 
 
 def create_new_enrollments(data):

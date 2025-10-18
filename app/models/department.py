@@ -3,9 +3,8 @@ from db.db_utils import (
     get_insert_returning_query,
     handle_insert_result,
     get_archived_condition,
-    get_boolean_true,
+    BOOLEAN_TRUE,
 )
-
 
 db = Database()
 
@@ -56,10 +55,9 @@ def department_db_update(department_id, department_data):
 
 def department_db_archive(department_id):
     archived_condition_false = get_archived_condition(False)
-    archived_true = get_boolean_true()
     query = f"""
     UPDATE departments
-    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    SET is_archived = {BOOLEAN_TRUE}, updated_at = CURRENT_TIMESTAMP
     WHERE id = %s AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (department_id,))

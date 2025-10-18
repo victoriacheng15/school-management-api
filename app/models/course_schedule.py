@@ -3,7 +3,7 @@ from db.db_utils import (
     get_insert_returning_query,
     handle_insert_result,
     get_archived_condition,
-    get_boolean_true,
+    BOOLEAN_TRUE,
 )
 
 db = Database()
@@ -12,21 +12,17 @@ db = Database()
 def course_schedule_db_read_all(active_only=False):
     query = "SELECT * FROM course_schedule"
     if active_only:
-        # use archived condition helper for DB portability
         archived_condition = get_archived_condition(False)
         query += f" WHERE {archived_condition}"
     query += ";"
     result = db.execute_query(query)
-    # Convert all rows to regular dicts for consistency
     return [dict(row) for row in result] if result else []
 
 
 def course_schedule_db_read_by_id(course_schedule_id):
     query = "SELECT * FROM course_schedule WHERE id = %s;"
     result = db.execute_query(query, (course_schedule_id,))
-    if result:
-        return dict(result[0])
-    return None
+    return dict(result[0]) if result else None
 
 
 def course_schedule_db_read_by_ids(course_schedule_ids):
@@ -59,10 +55,9 @@ def course_schedule_db_update(course_schedule_id, course_schedule_data):
 
 def course_schedule_db_archive(course_schedule_id):
     archived_condition_false = get_archived_condition(False)
-    archived_true = get_boolean_true()
     query = f"""
     UPDATE course_schedule
-    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    SET is_archived = {BOOLEAN_TRUE}, updated_at = CURRENT_TIMESTAMP
     WHERE id = %s AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (course_schedule_id,))

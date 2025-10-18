@@ -3,7 +3,7 @@ from db.db_utils import (
     get_insert_returning_query,
     handle_insert_result,
     get_archived_condition,
-    get_boolean_true,
+    BOOLEAN_TRUE,
 )
 
 db = Database()
@@ -15,18 +15,13 @@ def instructor_db_read_all(active_only=False):
         query += " WHERE status = 'active'"
     query += ";"
     result = db.execute_query(query)
-    # Convert all rows to regular dicts for consistency
     return [dict(row) for row in result] if result else []
 
 
 def instructor_db_read_by_id(instructor_id):
     query = "SELECT * FROM instructors WHERE id = %s;"
     result = db.execute_query(query, (instructor_id,))
-    if result:
-        # PostgreSQL returns dict-like objects
-        # result[0] is the first row (a dict-like object)
-        return dict(result[0])  # Convert to regular dict for consistency
-    return None
+    return dict(result[0]) if result else None
 
 
 def instructor_db_read_by_ids(instructor_ids):
@@ -35,7 +30,6 @@ def instructor_db_read_by_ids(instructor_ids):
     placeholders = ",".join("%s" for _ in instructor_ids)
     query = f"SELECT * FROM instructors WHERE id IN ({placeholders});"
     result = db.execute_query(query, instructor_ids)
-    # Convert all rows to regular dicts for consistency
     return [dict(row) for row in result] if result else []
 
 
@@ -69,10 +63,9 @@ def instructor_db_update(instructor_id, instructor_data):
 
 def instructor_db_archive(instructor_id):
     archived_condition_false = get_archived_condition(False)
-    archived_true = get_boolean_true()
     query = f"""
     UPDATE instructors
-    SET is_archived = {archived_true}, status = 'inactive', updated_at = CURRENT_TIMESTAMP
+    SET is_archived = {BOOLEAN_TRUE}, status = 'inactive', updated_at = CURRENT_TIMESTAMP
     WHERE id = %s AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (instructor_id,))

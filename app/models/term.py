@@ -3,9 +3,8 @@ from db.db_utils import (
     get_insert_returning_query,
     handle_insert_result,
     get_archived_condition,
-    get_boolean_true,
+    BOOLEAN_TRUE,
 )
-
 
 db = Database()
 
@@ -17,16 +16,13 @@ def term_db_read_all(active_only=False):
         query += f" WHERE {archived_condition}"
     query += ";"
     result = db.execute_query(query)
-    # Convert rows to regular dicts for consistency with other models
     return [dict(row) for row in result] if result else []
 
 
 def term_db_read_by_id(term_id):
     query = "SELECT * FROM terms WHERE id = %s;"
     result = db.execute_query(query, (term_id,))
-    if result:
-        return dict(result[0])
-    return None
+    return dict(result[0]) if result else None
 
 
 def term_db_read_by_ids(term_ids):
@@ -59,10 +55,9 @@ def term_db_update(term_id, term_data):
 
 def term_db_archive(term_id):
     archived_condition_false = get_archived_condition(False)
-    archived_true = get_boolean_true()
     query = f"""
     UPDATE terms
-    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    SET is_archived = {BOOLEAN_TRUE}, updated_at = CURRENT_TIMESTAMP
     WHERE id = %s AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (term_id,))

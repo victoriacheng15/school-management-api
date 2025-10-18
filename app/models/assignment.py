@@ -3,7 +3,7 @@ from db.db_utils import (
     get_insert_returning_query,
     handle_insert_result,
     get_archived_condition,
-    get_boolean_true,
+    BOOLEAN_TRUE,
 )
 
 db = Database()
@@ -22,9 +22,7 @@ def assignment_db_read_all(active_only=False):
 def assignment_db_read_by_id(assignment_id):
     query = "SELECT * FROM assignments WHERE id = ?;"
     result = db.execute_query(query, (assignment_id,))
-    if result:
-        return dict(result[0])
-    return None
+    return dict(result[0]) if result else None
 
 
 def assignment_db_read_by_ids(assignment_ids):
@@ -57,10 +55,9 @@ def assignment_db_update(assignment_id, assignment_data):
 
 def assignment_db_archive(assignment_id):
     archived_condition_false = get_archived_condition(False)
-    archived_true = get_boolean_true()
     query = f"""
     UPDATE assignments
-    SET is_archived = {archived_true}, updated_at = CURRENT_TIMESTAMP
+    SET is_archived = {BOOLEAN_TRUE}, updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND {archived_condition_false};
     """
     cursor = db.execute_query(query, (assignment_id,))

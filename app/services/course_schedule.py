@@ -22,12 +22,12 @@ def get_all_course_schedules(active_only):
     results = course_schedule_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch course schedules.")
-    return results  # Already dicts from model
+    return results
 
 
 def get_course_schedule_by_id(course_schedule_id: int):
     course_schedule = course_schedule_db_read_by_id(course_schedule_id)
-    return course_schedule  # Already dict from model
+    return course_schedule
 
 
 def create_new_course_schedules(data):

@@ -22,12 +22,12 @@ def get_all_departments(active_only):
     results = department_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch departments.")
-    return results  # already dicts from model
+    return results
 
 
 def get_department_by_id(department_id: int):
     department = department_db_read_by_id(department_id)
-    return department  # already dict from model
+    return department
 
 
 def create_new_departments(data):

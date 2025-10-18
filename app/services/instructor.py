@@ -22,12 +22,12 @@ def get_all_instructors(active_only):
     results = instructor_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch instructors.")
-    return results  # Already dicts from model
+    return results
 
 
 def get_instructor_by_id(instructor_id: int):
     instructor = instructor_db_read_by_id(instructor_id)
-    return instructor  # Already dict from model
+    return instructor
 
 
 def create_new_instructors(data):

@@ -14,6 +14,10 @@ from app.utils import (
 )
 
 
+def assignment_row_to_dict(row):
+    return row if isinstance(row, dict) else row
+
+
 def get_all_assignments(active_only):
     results = assignment_db_read_all(active_only=active_only)
     if results is None:
@@ -23,11 +27,7 @@ def get_all_assignments(active_only):
 
 def get_assignment_by_id(assignment_id: int):
     assignment = assignment_db_read_by_id(assignment_id)
-    return assignment if assignment else None
-
-
-def assignment_row_to_dict(row):
-    return row if isinstance(row, dict) else row
+    return assignment
 
 
 def create_new_assignments(data):

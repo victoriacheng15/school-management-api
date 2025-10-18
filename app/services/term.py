@@ -7,7 +7,6 @@ from app.models import (
     term_db_archive,
 )
 from app.utils import (
-    term_row_to_dict,
     term_dict_to_row,
     bulk_create_entities,
     bulk_update_entities,
@@ -23,12 +22,12 @@ def get_all_terms(active_only):
     results = term_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch terms.")
-    return results  # Already dicts from model
+    return results
 
 
 def get_term_by_id(term_id: int):
     term = term_db_read_by_id(term_id)
-    return term  # Already dict from model
+    return term
 
 
 def create_new_terms(data):

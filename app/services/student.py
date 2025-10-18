@@ -14,7 +14,6 @@ from app.utils import (
 )
 
 
-# Identity function since our models now return dicts
 def student_row_to_dict(row):
     return row if isinstance(row, dict) else row
 
@@ -23,12 +22,12 @@ def get_all_students(active_only):
     results = student_db_read_all(active_only=active_only)
     if results is None:
         raise RuntimeError("Failed to fetch students.")
-    return results  # No need to convert, already dicts from model
+    return results
 
 
 def get_student_by_id(student_id: int):
     student = student_db_read_by_id(student_id)
-    return student  # No need to convert, already a dict from model
+    return student
 
 
 def create_new_students(data):

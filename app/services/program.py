@@ -27,7 +27,7 @@ def get_all_programs(active_only):
 
 def get_program_by_id(program_id: int):
     program = program_db_read_by_id(program_id)
-    return program  # already dict from model
+    return program
 
 
 def create_new_programs(data):

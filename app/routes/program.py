@@ -29,10 +29,8 @@ def handle_read_all_programs():
 @handle_exceptions_read()
 def handle_get_program_by_id(program_id):
     program = get_program_by_id(program_id)
-
     if program is None:
         return api_response_error("Program not found.", 404)
-
     return api_response(program, "Program fetched successfully.")
 
 

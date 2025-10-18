@@ -29,10 +29,8 @@ def handle_read_all_departments():
 @handle_exceptions_read()
 def handle_get_department_by_id(department_id):
     department = get_department_by_id(department_id)
-
     if department is None:
         return api_response_error("Department not found.", 404)
-
     return api_response(department, "Department fetched successfully.")
 
 

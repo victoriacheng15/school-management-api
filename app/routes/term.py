@@ -1,6 +1,11 @@
 from flask import Blueprint, jsonify, request
-from app.utils import handle_exceptions_read, handle_exceptions_write
-from app.utils import build_bulk_response, api_response, api_response_error
+from app.utils import (
+    build_bulk_response,
+    api_response,
+    api_response_error,
+    handle_exceptions_read,
+    handle_exceptions_write,
+)
 from app.services import (
     get_all_terms,
     get_term_by_id,
@@ -65,14 +70,17 @@ def handle_update_terms():
 @term_bp.route("/terms", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_terms():
-    ids = request.get_json().get("ids", [])
-    results, error_data, status_code = archive_terms(ids)
+    payload = request.get_json()
+    if not payload or "ids" not in payload:
+        raise KeyError("ids")
+
+    archived_data, error_data, status_code = archive_terms(payload["ids"])
 
     if error_data:
         return api_response_error(error_data, status_code)
 
     response_data, status_code = build_bulk_response(
-        success_list=results,
+        success_list=archived_data,
         success_msg_single="Term archived successfully.",
         success_msg_bulk="{} terms archived successfully.",
     )

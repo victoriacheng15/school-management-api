@@ -1,16 +1,5 @@
-"""
-Database utilities for PostgreSQL only
-"""
-
-
-def get_boolean_true():
-    """Get the boolean TRUE value for PostgreSQL"""
-    return "TRUE"
-
-
-def get_boolean_false():
-    """Get the boolean FALSE value for PostgreSQL"""
-    return "FALSE"
+# PostgreSQL boolean constants
+BOOLEAN_TRUE = "TRUE"
 
 
 def get_insert_returning_query(table, columns, returning_column="id"):
@@ -27,9 +16,7 @@ def handle_insert_result(result):
     """
     Handle the result of an INSERT operation for PostgreSQL
     """
-    if result and len(result) > 0:
-        return result[0]["id"]
-    return None
+    return result[0]["id"] if result else None
 
 
 def get_archived_condition(archived_value=False):

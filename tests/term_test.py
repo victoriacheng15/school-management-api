@@ -1,5 +1,4 @@
 import pytest
-import os
 from datetime import date
 from unittest.mock import patch
 from app.models import (
@@ -32,6 +31,7 @@ def make_term_row():
         "end_date": "2025-12-15",
         "created_at": today,
         "updated_at": today,
+        "is_archived": False,
     }
 
 

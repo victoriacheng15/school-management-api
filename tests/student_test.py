@@ -35,12 +35,12 @@ def make_student_row():
         "country": "Canada",
         "address_type": "local",
         "status": "active",
-        "is_full_time": False,
-        "is_archived": False,
+        "coop": False,
+        "is_international": False,
         "program_id": 1,
         "created_at": today,
         "updated_at": today,
-        "archived_by": 0,
+        "is_archived": False,
     }
 
 
@@ -443,9 +443,12 @@ class TestStudentModel:
             valid_student_row["country"],
             valid_student_row["address_type"],
             valid_student_row["status"],
-            valid_student_row["is_full_time"],
-            valid_student_row["is_archived"],
+            valid_student_row["coop"],
+            valid_student_row["is_international"],
             valid_student_row["program_id"],
+            valid_student_row["created_at"],
+            valid_student_row["updated_at"],
+            valid_student_row["is_archived"],
         )
 
         result = student_db_insert(params)

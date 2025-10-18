@@ -14,7 +14,7 @@ echo "🔗 Database: Azure Database for PostgreSQL"
 echo ""
 
 # Run the initialization script
-python3 db/init_postgresql.py
+python3 db/init.py
 
 if [ $? -eq 0 ]; then
     echo ""

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-PostgreSQL Database Initialization Script
-This script initializes the PostgreSQL database with the schema and sample data.
+Database Initialization Script
+This script initializes the database with the schema and sample data.
 """
 
 import os
@@ -12,9 +12,9 @@ sys.path.append(".")
 from db.database import Database
 
 
-def init_postgresql_database():
-    """Initialize PostgreSQL database with schema"""
-    print("Initializing PostgreSQL database...")
+def init_database():
+    """Initialize database with schema"""
+    print("Initializing database...")
 
     # Use environment variables already set by docker-compose
     # No need to override them here
@@ -22,13 +22,13 @@ def init_postgresql_database():
     try:
         db = Database()
 
-        # Read and execute PostgreSQL schema
-        with open("db/schema_postgresql.sql", "r") as f:
+        # Read and execute schema
+        with open("db/schema.sql", "r") as f:
             schema_sql = f.read()
 
         # Execute the schema
         db.execute_script(schema_sql)
-        print("✅ PostgreSQL schema created successfully!")
+        print("✅ Schema created successfully!")
 
         # Verify tables were created
         tables_query = """
@@ -47,12 +47,12 @@ def init_postgresql_database():
         return True
 
     except Exception as e:
-        print(f"❌ Error initializing PostgreSQL database: {e}")
+        print(f"❌ Error initializing database: {e}")
         return False
 
 
 def populate_sample_data():
-    """Populate PostgreSQL database with sample data"""
+    """Populate database with sample data"""
     print("\n🌱 Populating sample data...")
 
     try:
@@ -203,18 +203,18 @@ def populate_sample_data():
 
 
 if __name__ == "__main__":
-    print("PostgreSQL Database Setup")
+    print("Database Setup")
     print("=" * 40)
 
     # Initialize schema
-    schema_ok = init_postgresql_database()
+    schema_ok = init_database()
 
     if schema_ok:
         # Populate sample data
         data_ok = populate_sample_data()
 
         if data_ok:
-            print("\n🎉 PostgreSQL database setup complete!")
+            print("\n🎉 Database setup complete!")
             sys.exit(0)
         else:
             print("\n⚠️  Schema created but sample data failed")

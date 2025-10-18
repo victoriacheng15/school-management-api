@@ -171,8 +171,8 @@ project/
 │   ├── data.py                 # Initial data population
 │   ├── database.py             # Main DB connection logic
 │   ├── db_utils.py             # Helper functions for DB
-│   ├── init_postgresql.py      # DB initialization script
-│   ├── schema_postgresql.sql   # DB schema
+│   ├── init.py                 # DB initialization script
+│   ├── schema.sql              # DB schema
 ├── scripts/                    # Scripts to run and automate project tasks
 ├── tests/                      # Unit tests
 ├── docs/                       # Project documentation

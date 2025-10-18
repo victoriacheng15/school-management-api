@@ -14,7 +14,7 @@ else
       sleep 2
   done
   echo "PostgreSQL is up - initializing database..."
-  python3 db/init_postgresql.py
+  python3 db/init.py
 fi
 
 # Start the Flask application using Gunicorn

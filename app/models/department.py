@@ -6,7 +6,6 @@ from db.db_utils import (
     BOOLEAN_TRUE,
 )
 
-
 db = Database()
 
 

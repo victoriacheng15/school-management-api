@@ -15,7 +15,6 @@ def student_db_read_all(active_only=False):
         query += " WHERE status = 'active'"
     query += ";"
     result = db.execute_query(query)
-    # Convert all rows to regular dicts for consistency
     return [dict(row) for row in result] if result else []
 
 
@@ -31,7 +30,6 @@ def student_db_read_by_ids(student_ids):
     placeholders = ",".join("%s" for _ in student_ids)
     query = f"SELECT * FROM students WHERE id IN ({placeholders});"
     result = db.execute_query(query, student_ids)
-    # Convert all rows to regular dicts for consistency
     return [dict(row) for row in result] if result else []
 
 

@@ -12,12 +12,10 @@ db = Database()
 def course_schedule_db_read_all(active_only=False):
     query = "SELECT * FROM course_schedule"
     if active_only:
-        # use archived condition helper for DB portability
         archived_condition = get_archived_condition(False)
         query += f" WHERE {archived_condition}"
     query += ";"
     result = db.execute_query(query)
-    # Convert all rows to regular dicts for consistency
     return [dict(row) for row in result] if result else []
 
 

@@ -6,7 +6,6 @@ from db.db_utils import (
     BOOLEAN_TRUE,
 )
 
-
 db = Database()
 
 
@@ -17,7 +16,6 @@ def term_db_read_all(active_only=False):
         query += f" WHERE {archived_condition}"
     query += ";"
     result = db.execute_query(query)
-    # Convert rows to regular dicts for consistency with other models
     return [dict(row) for row in result] if result else []
 
 

@@ -29,10 +29,8 @@ def handle_read_all_courses():
 @handle_exceptions_read()
 def handle_get_course_by_id(course_id):
     course = get_course_by_id(course_id)
-
     if course is None:
         return api_response_error("Course not found.", 404)
-
     return api_response(course, "Course fetched successfully.")
 
 

@@ -13,32 +13,16 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-        with:
-          ref: ${{ github.head_ref }}
-
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c
+      - uses: actions/checkout@v5.0.0
+      - uses: actions/setup-python@v6.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install dependencies and run ruff
-        run: |
-          make install
-          sleep 1
-          make format
+      - name: Install dependencies
+        run: make install
 
-      - name: Commit and push changes
-        run: | 
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          else
-            git commit -m "ci: auto-format code with Ruff"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
+      - name: Check formatting with Ruff
+        run: ruff format --check .
   test:
     runs-on: ubuntu-latest
     needs: format
@@ -49,8 +33,8 @@ jobs:
       LOCAL_DB_PASSWORD: ${{ secrets.LOCAL_DB_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c
+      - uses: actions/checkout@v5.0.0
+      - uses: actions/setup-python@v6.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -64,7 +48,7 @@ jobs:
           echo "Coverage command completed with exit code: $?"
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: coverage
           path: coverage_output.txt
@@ -73,13 +57,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@v5.0.0
 
       - name: Download coverage
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        uses: actions/download-artifact@v5.0.0
         with:
           name: coverage
-          # download-artifact creates a directory at the destination path.
           path: ./coverage
 
       - name: Post PR comments

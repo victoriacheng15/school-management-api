@@ -1,24 +1,3 @@
-def student_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "first_name": row["first_name"],
-        "last_name": row["last_name"],
-        "email": row["email"],
-        "address": row["address"],
-        "city": row["city"],
-        "province": row["province"],
-        "country": row["country"],
-        "address_type": row["address_type"],
-        "status": row["status"],
-        "coop": row["coop"],
-        "is_international": row["is_international"],
-        "program_id": row["program_id"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
-        "is_archived": row["is_archived"],
-    }
-
-
 def student_dict_to_row(data):
     return (
         data.get("first_name", None),
@@ -36,23 +15,6 @@ def student_dict_to_row(data):
     )
 
 
-def instructor_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "first_name": row["first_name"],
-        "last_name": row["last_name"],
-        "email": row["email"],
-        "address": row["address"],
-        "province": row["province"],
-        "employment": row["employment"],
-        "status": row["status"],
-        "department_id": row["department_id"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
-        "is_archived": row["is_archived"],
-    }
-
-
 def instructor_dict_to_row(data):
     return (
         data.get("first_name", None),
@@ -66,30 +28,8 @@ def instructor_dict_to_row(data):
     )
 
 
-def department_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "name": row["name"],
-        "created_at": row.get("created_at"),
-        "updated_at": row.get("updated_at"),
-        "is_archived": row.get("is_archived"),
-    }
-
-
 def department_dict_to_row(data):
     return (data.get("name", None),)
-
-
-def program_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "name": row["name"],
-        "type": row["type"],
-        "department_id": row.get("department_id"),
-        "created_at": row.get("created_at"),
-        "updated_at": row.get("updated_at"),
-        "is_archived": row.get("is_archived"),
-    }
 
 
 def program_dict_to_row(data):
@@ -98,19 +38,6 @@ def program_dict_to_row(data):
         data.get("type", "diploma"),
         data.get("department_id"),
     )
-
-
-def course_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "title": row["title"],
-        "code": row["code"],
-        "term_id": row["term_id"],
-        "department_id": row["department_id"],
-        "created_at": row.get("created_at"),
-        "updated_at": row.get("updated_at"),
-        "is_archived": row.get("is_archived"),
-    }
 
 
 def course_dict_to_row(data):
@@ -122,35 +49,12 @@ def course_dict_to_row(data):
     )
 
 
-def enrollment_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "student_id": row["student_id"],
-        "course_id": row["course_id"],
-        "grade": row["grade"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
-        "is_archived": row["is_archived"],
-    }
-
-
 def enrollment_dict_to_row(data):
     return (
         data.get("student_id"),
         data.get("course_id"),
         data.get("grade", None),
     )
-
-
-def assignment_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "instructor_id": row["instructor_id"],
-        "course_id": row["course_id"],
-        "created_at": row["created_at"],
-        "updated_at": row["updated_at"],
-        "is_archived": row["is_archived"],
-    }
 
 
 def assignment_dict_to_row(data):
@@ -160,36 +64,12 @@ def assignment_dict_to_row(data):
     )
 
 
-def term_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "name": row["name"],
-        "start_date": row["start_date"],
-        "end_date": row["end_date"],
-        "created_at": row.get("created_at"),
-        "updated_at": row.get("updated_at"),
-    }
-
-
 def term_dict_to_row(data):
     return (
         data.get("name", None),
         data.get("start_date", None),
         data.get("end_date", None),
     )
-
-
-def course_schedule_row_to_dict(row):
-    return {
-        "id": row["id"],
-        "course_id": row["course_id"],
-        "day": row["day"],
-        "time": row["time"],
-        "room": row.get("room"),
-        "created_at": row.get("created_at"),
-        "updated_at": row.get("updated_at"),
-        "is_archived": row.get("is_archived"),
-    }
 
 
 def course_schedule_dict_to_row(data):

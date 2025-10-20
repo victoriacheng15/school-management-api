@@ -1,104 +1,177 @@
-# Learning Notes
+# 🧭 Learning Notes
 
-Here is a section of what I learned from this project:
+Here’s a summary of what I learned while building this Flask API project.
 
-## Docker builds
+---
 
-During the development of this Flask API, I compared the build process between **single-stage** and **multi-stage** Dockerfiles. Here are some of the findings:
+## 🧩 Docker Multi-Stage Builds
 
-- Single-stage build:
-  - Time taken: Approximately 1.67s
-  - Process:
-    - All dependencies, including build tools and caches, are installed into the same image.
-    - The final image size is larger due to the inclusion of build tools and extra files.
-- Multi-Stage Build
-  - Time Taken: Approximately 1.08s
-  - Process:
-    - Dependencies are installed in a separate builder stage, and only the necessary files (like the app and required libraries) are copied into the final image.
-    - The final image is smaller and cleaner, containing only the essential runtime environment.
-- Conclusion:
-  - Multi-Stage Builds are faster and create smaller, cleaner images than single-stage builds.
-  - For small apps like this one, the difference in build time might not be significant, but the resulting image size is smaller and more efficient.
-  - Multi-stage builds are particularly useful when you want to separate build dependencies from production runtime, reducing security risks and keeping images optimized.
+**Context:** While containerizing my Flask API, I compared single-stage and multi-stage Docker builds to understand performance and image size differences.
 
-## Archiving Data
+**What I Learned:**
 
-While building the database schema for this project, I also learned how real-world apps handle archiving old or inactive data.
+- Multi-stage builds produce smaller, cleaner images by separating build dependencies from the runtime environment.  
+- The resulting image is more secure and efficient to deploy.  
+- For small projects, build-time improvement is minor, but image size and maintainability improve significantly.  
 
-- Why archive data?
-  - To keep the main tables small and fast.
-  - To separate active records from old/inactive ones.
-  - To follow data retention rules (e.g., keep inactive student records for one year).
-- How archiving usually works:
-  - Add an `is_archived` column to tables like students, instructors, or courses.
-  - Use the `updated_at` column to track when each record was last changed.
-  - Combine `updated_at` with a status field (like the `status` column in the students table) to decide whether a record is inactive.
-  - If a student has an inactive status and hasn’t been updated for a long time (e.g., one year), the record can be marked as archived or moved to an archive table.
-- What I learned:
-  - Archiving based on `updated_at` along with the record’s status is a more accurate approach.
-  - It helps reduce clutter and keeps recent data easy to access.
-  - Users like students aren’t archived immediately — they are given time before being flagged.
-- Sources I referenced:
-  - [Data archiving best practice](https://success.outsystems.com/documentation/outsystems_developer_cloud/building_apps/data_management/best_practices_for_data_management/data_archiving_best_practice)
-  - [Efficient Data Management: Overcoming the Challenges of Large Tables with an Archival Strategy](https://opensource-db.com/efficient-data-management-overcoming-the-challenges-of-large-tables-with-an-archival-strategy)
-  
-## Database Connection
+**Why It Matters:**
 
-While building the database layer for this project, I explored how to manage SQLite connections in a clean and safe way.
+- Reduces attack surface and unnecessary files in production images.  
+- Optimizes CI/CD pipelines and deployment performance.  
+- Encourages better separation of concerns between build and runtime stages.  
 
-- Why close the database connection after each operation?
-  - Prevents database locks and memory issues, especially in SQLite.
-  - Ensures connections aren’t left open accidentally.
-  - Each API call is independent, so there’s no need to keep the connection open.
-- How I applied it:
-  - Updated the Database class to call self.close() in a finally block after every execute_query, execute_many, and execute_script call.
-  - This guarantees the connection is closed, even if an error happens during execution.
-- What I learned:
-  - For SQLite, it’s generally better to open and close the connection for each operation to avoid issues and keep things simple.
-  - In larger SQL databases (like PostgreSQL or MySQL), keeping a persistent connection (e.g., using connection pooling) is more common for performance.
-    - sources:
-      - [PostgreSQL Connection Pooling](https://www.compilenrun.com/docs/database/postgresql/postgresql-best-practices/postgresql-connection-pooling/?utm_source=chatgpt.com)
-      - [Why Connection Pooling Is Essential for PostgreSQL Database Optimisation](https://caw.tech/why-connection-pooling-is-essential-for-postgresql-database-optimisation/)
-  - Since this is a small app using SQLite, closing the connection after each use is a good, safe choice.
+**How I Applied It:**
 
-## Python Decorators for Exception Handling
+- Measured a single-stage build: ~1.67s build time.  
+- Measured a multi-stage build: ~1.08s build time.  
+- Verified that the multi-stage image excluded build tools and cached files, resulting in a smaller, more focused final image.  
 
-To improve route code readability and reduce repetitive error handling in the Flask API, I wrote custom Python decorators.
+**Challenges / Limitations:**
 
-- Why use decorators for exception handling?
-  - They allow wrapping route functions to automatically catch and handle common errors.
-  - They reduce boilerplate try-except blocks scattered across multiple routes.
-  - Improve consistency in error responses returned by the API.
-- How I applied it:
-  - Created decorators that catch specific exceptions like `KeyError` and general exceptions.
-  - Decorators return JSON error responses with proper HTTP status codes.
-  - Applied these decorators across route handlers to keep route logic clean and focused on core functionality.
-- What I learned:
-  - Decorators are a powerful Python feature to abstract cross-cutting concerns like error handling.
-  - Simplifying routes this way makes the code easier to maintain and extend.
-  - This pattern can be reused for logging, authorization checks, or input validation in future projects.
+- Slightly more complex Dockerfile syntax to maintain.  
+- Minimal build-time difference for small applications.  
 
-## N+1 Problem in Bulk Operations
+**References:**
 
-While implementing bulk creation endpoints in this API (for students, instructors, courses, etc.), I encountered the classic N+1 problem.
+- Docker Docs: Multi-Stage Builds  
+- Best Practices for Building Efficient Docker Images  
 
-- Why is it a problem?
-  - The current approach inserts each entity one by one in a loop, resulting in a separate database query for each record.
-  - This is inefficient for large batches, as it increases database load and slows down API response times.
+---
 
-- How I handled it in this project:
-  - For simplicity and because this is a sandbox project, I kept the one-by-one insert logic for all bulk creation routes.
-  - I noted that SQLite’s `executemany` can be used for batch inserts, but it does not easily return all inserted row IDs.
-  - Fixing this would require refactoring the service and model layers to support batch inserts and fetching all inserted IDs for the response.
+## 🧩 Archiving Data
 
-- What I learned:
-  - The N+1 problem is a common performance issue in APIs that process bulk operations.
-  - Batch inserts (using methods like `executemany`) are the recommended solution, but may require additional logic to retrieve all inserted IDs.
-  - For production systems, it’s important to avoid N+1 patterns to ensure scalability and efficiency.
+**Context:** While designing the database schema, I explored how production systems manage and archive old or inactive data efficiently.
 
-- What I would do in a production app:
-  - Implement a batch insert function in the model layer using `executemany` for all bulk creation endpoints.
-  - Refactor the service/helper logic to use the batch insert and fetch all inserted IDs for the response, possibly by querying with a unique field or timestamp after the insert.
+**What I Learned:**
 
-- Sources I referenced:
-  - [Python SQLite executemany docs](https://docs.python.org/3/library/sqlite3.html#sqlite3.Cursor.executemany)
+- Archiving prevents large table growth and improves query performance.  
+- Combining `updated_at` with a `status` column provides a reliable way to flag inactive records.  
+- Archiving ensures compliance with data retention policies.  
+
+**Why It Matters:**
+
+- Keeps active tables lightweight and responsive.  
+- Simplifies reporting by separating current vs. historical data.  
+- Helps meet legal or organizational data retention requirements.  
+
+**How I Applied It:**
+
+- Added `is_archived`, `status`, and `updated_at` columns to relevant tables (e.g., `students`, `instructors`).  
+- Defined logic to flag records as archived after inactivity (e.g., 1 year).  
+- Ensured archived data remains accessible for compliance purposes.  
+
+**Challenges / Limitations:**
+
+- Requires additional maintenance scripts or cron jobs for automated archiving.  
+- Queries must explicitly exclude archived records where appropriate.  
+
+**References:**
+
+- Data Archiving Best Practices  
+- Efficient Data Management: Overcoming the Challenges of Large Tables with an Archival Strategy  
+
+---
+
+## 🧩 Managing SQLite Database Connections
+
+**Context:** While building the database layer, I investigated safe connection handling patterns for SQLite in API-based applications.
+
+**What I Learned:**
+
+- Closing the database connection after each operation prevents locks and memory issues.  
+- Each API call should manage its own short-lived connection.  
+- Persistent connections are better suited for larger systems like PostgreSQL or MySQL.  
+
+**Why It Matters:**
+
+- SQLite doesn’t handle concurrent writes well, so keeping connections short-lived avoids contention.  
+- Simplifies error recovery and ensures resources are released properly.  
+
+**How I Applied It:**
+
+- Wrapped every query execution in a `try-finally` block.  
+- Ensured `self.close()` runs after `execute_query`, `execute_many`, and `execute_script` calls.  
+- Verified stability by testing multiple API calls without connection leaks.  
+
+**Challenges / Limitations:**
+
+- Opening and closing connections frequently adds minimal overhead, but is acceptable for small apps.  
+- Connection pooling isn’t available by default in SQLite.  
+
+**References:**
+
+- PostgreSQL Connection Pooling  
+- Why Connection Pooling Is Essential for Database Optimization  
+
+---
+
+## 🧩 Python Decorators for Exception Handling
+
+**Context:** To make route handlers cleaner and more consistent, I implemented custom decorators to handle exceptions across Flask routes.
+
+**What I Learned:**
+
+- Decorators can abstract repetitive logic such as exception handling, logging, and validation.  
+- This pattern improves code maintainability and readability.  
+- Centralized error handling helps return consistent API responses.  
+
+**Why It Matters:**
+
+- Reduces repetitive `try-except` blocks in every route.  
+- Encourages consistent structure and reusable error patterns.  
+- Easier to extend (e.g., add logging or authorization layers later).  
+
+**How I Applied It:**
+
+- Wrote decorators to catch `KeyError` and general exceptions.  
+- Returned JSON responses with descriptive error messages and proper HTTP codes.  
+- Applied the decorators across multiple route functions.  
+
+**Challenges / Limitations:**
+
+- Requires careful decorator ordering when stacking multiple decorators.  
+- Must ensure wrapped functions preserve metadata (using `functools.wraps`).  
+
+**References:**
+
+- Python Docs: functools.wraps  
+- Flask Patterns: Centralized Error Handling  
+
+---
+
+## 🧩 The N+1 Problem in Bulk Operations
+
+**Context:** While implementing bulk creation endpoints (students, instructors, courses), I encountered the N+1 query problem.
+
+**What I Learned:**
+
+- Executing inserts one-by-one in a loop causes unnecessary database roundtrips.  
+- Batch operations improve efficiency, especially at scale.  
+- SQLite’s `executemany()` supports batch inserts but lacks built-in ID retrieval for inserted rows.  
+
+**Why It Matters:**
+
+- Prevents performance bottlenecks during bulk API operations.  
+- Enables faster and more scalable data ingestion in production systems.  
+
+**How I Applied It:**
+
+- Used simple one-by-one inserts for this learning project for simplicity.  
+- Documented that batch inserts are the preferred pattern for production.  
+- Planned a future refactor using `executemany()` plus an additional query to fetch inserted IDs.  
+
+**Challenges / Limitations:**
+
+- SQLite doesn’t easily return multiple inserted IDs in batch mode.  
+- Requires restructuring model/service layers to handle batch inserts cleanly.  
+
+**References:**
+
+- Python SQLite executemany Documentation  
+- Articles on Solving the N+1 Query Problem  
+
+---
+
+## 🧠 Summary
+
+This project helped me deepen my understanding of containerization, database design, and backend engineering patterns. Each challenge—from managing Docker builds to improving database logic—reinforced how small architectural choices impact performance, maintainability, and scalability.

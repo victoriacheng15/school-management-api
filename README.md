@@ -6,7 +6,7 @@ A hands-on project to explore backend development by building a Flask-based REST
 
 Check out the YouTube demo to see the API in action:
 
-👉 [Watch the Demo](https://youtube.com/shorts/7JlKnhOzrFE)
+👉 [Watch the Demo](https://www.youtube.com/shorts/B1n6sOdT3PE)
 
 **About this video:**
 

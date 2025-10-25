@@ -1,4 +1,4 @@
-# School Flask API
+# School Management API
 
 A hands-on project to explore backend development by building a Flask-based REST API for managing school-related data — including students, courses, instructors, and programs. This project is part of my learning journey to better understand how backend systems are structured and how data flows through them.
 

@@ -11,8 +11,9 @@ The architecture follows a layered approach, separating routing, business logic,
 - Flask – API framework
 - PostgreSQL (Docker container) – Local development
 - Azure Database for PostgreSQL – Cloud database (production)
-- Azure Container Registry (ACR) – Container image storage
-- Azure Web App – Frontend/client application
+- Azure Container Registry (ACR) – Container image storage (production)
+- GitHub Container Registry (GHCR) – CI/CD artifact storage
+- Azure Web App – Hosting containerized Flask API (production)
 - Docker – Containerization
 - Gunicorn – WSGI server
 - GitHub Actions – CI for format, test, coverage, and markdown linting
@@ -155,9 +156,55 @@ classDiagram
     Model --|> DB : Executes queries via
 ```
 
+## Deployment Architecture
+
+This diagram illustrates the production infrastructure and the separation between local development and production environments.
+
+```mermaid
+flowchart TB
+    subgraph "Local Development"
+        DevAPI["Flask API<br/>(Local)"]
+        DevDB["PostgreSQL<br/>(Docker Compose)"]
+        DevAPI -->|SQL| DevDB
+    end
+
+    subgraph "Azure Production"
+        ACR["Azure Container<br/>Registry (ACR)"]
+        WebApp["Azure Web App<br/>(Flask API Container)"]
+        AzureDB["Azure Database for<br/>PostgreSQL"]
+        
+        ACR -->|Pull Image| WebApp
+        WebApp -->|SQL| AzureDB
+    end
+
+    subgraph "CI/CD"
+        GHActions["GitHub Actions<br/>(CI: Format, Test, Coverage)"]
+        GHCR["GitHub Container<br/>Registry (GHCR)"]
+        
+        GHActions -->|Build & Push| GHCR
+    end
+
+    Developer["Developer"] -->|Code Push| GHActions
+    Developer -.->|Manual Build & Push| ACR
+    Client["Client/API Consumer"] -->|HTTPS| WebApp
+```
+
+**Deployment Process:**
+
+1. **Development**: Developers work locally with Flask API and PostgreSQL in Docker Compose
+2. **CI/CD**: Code pushed to GitHub triggers automated format checks, tests, and coverage reporting via GitHub Actions
+3. **Artifact Storage**: GitHub Actions builds Docker image and pushes to GHCR for CI/CD purposes
+4. **Production Deployment** (Manual):
+   - Docker image is manually built and pushed to Azure Container Registry (ACR)
+   - Azure Web App pulls the image from ACR
+   - Flask API runs in Azure Web App container with Gunicorn
+   - API connects to Azure Database for PostgreSQL for data persistence
+5. **Client Access**: External clients/applications access the API via HTTPS through Azure Web App
+
+**Note**: Deployment to production is currently a manual process. GHCR serves as an artifact repository for CI/CD workflows but is not used for production deployments.
+
 ## Folder Structure
 
-```plaintext
 ```plaintext
 project/
 ├── run.py                      # Flask app entry point
@@ -186,5 +233,6 @@ project/
 └── .github/
     └── workflows/
         └── ci.yml              # CI workflow for format, test, coverage
+        └── ghcr.yml            # Build and push Docker image to GHCR
         └── markdownlint.yml    # CI workflow for format markdown files
 ```

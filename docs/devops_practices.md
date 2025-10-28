@@ -1,70 +1,122 @@
 # DevOps Practices
 
-This repository implements automated code quality and documentation checks using GitHub Actions workflows. The system enforces consistent formatting and style across the codebase.
+This document outlines all DevOps workflows, CI/CD pipelines, and automation practices used in the school-management-api project.
 
-## Workflows
+## Overview
 
-### CI Workflow: Format, Test, and Coverage
+The project uses GitHub Actions for continuous integration, deployment, and code quality checks. All workflows follow a snake_case naming convention and use path filters to optimize CI/CD execution.
 
-The CI workflow automatically formats code, runs tests, and posts coverage results for pull requests targeting the `main` branch.
+## Workflow Architecture
 
-**Trigger Conditions:**
+### Path-Based Triggering
 
-- On pull requests targeting the `main` branch.
-- When changes are made to files in: `run.py`, `db/`, `app/`, or `tests/`.
+All workflows use path filters to ensure they only run when relevant files change:
 
-**Workflow Steps:**
+- **API workflows**: Trigger on `run.py`, `db/**`, `app/**`, or `tests/**` changes
+- **Documentation workflows**: Trigger on `**/*.md` changes
 
-1. **Check Formatting:** Reports any Python code formatting issues found using Ruff.
-2. **Run Tests:** Executes the test suite with `pytest` and calculates code coverage.
-3. **Post Coverage Report:** Uploads the coverage results and posts a summary comment on the pull request.
+This approach:
 
-### Docker Image Build & Publish to GHCR
+- Reduces unnecessary workflow runs
+- Saves CI/CD minutes
+- Provides faster feedback
+- Keeps concerns separated
 
-This workflow builds the Docker image using the multi-stage Dockerfile and pushes it to GitHub Container Registry (GHCR) on every push to `main` or when manually triggered.
+## Active Workflows
 
-**Trigger Conditions:**
+### 1. Format, Test & Coverage (`ci.yml`)
 
-- On push to the `main` branch.
-- Manual trigger via GitHub Actions UI (`workflow_dispatch`).
+**Purpose**: Ensures consistent code formatting, validates that all tests pass, and reports code coverage for pull requests.
 
-**Workflow Steps:**
+**Trigger**:
 
-1. **Checkout code:** Checks out the code.
-2. **Authenticate to GHCR:** Logs in to GitHub Container Registry using the built-in `GITHUB_TOKEN`.
-3. **Build Docker image:** Builds the image from `Dockerfile.multi-stage` and tags it as `ghcr.io/victoriacheng15/school-api:latest`.
-4. **Push image:** Pushes the tagged image to GHCR for use in deployments.
+- Pull requests to `main` branch that modify files in `run.py`, `db/**`, `app/**`, or `tests/**`
+- Manual dispatch (`workflow_dispatch`)
 
-### Documentation Linting with Markdownlint
+**Environment Variables**:
 
-The **Markdownlint Workflow** ensures consistent documentation formatting using [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli) for all files in the `docs/` directory.
+- `PYTHON_VERSION`: `3.10`
 
-**Trigger Conditions:**
+**Jobs**:
 
-- On pull requests modifying `docs/*.md` files.
-- On direct pushes to `docs/*.md` files.
-- Can be manually triggered via GitHub Actions UI (`workflow_dispatch`).
+1. **Format Job**:
+   - Checkout code
+   - Setup Python 3.10
+   - Install dependencies (`make install`)
+   - Check formatting with Ruff (`ruff format --check .`)
 
-**Workflow Steps:**
+2. **Test Job** (runs after format):
+   - Checkout code
+   - Setup Python 3.10
+   - Install dependencies (`make install`)
+   - Run tests with coverage (`make coverage`)
+   - Upload coverage artifact
 
-1. **Checkout code:** Checks out the code.
-2. **Install linter:** Globally installs `markdownlint-cli` via npm.
-3. **Run linting:** Reports any markdown style issues found in `docs/`.
+3. **Coverage Report Job** (runs after test):
+   - Checkout code
+   - Download coverage artifact
+   - Post PR comment with coverage summary table
 
-## Development Practices
+**Key Features**:
 
-### Contribution Flow
+- Fails PR if formatting issues are detected
+- Prevents broken code from reaching main branch
+- Coverage threshold: 80%
+- Automated PR comment with coverage metrics (Pass/Fail status)
+- Required check before merge
 
-1. Create feature branches from `main`.
-2. Open pull requests for all changes.
-3. Automated checks will:
-    - Check Python code formatting.
-    - Run tests and calculate code coverage.
-    - Lint Markdown documentation in `docs/`.
-4. Address any unresolved linting issues or test failures before merging.
+**Required Secrets**:
 
-### Quality Enforcement
+- `LOCAL_DB_HOST`: Database host for testing
+- `LOCAL_DB_NAME`: Database name for testing
+- `LOCAL_DB_USER`: Database user for testing
+- `LOCAL_DB_PASSWORD`: Database password for testing
 
-- Python files maintain consistent style via Ruff.
-- All code is automatically tested, and coverage is reported.
-- Documentation adheres to Markdown best practices.
+---
+
+### 2. Build and Push Docker Image to GHCR (`ghcr.yml`)
+
+**Purpose**: Builds the Docker image using the multi-stage Dockerfile and pushes it to GitHub Container Registry (GHCR).
+
+**Trigger**:
+
+- Push to `main` branch
+- Manual dispatch (`workflow_dispatch`)
+
+**Steps**:
+
+1. Checkout code
+2. Log in to GitHub Container Registry using `GITHUB_TOKEN`
+3. Build Docker image from `Dockerfile.multi-stage` and tag as `ghcr.io/victoriacheng15/school-api:latest`
+4. Push image to GHCR
+
+**Key Features**:
+
+- Automated build and publish on merge to main
+- Uses multi-stage Dockerfile for optimized image size
+- Image available for deployments from GHCR
+
+**Note**: Originally intended to push to Azure Container Registry (ACR), but switched to GitHub Container Registry due to challenges with the `azure/login` workflow authentication at the time of implementation.
+
+---
+
+### 3. Markdownlint (`markdownlint.yml`)
+
+**Purpose**: Ensures consistent markdown formatting across all documentation files.
+
+**Trigger**:
+
+- Pull requests that modify `**/*.md` files
+- Manual dispatch (`workflow_dispatch`)
+
+**Steps**:
+
+1. Checkout code
+2. Install markdownlint-cli globally via npm
+3. Run markdown linter on all `.md` files
+
+**Key Features**:
+
+- Maintains documentation quality
+- Enforces markdown best practices
+- Validates all markdown files in the repository

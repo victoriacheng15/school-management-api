@@ -1,6 +1,6 @@
 # School Management API
 
-A hands-on project to explore backend development by building a Flask-based REST API for managing school-related data — including students, courses, instructors, and programs. This project is part of my learning journey to better understand how backend systems are structured and how data flows through them.
+A backend and DevOps learning project that simulates a real-world school management system. It started as a simple SQLite prototype and evolved into a Dockerized Flask API connected to Azure Database for PostgreSQL, complete with automated CI/CD and test coverage reporting.
 
 ## 📺 Demo
 
@@ -8,142 +8,122 @@ Check out the YouTube demo to see the API in action:
 
 👉 [Watch the Demo](https://www.youtube.com/shorts/B1n6sOdT3PE)
 
-**About this video:**
-
-This video demonstrates a Flask REST API deployed on an Azure Web App using Docker, with Azure Container Registry (ACR) for image storage and Azure Database for PostgreSQL for data storage.
-
-**The demo covers:**
+**This short video shows:**
 
 - Architecture overview
 - Request/response flow
-- Example API calls (read, create, update, archive) on instructors
-
-A simple walkthrough of deploying and testing a school database API on Azure.
+- Example API calls for instructors (read, create, update, archive)
+- Deployment to Azure Web App using Docker and ACR
 
 ---
 
-## Tech Stack
+## 🧰 Tech Stack
 
 ![Python](https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3BABC3.svg?style=for-the-badge&logo=Flask&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white) ![Azure](https://img.shields.io/badge/Azure-007FFF.svg?style=for-the-badge&logo=Azure&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white) ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC.svg?style=for-the-badge&logo=Pytest&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=GitHub-Actions&logoColor=white)
 
-## Documentation & Notes
+## 📘 Documentation & Notes
 
-- [Architecture Overview](docs/architecture.md)  
-- [DevOps Practices](docs/devops_practices.md)  
-- [Learning Notes](docs/learning_note.md)  
+- [Architecture Overview](docs/architecture.md): High-level system design and data flow
+- [DevOps Practices](docs/devops_practices.md): CI/CD setup, Docker use, Azure integration
+- [Learning Notes](docs/learning_note.md): Key lessons, decisions, and trade-offs from the project
 
-## Why I Built This
+## 🧠 Why I Built This
 
-To gain real backend experience beyond tutorials by:
+I built this project to gain real backend engineering experience beyond tutorials — focusing on how systems evolve from local development to cloud deployment.
 
-- Designing clean, modular REST APIs
-- Handling CRUD + archive logic across multiple entities
-- Writing testable, maintainable backend logic
-- Practicing containerization using Docker (incl. multi-stage builds)
-- Implementing automated CI/CD pipelines for code quality and testing
-- Expanding to use Azure Database for PostgreSQL for production/cloud experience
-- Utilizing Dockerized PostgreSQL for local development and testing
-- Includes automated CI/CD workflows using GitHub Actions:
-  - Code formatting and linting (Ruff)
-  - Unit tests
-  - Coverage reporting with PR comments
+### Goals
 
-## What It Does
+- Design clean, modular REST APIs for multiple entities
+- Implement CRUD + archiving logic to preserve data history
+- Write maintainable and testable backend logic
+- Practice containerization using multi-stage Docker builds
+- Build automated CI/CD pipelines for linting, testing, and coverage reporting
+- Deploy to the cloud with Azure Database for PostgreSQL
 
-- Provides RESTful endpoints for core school entities (students, instructors, courses, enrollments, etc.)
-- Supports full CRUD operations plus archiving (soft deletes) to preserve data history
-- Uses PostgreSQL for robust, production-ready data management (local via Docker, cloud via Azure)
-- Is fully containerized for easy deployment
+### DevOps & Automation
+
+- Continuous integration via GitHub Actions
+- Ruff for formatting and linting
+- Pytest for unit and integration testing
+- Coverage reports automatically posted in pull requests
+
+## ⚙️ What It Does
+
+- Exposes RESTful endpoints for students, instructors, courses, enrollments, and more
+- Supports full CRUD + soft-delete (archive) logic
+- Uses PostgreSQL (Dockerized locally, Azure-managed in production)
+- Fully containerized for consistent deployment
 - Includes automated tests for routes and business logic
 
-## Environments Overview
+## 🌍 Environment Overview
 
-This project supports three main environments for development and deployment:
+This project is designed to simulate real development and deployment environments:
 
-- **Local Development:**
-  - Run the Flask API directly on your machine using your own Python environment and a local PostgreSQL instance (optional).
-  - Fastest for debugging and iterating on code.
+| Environment | Description |
+|-------------|-------------|
+| **Local (Direct)** | Run Flask API with your local Python env and PostgreSQL. Fastest for debugging. |
+| **Local (Dockerized)** | Use Docker Compose to spin up Flask API + PostgreSQL. Reproducible, isolated environment. |
+| **Production (Azure)** | Deployed Flask API connected to Azure Database for PostgreSQL. Provides reliability, backups, scalability. |
 
-- **Dockerized PostgreSQL (Recommended for Local Dev):**
-  - Use Docker Compose to spin up both the Flask API and a PostgreSQL database in containers.
-  - Ensures consistency and easy setup—no need to install PostgreSQL locally.
-  - Ideal for development and testing.
-
-- **Production (Azure Database for PostgreSQL):**
-  - Deploy the Flask API to production and connect to a managed Azure Database for PostgreSQL instance.
-  - Provides cloud reliability, backups, and scalability for real-world use.
-
-See below for how to run and configure each environment.
-
-All interactions happen through REST APIs, using tools like curl, Postman, or automated test scripts. There is no frontend.
-
-## 🛠️ Running & Configuring Environments
+## 🧪 Running Locally
 
 ### 1. Local Development (Direct)
 
-- Install Python and dependencies from `requirements.txt`.
-- (Optional) Install PostgreSQL locally and update your environment variables to point to your local DB.
-- Run the Flask app directly for fast iteration.
+```bash
+# Install dependencies
+pip install -r requirements.txt
+# Run app
+python run.py
+```
 
-### 2. Local Development (Dockerized PostgreSQL)
+(Optionally, install PostgreSQL locally and configure your `.env`.)
 
-- **Recommended:** Use Docker Compose for a consistent, isolated environment.
-- Prerequisites: Docker, `make` (most Unix-based systems).
-- Start everything with:
+### 2. Local Development (Dockerized) - Recommended
 
-  ```sh
-  make up
-  ```
+```bash
+make up      # start API + DB containers via Docker Compose
+./api_client.sh read students
+make down    # stop containers
+make down V=1  # clear volumes if needed
+```
 
-- Interact with the API (example):
+### 3. Production (Azure)
 
-  ```sh
-  ./api_client.sh read students
-  ```
-
-- Stop and clean up Docker resources:
-
-  ```sh
-  make down
-  # or
-  make down V=1 # clear volume
-  ```
-
-### 3. Production (Azure Database for PostgreSQL)
-
-- Deploy the Flask API to your production environment (e.g., Azure App Service, VM, or container).
-- Provision an Azure Database for PostgreSQL instance.
-- Update your environment variables to point to the Azure DB connection string.
-- Run migrations/init scripts as needed (see `scripts/init_azure_db.sh`).
+- Deploy Docker image via ACR to Azure Web App
+- Connect to Azure Database for PostgreSQL
+- Update environment variables and run init scripts (`scripts/init_azure_db.sh`)
 
 ---
 
-## 🧪 Interact with the API via Bash Script
+## � API Highlights
 
-A helper script `api_client.sh` is included to simplify sending requests to the API without needing Postman or typing full `curl` commands.
-
-### Usage
+Includes a helper Bash script `api_client.sh` to simplify testing via command line.
 
 ```bash
 ./api_client.sh read students
-./api_client.sh read students 1
-./api_client.sh read students active
-./api_client.sh create students
-./api_client.sh update students
+./api_client.sh create instructors
+./api_client.sh archive courses
 ```
 
-### API Highlights
+| Resource | GET | POST | PUT | PATCH (Archive) |
+|----------|-----|------|-----|-----------------|
+| Students | ✔ | ✔ | ✔ | ✔ |
+| Instructors | ✔ | ✔ | ✔ | ✔ |
+| Courses | ✔ | ✔ | ✔ | ✔ |
+| Enrollments | ✔ | ✔ | ✔ | ✔ |
+| Programs | ✔ | ✔ | ✔ | ✔ |
+| Departments | ✔ | ✔ | ✔ | ✔ |
+| Assignments | ✔ | ✔ | ✔ | ✔ |
+| Terms | ✔ | ✔ | ✔ | ✔ |
 
-Uses PostgreSQL for robust data management and production-ready deployment.
+---
 
-| Resource           | GET (Read) | POST (Create) | PUT (Update) | PATCH (Archive) |
-|--------------------|------------|---------------|--------------|-----------------|
-| Assignments        | ✔          | ✔             | ✔            | ✔               |
-| Course Schedule    | ✔          | ✔             | ✔            | ✔               |
-| Courses            | ✔          | ✔             | ✔            | ✔               |
-| Departments        | ✔          | ✔             | ✔            | ✔               |
-| Enrollments        | ✔          | ✔             | ✔            | ✔               |
-| Instructors        | ✔          | ✔             | ✔            | ✔               |
-| Programs           | ✔          | ✔             | ✔            | ✔               |
-| Students           | ✔          | ✔             | ✔            | ✔               |
-| Terms              | ✔          | ✔             | ✔            | ✔               |
+## 🧾 Summary
+
+This project evolved from a simple CRUD API into a production-ready backend with:
+
+- Dockerized PostgreSQL
+- Automated CI/CD
+- Cloud deployment on Azure
+
+It represents a practical journey through backend design, DevOps practices, and system evolution — the way real-world services grow.

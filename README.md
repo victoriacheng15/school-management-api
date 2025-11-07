@@ -4,16 +4,9 @@ A backend and DevOps learning project that simulates a real-world school managem
 
 ## 📺 Demo
 
-Check out the YouTube demo to see the API in action:
+Watch a Flask REST API in action, deployed on Azure Web App with Docker, using ACR for images, Azure PostgreSQL for data, and Nginx to hide the long Azure URL behind a simple endpoint. The demo covers reading, creating, updating, and archiving student records in the cloud.
 
-👉 [Watch the Demo](https://www.youtube.com/shorts/B1n6sOdT3PE)
-
-**This short video shows:**
-
-- Architecture overview
-- Request/response flow
-- Example API calls for instructors (read, create, update, archive)
-- Deployment to Azure Web App using Docker and ACR
+👉 [Watch the Demo](https://youtu.be/rRiJONIPWvA)
 
 ---
 

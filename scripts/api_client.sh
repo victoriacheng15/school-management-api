@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-BASE_URL="http://127.0.0.1:5000"
+# Set the base URL of the API
+BASE_URL=""
 
 get_resource() {
   local resource=$1

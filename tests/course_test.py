@@ -442,7 +442,7 @@ class TestCourseReadRoute:
     ):
         mock_get.return_value = valid_course_create_data
 
-        resp = client.get("/courses")
+        resp = client.get("/api/courses")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Courses fetched successfully." in data["message"]
@@ -454,7 +454,7 @@ class TestCourseReadRoute:
     def test_handle_course_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/courses")
+        response = client.get("/api/courses")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -465,7 +465,7 @@ class TestCourseReadRoute:
     def test_handle_get_course_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "title": "Introduction to Programming"}
 
-        response = client.get("/courses/1")
+        response = client.get("/api/courses/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -477,7 +477,7 @@ class TestCourseReadRoute:
     def test_handle_get_course_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/courses/999")
+        response = client.get("/api/courses/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -488,7 +488,7 @@ class TestCourseReadRoute:
     def test_handle_get_course_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/courses/1")
+        response = client.get("/api/courses/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -503,7 +503,7 @@ class TestCourseCreateRoute:
     ):
         mock_create_new_courses.return_value = (valid_course_create_data, None, None)
 
-        response = client.post("/courses", json=valid_course_create_data)
+        response = client.post("/api/courses", json=valid_course_create_data)
         data = response.get_json()
 
         assert response.status_code == 201
@@ -518,7 +518,7 @@ class TestCourseCreateRoute:
         error_code = 400
         mock_create_new_courses.return_value = ([], error_data, error_code)
 
-        response = client.post("/courses", json=valid_course_create_data)
+        response = client.post("/api/courses", json=valid_course_create_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -530,7 +530,7 @@ class TestCourseCreateRoute:
     ):
         mock_create_new_courses.side_effect = KeyError("title")
 
-        response = client.post("/courses", json=valid_course_create_data)
+        response = client.post("/api/courses", json=valid_course_create_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -542,7 +542,7 @@ class TestCourseCreateRoute:
     ):
         mock_create_new_courses.side_effect = Exception("DB failure")
 
-        response = client.post("/courses", json=valid_course_create_data)
+        response = client.post("/api/courses", json=valid_course_create_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -556,7 +556,7 @@ class TestCourseUpdateRoute:
     ):
         mock_update_courses.return_value = (valid_course_update_data, None, None)
 
-        response = client.put("/courses", json=valid_course_update_data)
+        response = client.put("/api/courses", json=valid_course_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -571,7 +571,7 @@ class TestCourseUpdateRoute:
         error_code = 422
         mock_update_courses.return_value = ([], error_data, error_code)
 
-        response = client.put("/courses", json=valid_course_update_data)
+        response = client.put("/api/courses", json=valid_course_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -583,7 +583,7 @@ class TestCourseUpdateRoute:
     ):
         mock_update_courses.side_effect = KeyError("title")
 
-        response = client.put("/courses", json=valid_course_update_data)
+        response = client.put("/api/courses", json=valid_course_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -595,7 +595,7 @@ class TestCourseUpdateRoute:
     ):
         mock_update_courses.side_effect = Exception("DB failure")
 
-        response = client.put("/courses", json=valid_course_update_data)
+        response = client.put("/api/courses", json=valid_course_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -609,7 +609,7 @@ class TestCourseArchiveRoute:
     ):
         mock_archive_courses.return_value = (valid_course_ids, None, 200)
 
-        response = client.patch("/courses", json={"ids": valid_course_ids})
+        response = client.patch("/api/courses", json={"ids": valid_course_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -624,7 +624,7 @@ class TestCourseArchiveRoute:
         error_code = 400
         mock_archive_courses.return_value = ([], error_data, error_code)
 
-        response = client.patch("/courses", json={"ids": valid_course_ids})
+        response = client.patch("/api/courses", json={"ids": valid_course_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -636,7 +636,7 @@ class TestCourseArchiveRoute:
     ):
         mock_archive_courses.side_effect = KeyError("ids")
 
-        response = client.patch("/courses", json={"ids": valid_course_ids})
+        response = client.patch("/api/courses", json={"ids": valid_course_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -648,7 +648,7 @@ class TestCourseArchiveRoute:
     ):
         mock_archive_courses.side_effect = Exception("DB failure")
 
-        response = client.patch("/courses", json={"ids": valid_course_ids})
+        response = client.patch("/api/courses", json={"ids": valid_course_ids})
         data = response.get_json()
 
         assert response.status_code == 500

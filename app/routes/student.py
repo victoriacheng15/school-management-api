@@ -17,7 +17,7 @@ from app.services import (
 student_bp = Blueprint("student", __name__)
 
 
-@student_bp.route("/students", methods=["GET"])
+@student_bp.route("/api/students", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_students():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_students():
     return api_response(students, "Students fetched successfully.")
 
 
-@student_bp.route("/students/<int:student_id>", methods=["GET"])
+@student_bp.route("/api/students/<int:student_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_student_by_id(student_id):
     student = get_student_by_id(student_id)
@@ -34,7 +34,7 @@ def handle_get_student_by_id(student_id):
     return api_response(student, "Student fetched successfully.")
 
 
-@student_bp.route("/students", methods=["POST"])
+@student_bp.route("/api/students", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_student():
     results, error_data, status_code = create_new_students(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_student():
     return jsonify(response_data), status_code
 
 
-@student_bp.route("/students", methods=["PUT"])
+@student_bp.route("/api/students", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_students():
     results, error_data, status_code = update_students(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_students():
     return jsonify(response_data), status_code
 
 
-@student_bp.route("/students", methods=["PATCH"])
+@student_bp.route("/api/students", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_students():
     payload = request.get_json()

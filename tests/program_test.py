@@ -437,7 +437,7 @@ class TestProgramReadRoute:
     ):
         mock_get.return_value = valid_program_create_data
 
-        resp = client.get("/programs")
+        resp = client.get("/api/programs")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Programs fetched successfully." in data["message"]
@@ -449,7 +449,7 @@ class TestProgramReadRoute:
     def test_handle_program_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/programs")
+        response = client.get("/api/programs")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -460,7 +460,7 @@ class TestProgramReadRoute:
     def test_handle_get_program_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "name": "Computer Science"}
 
-        response = client.get("/programs/1")
+        response = client.get("/api/programs/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -472,7 +472,7 @@ class TestProgramReadRoute:
     def test_handle_get_program_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/programs/999")
+        response = client.get("/api/programs/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -483,7 +483,7 @@ class TestProgramReadRoute:
     def test_handle_get_program_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/programs/1")
+        response = client.get("/api/programs/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -498,7 +498,7 @@ class TestProgramCreateRoute:
     ):
         mock_create_new_programs.return_value = (valid_program_create_data, None, 201)
 
-        response = client.post("/programs", json=valid_program_create_data)
+        response = client.post("/api/programs", json=valid_program_create_data)
         data = response.get_json()
 
         assert response.status_code == 201
@@ -513,7 +513,7 @@ class TestProgramCreateRoute:
         error_code = 400
         mock_create_new_programs.return_value = ([], error_data, error_code)
 
-        response = client.post("/programs", json=valid_program_create_data)
+        response = client.post("/api/programs", json=valid_program_create_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -525,7 +525,7 @@ class TestProgramCreateRoute:
     ):
         mock_create_new_programs.side_effect = KeyError("name")
 
-        response = client.post("/programs", json=valid_program_create_data)
+        response = client.post("/api/programs", json=valid_program_create_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -537,7 +537,7 @@ class TestProgramCreateRoute:
     ):
         mock_create_new_programs.side_effect = Exception("DB failure")
 
-        response = client.post("/programs", json=valid_program_create_data)
+        response = client.post("/api/programs", json=valid_program_create_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -551,7 +551,7 @@ class TestProgramUpdateRoute:
     ):
         mock_update_programs.return_value = (valid_program_update_data, None, 200)
 
-        response = client.put("/programs", json=valid_program_update_data)
+        response = client.put("/api/programs", json=valid_program_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -566,7 +566,7 @@ class TestProgramUpdateRoute:
         error_code = 422
         mock_update_programs.return_value = ([], error_data, error_code)
 
-        response = client.put("/programs", json=valid_program_update_data)
+        response = client.put("/api/programs", json=valid_program_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -578,7 +578,7 @@ class TestProgramUpdateRoute:
     ):
         mock_update_programs.side_effect = KeyError("name")
 
-        response = client.put("/programs", json=valid_program_update_data)
+        response = client.put("/api/programs", json=valid_program_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -590,7 +590,7 @@ class TestProgramUpdateRoute:
     ):
         mock_update_programs.side_effect = Exception("DB failure")
 
-        response = client.put("/programs", json=valid_program_update_data)
+        response = client.put("/api/programs", json=valid_program_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -604,7 +604,7 @@ class TestProgramArchiveRoute:
     ):
         mock_archive_programs.return_value = (valid_program_ids, None, 200)
 
-        response = client.patch("/programs", json={"ids": valid_program_ids})
+        response = client.patch("/api/programs", json={"ids": valid_program_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -619,7 +619,7 @@ class TestProgramArchiveRoute:
         error_code = 400
         mock_archive_programs.return_value = ([], error_data, error_code)
 
-        response = client.patch("/programs", json={"ids": valid_program_ids})
+        response = client.patch("/api/programs", json={"ids": valid_program_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -631,7 +631,7 @@ class TestProgramArchiveRoute:
     ):
         mock_archive_programs.side_effect = KeyError("ids")
 
-        response = client.patch("/programs", json={"ids": valid_program_ids})
+        response = client.patch("/api/programs", json={"ids": valid_program_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -643,7 +643,7 @@ class TestProgramArchiveRoute:
     ):
         mock_archive_programs.side_effect = Exception("DB failure")
 
-        response = client.patch("/programs", json={"ids": valid_program_ids})
+        response = client.patch("/api/programs", json={"ids": valid_program_ids})
         data = response.get_json()
 
         assert response.status_code == 500

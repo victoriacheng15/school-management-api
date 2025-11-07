@@ -17,7 +17,7 @@ from app.services import (
 course_schedule_bp = Blueprint("course_schedule", __name__)
 
 
-@course_schedule_bp.route("/course_schedules", methods=["GET"])
+@course_schedule_bp.route("/api/course_schedules", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_course_schedules():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_course_schedules():
     return api_response(course_schedules, "Course schedules fetched successfully.")
 
 
-@course_schedule_bp.route("/course_schedules/<int:course_schedule_id>", methods=["GET"])
+@course_schedule_bp.route("/api/course_schedules/<int:course_schedule_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_course_schedule_by_id(course_schedule_id):
     course_schedule = get_course_schedule_by_id(course_schedule_id)
@@ -34,7 +34,7 @@ def handle_get_course_schedule_by_id(course_schedule_id):
     return api_response(course_schedule, "Course schedule fetched successfully.")
 
 
-@course_schedule_bp.route("/course_schedules", methods=["POST"])
+@course_schedule_bp.route("/api/course_schedules", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_course_schedule():
     results, error_data, status_code = create_new_course_schedules(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_course_schedule():
     return jsonify(response_data), status_code
 
 
-@course_schedule_bp.route("/course_schedules", methods=["PUT"])
+@course_schedule_bp.route("/api/course_schedules", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_course_schedules():
     results, error_data, status_code = update_course_schedules(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_course_schedules():
     return jsonify(response_data), status_code
 
 
-@course_schedule_bp.route("/course_schedules", methods=["PATCH"])
+@course_schedule_bp.route("/api/course_schedules", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_course_schedules():
     payload = request.get_json()

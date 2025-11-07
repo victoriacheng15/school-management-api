@@ -17,7 +17,7 @@ from app.services import (
 term_bp = Blueprint("term", __name__)
 
 
-@term_bp.route("/terms", methods=["GET"])
+@term_bp.route("/api/terms", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_terms():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_terms():
     return api_response(terms, "Terms fetched successfully.")
 
 
-@term_bp.route("/terms/<int:term_id>", methods=["GET"])
+@term_bp.route("/api/terms/<int:term_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_term_by_id(term_id):
     term = get_term_by_id(term_id)
@@ -34,7 +34,7 @@ def handle_get_term_by_id(term_id):
     return api_response(term, "Term fetched successfully.")
 
 
-@term_bp.route("/terms", methods=["POST"])
+@term_bp.route("/api/terms", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_term():
     results, error_data, status_code = create_new_terms(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_term():
     return jsonify(response_data), status_code
 
 
-@term_bp.route("/terms", methods=["PUT"])
+@term_bp.route("/api/terms", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_terms():
     results, error_data, status_code = update_terms(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_terms():
     return jsonify(response_data), status_code
 
 
-@term_bp.route("/terms", methods=["PATCH"])
+@term_bp.route("/api/terms", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_terms():
     payload = request.get_json()

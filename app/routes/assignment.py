@@ -17,7 +17,7 @@ from app.services import (
 assignment_bp = Blueprint("assignment", __name__)
 
 
-@assignment_bp.route("/assignments", methods=["GET"])
+@assignment_bp.route("/api/assignments", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_assignments():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_assignments():
     return api_response(assignments, "Assignments fetched successfully.")
 
 
-@assignment_bp.route("/assignments/<int:assignment_id>", methods=["GET"])
+@assignment_bp.route("/api/assignments/<int:assignment_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_assignment_by_id(assignment_id):
     assignment = get_assignment_by_id(assignment_id)
@@ -34,7 +34,7 @@ def handle_get_assignment_by_id(assignment_id):
     return api_response(assignment, "Assignment fetched successfully.")
 
 
-@assignment_bp.route("/assignments", methods=["POST"])
+@assignment_bp.route("/api/assignments", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_assignment():
     results, error_data, status_code = create_new_assignments(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_assignment():
     return jsonify(response_data), status_code
 
 
-@assignment_bp.route("/assignments", methods=["PUT"])
+@assignment_bp.route("/api/assignments", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_assignments():
     results, error_data, status_code = update_assignments(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_assignments():
     return jsonify(response_data), status_code
 
 
-@assignment_bp.route("/assignments", methods=["PATCH"])
+@assignment_bp.route("/api/assignments", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_assignments():
     payload = request.get_json()

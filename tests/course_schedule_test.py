@@ -467,7 +467,7 @@ class TestCourseScheduleReadRoute:
     ):
         mock_get.return_value = valid_course_schedule_create_data
 
-        resp = client.get("/course_schedules")
+        resp = client.get("/api/course_schedules")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Course schedules fetched successfully." in data["message"]
@@ -479,7 +479,7 @@ class TestCourseScheduleReadRoute:
     def test_handle_course_schedule_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/course_schedules")
+        response = client.get("/api/course_schedules")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -490,7 +490,7 @@ class TestCourseScheduleReadRoute:
     def test_handle_get_course_schedule_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "day": "Monday"}
 
-        response = client.get("/course_schedules/1")
+        response = client.get("/api/course_schedules/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -502,7 +502,7 @@ class TestCourseScheduleReadRoute:
     def test_handle_get_course_schedule_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/course_schedules/999")
+        response = client.get("/api/course_schedules/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -513,7 +513,7 @@ class TestCourseScheduleReadRoute:
     def test_handle_get_course_schedule_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/course_schedules/1")
+        response = client.get("/api/course_schedules/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -536,7 +536,7 @@ class TestCourseScheduleCreateRoute:
         )
 
         response = client.post(
-            "/course_schedules", json=valid_course_schedule_create_data
+            "/api/course_schedules", json=valid_course_schedule_create_data
         )
         data = response.get_json()
 
@@ -556,7 +556,7 @@ class TestCourseScheduleCreateRoute:
         mock_create_new_course_schedules.return_value = ([], error_data, error_code)
 
         response = client.post(
-            "/course_schedules", json=valid_course_schedule_create_data
+            "/api/course_schedules", json=valid_course_schedule_create_data
         )
         data = response.get_json()
 
@@ -573,7 +573,7 @@ class TestCourseScheduleCreateRoute:
         mock_create_new_course_schedules.side_effect = KeyError("course_id")
 
         response = client.post(
-            "/course_schedules", json=valid_course_schedule_create_data
+            "/api/course_schedules", json=valid_course_schedule_create_data
         )
         data = response.get_json()
 
@@ -590,7 +590,7 @@ class TestCourseScheduleCreateRoute:
         mock_create_new_course_schedules.side_effect = Exception("DB failure")
 
         response = client.post(
-            "/course_schedules", json=valid_course_schedule_create_data
+            "/api/course_schedules", json=valid_course_schedule_create_data
         )
         data = response.get_json()
 
@@ -610,7 +610,7 @@ class TestCourseScheduleUpdateRoute:
         )
 
         response = client.put(
-            "/course_schedules", json=valid_course_schedule_update_data
+            "/api/course_schedules", json=valid_course_schedule_update_data
         )
         data = response.get_json()
 
@@ -627,7 +627,7 @@ class TestCourseScheduleUpdateRoute:
         mock_update_course_schedules.return_value = ([], error_data, error_code)
 
         response = client.put(
-            "/course_schedules", json=valid_course_schedule_update_data
+            "/api/course_schedules", json=valid_course_schedule_update_data
         )
         data = response.get_json()
 
@@ -641,7 +641,7 @@ class TestCourseScheduleUpdateRoute:
         mock_update_course_schedules.side_effect = KeyError("course_id")
 
         response = client.put(
-            "/course_schedules", json=valid_course_schedule_update_data
+            "/api/course_schedules", json=valid_course_schedule_update_data
         )
         data = response.get_json()
 
@@ -655,7 +655,7 @@ class TestCourseScheduleUpdateRoute:
         mock_update_course_schedules.side_effect = Exception("DB failure")
 
         response = client.put(
-            "/course_schedules", json=valid_course_schedule_update_data
+            "/api/course_schedules", json=valid_course_schedule_update_data
         )
         data = response.get_json()
 
@@ -675,7 +675,7 @@ class TestCourseScheduleArchiveRoute:
         )
 
         response = client.patch(
-            "/course_schedules", json={"ids": valid_course_schedule_ids}
+            "/api/course_schedules", json={"ids": valid_course_schedule_ids}
         )
         data = response.get_json()
 
@@ -692,7 +692,7 @@ class TestCourseScheduleArchiveRoute:
         mock_archive_course_schedules.return_value = ([], error_data, error_code)
 
         response = client.patch(
-            "/course_schedules", json={"ids": valid_course_schedule_ids}
+            "/api/course_schedules", json={"ids": valid_course_schedule_ids}
         )
         data = response.get_json()
 
@@ -706,7 +706,7 @@ class TestCourseScheduleArchiveRoute:
         mock_archive_course_schedules.side_effect = KeyError("ids")
 
         response = client.patch(
-            "/course_schedules", json={"ids": valid_course_schedule_ids}
+            "/api/course_schedules", json={"ids": valid_course_schedule_ids}
         )
         data = response.get_json()
 
@@ -720,7 +720,7 @@ class TestCourseScheduleArchiveRoute:
         mock_archive_course_schedules.side_effect = Exception("DB failure")
 
         response = client.patch(
-            "/course_schedules", json={"ids": valid_course_schedule_ids}
+            "/api/course_schedules", json={"ids": valid_course_schedule_ids}
         )
         data = response.get_json()
 

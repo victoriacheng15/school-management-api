@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  CONTAINER_NAME: school-api
+  REGISTRY_USER: victoriacheng15
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -13,8 +17,12 @@ jobs:
       - name: Log in to GitHub Container Registry
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker image
-        run: docker build -f Dockerfile.multi-stage -t ghcr.io/victoriacheng15/school-api:latest .
+      - name: Build and tag Docker image
+        run: |
+          docker build -f Dockerfile.multi-stage -t ghcr.io/$REGISTRY_USER/$CONTAINER_NAME:${{ github.sha }} .
+          docker tag ghcr.io/$REGISTRY_USER/$CONTAINER_NAME:${{ github.sha }} ghcr.io/$REGISTRY_USER/$CONTAINER_NAME:latest
 
       - name: Push Docker image to GHCR
-        run: docker push ghcr.io/victoriacheng15/school-api:latest
+        run: |
+          docker push ghcr.io/$REGISTRY_USER/$CONTAINER_NAME:${{ github.sha }}
+          docker push ghcr.io/$REGISTRY_USER/$CONTAINER_NAME:latest

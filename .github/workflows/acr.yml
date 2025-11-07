@@ -1,0 +1,36 @@
+name: Build and Push to Azure Container Registry
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  CONTAINER_NAME: school-management-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5.0.0
+
+      - name: Log in to Azure
+        uses: azure/login@v2.3.0
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to Azure Container Registry
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -f Dockerfile.multi-stage -t ${{ secrets.ACR_NAME }}.azurecr.io/$CONTAINER_NAME:${{ github.sha }} .
+          docker tag ${{ secrets.ACR_NAME }}.azurecr.io/$CONTAINER_NAME:${{ github.sha }} ${{ secrets.ACR_NAME }}.azurecr.io/$CONTAINER_NAME:latest
+
+      - name: Push Docker image to ACR
+        run: |
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/$CONTAINER_NAME:${{ github.sha }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/$CONTAINER_NAME:latest

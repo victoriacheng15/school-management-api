@@ -485,9 +485,9 @@ class TestTermReadRoute:
     ):
         mock_get.return_value = valid_term_create_data
 
-        resp = client.get("/terms")
-        assert resp.status_code == 200
-        data = resp.get_json()
+        response = client.get("/api/terms")
+        assert response.status_code == 200
+        data = response.get_json()
         assert "Terms fetched successfully." in data["message"]
         assert isinstance(data["data"], list)
         assert data["data"] == valid_term_create_data
@@ -497,7 +497,7 @@ class TestTermReadRoute:
     def test_handle_term_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/terms")
+        response = client.get("/api/terms")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -508,7 +508,7 @@ class TestTermReadRoute:
     def test_handle_get_term_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "name": "Fall 2025"}
 
-        response = client.get("/terms/1")
+        response = client.get("/api/terms/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -520,7 +520,7 @@ class TestTermReadRoute:
     def test_handle_get_term_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/terms/999")
+        response = client.get("/api/terms/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -531,7 +531,7 @@ class TestTermReadRoute:
     def test_handle_get_term_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/terms/1")
+        response = client.get("/api/terms/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -546,7 +546,7 @@ class TestTermCreateRoute:
     ):
         mock_create_new_terms.return_value = (valid_term_create_data, None, None)
 
-        response = client.post("/terms", json=valid_term_create_data)
+        response = client.post("/api/terms", json=valid_term_create_data)
         data = response.get_json()
 
         assert response.status_code == 201
@@ -561,7 +561,7 @@ class TestTermCreateRoute:
         error_code = 400
         mock_create_new_terms.return_value = ([], error_data, error_code)
 
-        response = client.post("/terms", json=valid_term_create_data)
+        response = client.post("/api/terms", json=valid_term_create_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -573,7 +573,7 @@ class TestTermCreateRoute:
     ):
         mock_create_new_terms.side_effect = KeyError("name")
 
-        response = client.post("/terms", json=valid_term_create_data)
+        response = client.post("/api/terms", json=valid_term_create_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -585,7 +585,7 @@ class TestTermCreateRoute:
     ):
         mock_create_new_terms.side_effect = Exception("DB failure")
 
-        response = client.post("/terms", json=valid_term_create_data)
+        response = client.post("/api/terms", json=valid_term_create_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -599,7 +599,7 @@ class TestTermUpdateRoute:
     ):
         mock_update_terms.return_value = (valid_term_update_data, None, None)
 
-        response = client.put("/terms", json=valid_term_update_data)
+        response = client.put("/api/terms", json=valid_term_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -614,7 +614,7 @@ class TestTermUpdateRoute:
         error_code = 422
         mock_update_terms.return_value = ([], error_data, error_code)
 
-        response = client.put("/terms", json=valid_term_update_data)
+        response = client.put("/api/terms", json=valid_term_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -626,7 +626,7 @@ class TestTermUpdateRoute:
     ):
         mock_update_terms.side_effect = KeyError("name")
 
-        response = client.put("/terms", json=valid_term_update_data)
+        response = client.put("/api/terms", json=valid_term_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -638,7 +638,7 @@ class TestTermUpdateRoute:
     ):
         mock_update_terms.side_effect = Exception("DB failure")
 
-        response = client.put("/terms", json=valid_term_update_data)
+        response = client.put("/api/terms", json=valid_term_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -652,7 +652,7 @@ class TestTermArchiveRoute:
     ):
         mock_archive_terms.return_value = (valid_term_ids, None, 200)
 
-        response = client.patch("/terms", json={"ids": valid_term_ids})
+        response = client.patch("/api/terms", json={"ids": valid_term_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -667,7 +667,7 @@ class TestTermArchiveRoute:
         error_code = 400
         mock_archive_terms.return_value = ([], error_data, error_code)
 
-        response = client.patch("/terms", json={"ids": valid_term_ids})
+        response = client.patch("/api/terms", json={"ids": valid_term_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -679,7 +679,7 @@ class TestTermArchiveRoute:
     ):
         mock_archive_terms.side_effect = KeyError("ids")
 
-        response = client.patch("/terms", json={"ids": valid_term_ids})
+        response = client.patch("/api/terms", json={"ids": valid_term_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -691,7 +691,7 @@ class TestTermArchiveRoute:
     ):
         mock_archive_terms.side_effect = Exception("DB failure")
 
-        response = client.patch("/terms", json={"ids": valid_term_ids})
+        response = client.patch("/api/terms", json={"ids": valid_term_ids})
         data = response.get_json()
 
         assert response.status_code == 500

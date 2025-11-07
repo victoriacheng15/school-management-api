@@ -17,7 +17,7 @@ from app.services import (
 course_bp = Blueprint("course", __name__)
 
 
-@course_bp.route("/courses", methods=["GET"])
+@course_bp.route("/api/courses", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_courses():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_courses():
     return api_response(courses, "Courses fetched successfully.")
 
 
-@course_bp.route("/courses/<int:course_id>", methods=["GET"])
+@course_bp.route("/api/courses/<int:course_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_course_by_id(course_id):
     course = get_course_by_id(course_id)
@@ -34,7 +34,7 @@ def handle_get_course_by_id(course_id):
     return api_response(course, "Course fetched successfully.")
 
 
-@course_bp.route("/courses", methods=["POST"])
+@course_bp.route("/api/courses", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_course():
     results, error_data, status_code = create_new_courses(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_course():
     return jsonify(response_data), status_code
 
 
-@course_bp.route("/courses", methods=["PUT"])
+@course_bp.route("/api/courses", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_courses():
     results, error_data, status_code = update_courses(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_courses():
     return jsonify(response_data), status_code
 
 
-@course_bp.route("/courses", methods=["PATCH"])
+@course_bp.route("/api/courses", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_courses():
     payload = request.get_json()

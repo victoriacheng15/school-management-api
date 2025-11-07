@@ -433,7 +433,7 @@ class TestDepartmentReadRoute:
     ):
         mock_get.return_value = valid_department_create_data
 
-        resp = client.get("/departments")
+        resp = client.get("/api/departments")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Departments fetched successfully." in data["message"]
@@ -445,7 +445,7 @@ class TestDepartmentReadRoute:
     def test_handle_department_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/departments")
+        response = client.get("/api/departments")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -456,7 +456,7 @@ class TestDepartmentReadRoute:
     def test_handle_get_department_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "name": "Computer Science"}
 
-        response = client.get("/departments/1")
+        response = client.get("/api/departments/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -468,7 +468,7 @@ class TestDepartmentReadRoute:
     def test_handle_get_department_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/departments/999")
+        response = client.get("/api/departments/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -479,7 +479,7 @@ class TestDepartmentReadRoute:
     def test_handle_get_department_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/departments/1")
+        response = client.get("/api/departments/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -498,7 +498,7 @@ class TestDepartmentCreateRoute:
             None,
         )
 
-        response = client.post("/departments", json=valid_department_create_data)
+        response = client.post("/api/departments", json=valid_department_create_data)
         data = response.get_json()
 
         assert response.status_code == 201
@@ -513,7 +513,7 @@ class TestDepartmentCreateRoute:
         error_code = 400
         mock_create_new_departments.return_value = ([], error_data, error_code)
 
-        response = client.post("/departments", json=valid_department_create_data)
+        response = client.post("/api/departments", json=valid_department_create_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -525,7 +525,7 @@ class TestDepartmentCreateRoute:
     ):
         mock_create_new_departments.side_effect = KeyError("name")
 
-        response = client.post("/departments", json=valid_department_create_data)
+        response = client.post("/api/departments", json=valid_department_create_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -537,7 +537,7 @@ class TestDepartmentCreateRoute:
     ):
         mock_create_new_departments.side_effect = Exception("DB failure")
 
-        response = client.post("/departments", json=valid_department_create_data)
+        response = client.post("/api/departments", json=valid_department_create_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -555,7 +555,7 @@ class TestDepartmentUpdateRoute:
             None,
         )
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -570,7 +570,7 @@ class TestDepartmentUpdateRoute:
         error_code = 422
         mock_update_departments.return_value = ([], error_data, error_code)
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -582,7 +582,7 @@ class TestDepartmentUpdateRoute:
     ):
         mock_update_departments.side_effect = KeyError("name")
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -594,7 +594,7 @@ class TestDepartmentUpdateRoute:
     ):
         mock_update_departments.side_effect = Exception("DB failure")
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -608,7 +608,7 @@ class TestDepartmentArchiveRoute:
     ):
         mock_archive_departments.return_value = (valid_department_ids, None, 200)
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -623,7 +623,7 @@ class TestDepartmentArchiveRoute:
         error_code = 400
         mock_archive_departments.return_value = ([], error_data, error_code)
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -635,7 +635,7 @@ class TestDepartmentArchiveRoute:
     ):
         mock_archive_departments.side_effect = KeyError("ids")
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -647,7 +647,7 @@ class TestDepartmentArchiveRoute:
     ):
         mock_archive_departments.side_effect = Exception("DB failure")
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 500
@@ -665,7 +665,7 @@ class TestDepartmentUpdateRoute:
             None,
         )
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -680,7 +680,7 @@ class TestDepartmentUpdateRoute:
         error_code = 422
         mock_update_departments.return_value = ([], error_data, error_code)
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -692,7 +692,7 @@ class TestDepartmentUpdateRoute:
     ):
         mock_update_departments.side_effect = KeyError("name")
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -704,7 +704,7 @@ class TestDepartmentUpdateRoute:
     ):
         mock_update_departments.side_effect = Exception("DB failure")
 
-        response = client.put("/departments", json=valid_department_update_data)
+        response = client.put("/api/departments", json=valid_department_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -718,7 +718,7 @@ class TestDepartmentArchiveRoute:
     ):
         mock_archive_departments.return_value = (valid_department_ids, None, 200)
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -733,7 +733,7 @@ class TestDepartmentArchiveRoute:
         error_code = 400
         mock_archive_departments.return_value = ([], error_data, error_code)
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -745,7 +745,7 @@ class TestDepartmentArchiveRoute:
     ):
         mock_archive_departments.side_effect = KeyError("ids")
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -757,7 +757,7 @@ class TestDepartmentArchiveRoute:
     ):
         mock_archive_departments.side_effect = Exception("DB failure")
 
-        response = client.patch("/departments", json={"ids": valid_department_ids})
+        response = client.patch("/api/departments", json={"ids": valid_department_ids})
         data = response.get_json()
 
         assert response.status_code == 500

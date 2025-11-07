@@ -427,7 +427,7 @@ class TestAssignmentReadRoute:
     ):
         mock_get.return_value = valid_assignment_create_data
 
-        resp = client.get("/assignments")
+        resp = client.get("/api/assignments")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Assignments fetched successfully." in data["message"]
@@ -439,7 +439,7 @@ class TestAssignmentReadRoute:
     def test_handle_assignment_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/assignments")
+        response = client.get("/api/assignments")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -450,7 +450,7 @@ class TestAssignmentReadRoute:
     def test_handle_get_assignment_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "instructor_id": 1}
 
-        response = client.get("/assignments/1")
+        response = client.get("/api/assignments/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -462,7 +462,7 @@ class TestAssignmentReadRoute:
     def test_handle_get_assignment_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/assignments/999")
+        response = client.get("/api/assignments/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -473,7 +473,7 @@ class TestAssignmentReadRoute:
     def test_handle_get_assignment_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/assignments/1")
+        response = client.get("/api/assignments/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -492,7 +492,7 @@ class TestAssignmentCreateRoute:
             None,
         )
 
-        response = client.post("/assignments", json=valid_assignment_create_data)
+        response = client.post("/api/assignments", json=valid_assignment_create_data)
         data = response.get_json()
 
         assert response.status_code == 201
@@ -507,7 +507,7 @@ class TestAssignmentCreateRoute:
         error_code = 400
         mock_create_new_assignments.return_value = ([], error_data, error_code)
 
-        response = client.post("/assignments", json=valid_assignment_create_data)
+        response = client.post("/api/assignments", json=valid_assignment_create_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -519,7 +519,7 @@ class TestAssignmentCreateRoute:
     ):
         mock_create_new_assignments.side_effect = KeyError("instructor_id")
 
-        response = client.post("/assignments", json=valid_assignment_create_data)
+        response = client.post("/api/assignments", json=valid_assignment_create_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -531,7 +531,7 @@ class TestAssignmentCreateRoute:
     ):
         mock_create_new_assignments.side_effect = Exception("DB failure")
 
-        response = client.post("/assignments", json=valid_assignment_create_data)
+        response = client.post("/api/assignments", json=valid_assignment_create_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -549,7 +549,7 @@ class TestAssignmentUpdateRoute:
             None,
         )
 
-        response = client.put("/assignments", json=valid_assignment_update_data)
+        response = client.put("/api/assignments", json=valid_assignment_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -564,7 +564,7 @@ class TestAssignmentUpdateRoute:
         error_code = 422
         mock_update_assignments.return_value = ([], error_data, error_code)
 
-        response = client.put("/assignments", json=valid_assignment_update_data)
+        response = client.put("/api/assignments", json=valid_assignment_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -576,7 +576,7 @@ class TestAssignmentUpdateRoute:
     ):
         mock_update_assignments.side_effect = KeyError("instructor_id")
 
-        response = client.put("/assignments", json=valid_assignment_update_data)
+        response = client.put("/api/assignments", json=valid_assignment_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -588,7 +588,7 @@ class TestAssignmentUpdateRoute:
     ):
         mock_update_assignments.side_effect = Exception("DB failure")
 
-        response = client.put("/assignments", json=valid_assignment_update_data)
+        response = client.put("/api/assignments", json=valid_assignment_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -602,7 +602,7 @@ class TestAssignmentArchiveRoute:
     ):
         mock_archive_assignments.return_value = (valid_assignment_ids, None, 200)
 
-        response = client.patch("/assignments", json={"ids": valid_assignment_ids})
+        response = client.patch("/api/assignments", json={"ids": valid_assignment_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -617,7 +617,7 @@ class TestAssignmentArchiveRoute:
         error_code = 400
         mock_archive_assignments.return_value = ([], error_data, error_code)
 
-        response = client.patch("/assignments", json={"ids": valid_assignment_ids})
+        response = client.patch("/api/assignments", json={"ids": valid_assignment_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -629,7 +629,7 @@ class TestAssignmentArchiveRoute:
     ):
         mock_archive_assignments.side_effect = KeyError("ids")
 
-        response = client.patch("/assignments", json={"ids": valid_assignment_ids})
+        response = client.patch("/api/assignments", json={"ids": valid_assignment_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -641,7 +641,7 @@ class TestAssignmentArchiveRoute:
     ):
         mock_archive_assignments.side_effect = Exception("DB failure")
 
-        response = client.patch("/assignments", json={"ids": valid_assignment_ids})
+        response = client.patch("/api/assignments", json={"ids": valid_assignment_ids})
         data = response.get_json()
 
         assert response.status_code == 500

@@ -17,7 +17,7 @@ from app.services import (
 department_bp = Blueprint("department", __name__)
 
 
-@department_bp.route("/departments", methods=["GET"])
+@department_bp.route("/api/departments", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_departments():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_departments():
     return api_response(departments, "Departments fetched successfully.")
 
 
-@department_bp.route("/departments/<int:department_id>", methods=["GET"])
+@department_bp.route("/api/departments/<int:department_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_department_by_id(department_id):
     department = get_department_by_id(department_id)
@@ -34,7 +34,7 @@ def handle_get_department_by_id(department_id):
     return api_response(department, "Department fetched successfully.")
 
 
-@department_bp.route("/departments", methods=["POST"])
+@department_bp.route("/api/departments", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_department():
     results, error_data, status_code = create_new_departments(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_department():
     return jsonify(response_data), status_code
 
 
-@department_bp.route("/departments", methods=["PUT"])
+@department_bp.route("/api/departments", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_departments():
     results, error_data, status_code = update_departments(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_departments():
     return jsonify(response_data), status_code
 
 
-@department_bp.route("/departments", methods=["PATCH"])
+@department_bp.route("/api/departments", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_departments():
     payload = request.get_json()

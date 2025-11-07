@@ -17,7 +17,7 @@ from app.services import (
 program_bp = Blueprint("program", __name__)
 
 
-@program_bp.route("/programs", methods=["GET"])
+@program_bp.route("/api/programs", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_programs():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_programs():
     return api_response(programs, "Programs fetched successfully.")
 
 
-@program_bp.route("/programs/<int:program_id>", methods=["GET"])
+@program_bp.route("/api/programs/<int:program_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_program_by_id(program_id):
     program = get_program_by_id(program_id)
@@ -34,7 +34,7 @@ def handle_get_program_by_id(program_id):
     return api_response(program, "Program fetched successfully.")
 
 
-@program_bp.route("/programs", methods=["POST"])
+@program_bp.route("/api/programs", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_program():
     results, error_data, status_code = create_new_programs(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_program():
     return jsonify(response_data), status_code
 
 
-@program_bp.route("/programs", methods=["PUT"])
+@program_bp.route("/api/programs", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_programs():
     results, error_data, status_code = update_programs(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_programs():
     return jsonify(response_data), status_code
 
 
-@program_bp.route("/programs", methods=["PATCH"])
+@program_bp.route("/api/programs", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_programs():
     payload = request.get_json()

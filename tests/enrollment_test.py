@@ -442,7 +442,7 @@ class TestEnrollmentReadRoute:
     ):
         mock_get.return_value = valid_enrollment_create_data
 
-        resp = client.get("/enrollments")
+        resp = client.get("/api/enrollments")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Enrollments fetched successfully." in data["message"]
@@ -456,7 +456,7 @@ class TestEnrollmentReadRoute:
     ):
         mock_get.return_value = valid_enrollment_create_data
 
-        resp = client.get("/enrollments?active_only=true")
+        resp = client.get("/api/enrollments?active_only=true")
         assert resp.status_code == 200
         data = resp.get_json()
         assert "Enrollments fetched successfully." in data["message"]
@@ -466,7 +466,7 @@ class TestEnrollmentReadRoute:
     def test_handle_enrollment_db_read_all_exception(self, mock_get_all, client):
         mock_get_all.side_effect = Exception("DB failure")
 
-        response = client.get("/enrollments")
+        response = client.get("/api/enrollments")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -477,7 +477,7 @@ class TestEnrollmentReadRoute:
     def test_handle_get_enrollment_by_id_success(self, mock_get_by_id, client):
         mock_get_by_id.return_value = {"id": 1, "grade": "A"}
 
-        response = client.get("/enrollments/1")
+        response = client.get("/api/enrollments/1")
         data = response.get_json()
 
         assert response.status_code == 200
@@ -489,7 +489,7 @@ class TestEnrollmentReadRoute:
     def test_handle_get_enrollment_by_id_not_found(self, mock_get_by_id, client):
         mock_get_by_id.return_value = None
 
-        response = client.get("/enrollments/999")
+        response = client.get("/api/enrollments/999")
         data = response.get_json()
 
         assert response.status_code == 404
@@ -500,7 +500,7 @@ class TestEnrollmentReadRoute:
     def test_handle_get_enrollment_by_id_exception(self, mock_get_by_id, client):
         mock_get_by_id.side_effect = Exception("DB error")
 
-        response = client.get("/enrollments/1")
+        response = client.get("/api/enrollments/1")
         data = response.get_json()
 
         assert response.status_code == 500
@@ -518,7 +518,7 @@ class TestEnrollmentCreateRoute:
             None,
         )
 
-        response = client.post("/enrollments", json=valid_enrollment_create_data)
+        response = client.post("/api/enrollments", json=valid_enrollment_create_data)
         data = response.get_json()
 
         assert response.status_code == 201
@@ -533,7 +533,7 @@ class TestEnrollmentCreateRoute:
         error_code = 400
         mock_create_new_enrollments.return_value = ([], error_data, error_code)
 
-        response = client.post("/enrollments", json=valid_enrollment_create_data)
+        response = client.post("/api/enrollments", json=valid_enrollment_create_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -545,7 +545,7 @@ class TestEnrollmentCreateRoute:
     ):
         mock_create_new_enrollments.side_effect = KeyError("student_id")
 
-        response = client.post("/enrollments", json=valid_enrollment_create_data)
+        response = client.post("/api/enrollments", json=valid_enrollment_create_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -557,7 +557,7 @@ class TestEnrollmentCreateRoute:
     ):
         mock_create_new_enrollments.side_effect = Exception("DB failure")
 
-        response = client.post("/enrollments", json=valid_enrollment_create_data)
+        response = client.post("/api/enrollments", json=valid_enrollment_create_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -575,7 +575,7 @@ class TestEnrollmentUpdateRoute:
             None,
         )
 
-        response = client.put("/enrollments", json=valid_enrollment_update_data)
+        response = client.put("/api/enrollments", json=valid_enrollment_update_data)
         data = response.get_json()
 
         assert response.status_code == 200
@@ -590,7 +590,7 @@ class TestEnrollmentUpdateRoute:
         error_code = 422
         mock_update_enrollments.return_value = ([], error_data, error_code)
 
-        response = client.put("/enrollments", json=valid_enrollment_update_data)
+        response = client.put("/api/enrollments", json=valid_enrollment_update_data)
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -602,7 +602,7 @@ class TestEnrollmentUpdateRoute:
     ):
         mock_update_enrollments.side_effect = KeyError("student_id")
 
-        response = client.put("/enrollments", json=valid_enrollment_update_data)
+        response = client.put("/api/enrollments", json=valid_enrollment_update_data)
         data = response.get_json()
 
         assert response.status_code == 400
@@ -614,7 +614,7 @@ class TestEnrollmentUpdateRoute:
     ):
         mock_update_enrollments.side_effect = Exception("DB failure")
 
-        response = client.put("/enrollments", json=valid_enrollment_update_data)
+        response = client.put("/api/enrollments", json=valid_enrollment_update_data)
         data = response.get_json()
 
         assert response.status_code == 500
@@ -628,7 +628,7 @@ class TestEnrollmentArchiveRoute:
     ):
         mock_archive_enrollments.return_value = (valid_enrollment_ids, None, 200)
 
-        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        response = client.patch("/api/enrollments", json={"ids": valid_enrollment_ids})
         data = response.get_json()
 
         assert response.status_code == 200
@@ -643,7 +643,7 @@ class TestEnrollmentArchiveRoute:
         error_code = 400
         mock_archive_enrollments.return_value = ([], error_data, error_code)
 
-        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        response = client.patch("/api/enrollments", json={"ids": valid_enrollment_ids})
         data = response.get_json()
 
         assert response.status_code == error_code
@@ -655,7 +655,7 @@ class TestEnrollmentArchiveRoute:
     ):
         mock_archive_enrollments.side_effect = KeyError("ids")
 
-        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        response = client.patch("/api/enrollments", json={"ids": valid_enrollment_ids})
         data = response.get_json()
 
         assert response.status_code == 400
@@ -667,7 +667,7 @@ class TestEnrollmentArchiveRoute:
     ):
         mock_archive_enrollments.side_effect = Exception("DB failure")
 
-        response = client.patch("/enrollments", json={"ids": valid_enrollment_ids})
+        response = client.patch("/api/enrollments", json={"ids": valid_enrollment_ids})
         data = response.get_json()
 
         assert response.status_code == 500

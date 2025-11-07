@@ -17,7 +17,7 @@ from app.services import (
 enrollment_bp = Blueprint("enrollment", __name__)
 
 
-@enrollment_bp.route("/enrollments", methods=["GET"])
+@enrollment_bp.route("/api/enrollments", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_enrollments():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_enrollments():
     return api_response(enrollments, "Enrollments fetched successfully.")
 
 
-@enrollment_bp.route("/enrollments/<int:enrollment_id>", methods=["GET"])
+@enrollment_bp.route("/api/enrollments/<int:enrollment_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_enrollment_by_id(enrollment_id):
     enrollment = get_enrollment_by_id(enrollment_id)
@@ -34,7 +34,7 @@ def handle_get_enrollment_by_id(enrollment_id):
     return api_response(enrollment, "Enrollment fetched successfully.")
 
 
-@enrollment_bp.route("/enrollments", methods=["POST"])
+@enrollment_bp.route("/api/enrollments", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_enrollment():
     results, error_data, status_code = create_new_enrollments(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_enrollment():
     return jsonify(response_data), status_code
 
 
-@enrollment_bp.route("/enrollments", methods=["PUT"])
+@enrollment_bp.route("/api/enrollments", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_enrollments():
     results, error_data, status_code = update_enrollments(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_enrollments():
     return jsonify(response_data), status_code
 
 
-@enrollment_bp.route("/enrollments", methods=["PATCH"])
+@enrollment_bp.route("/api/enrollments", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_enrollments():
     payload = request.get_json()

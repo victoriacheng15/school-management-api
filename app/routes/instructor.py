@@ -17,7 +17,7 @@ from app.services import (
 instructor_bp = Blueprint("instructor", __name__)
 
 
-@instructor_bp.route("/instructors", methods=["GET"])
+@instructor_bp.route("/api/instructors", methods=["GET"])
 @handle_exceptions_read()
 def handle_read_all_instructors():
     active_only = request.args.get("active_only", "false").lower() == "true"
@@ -25,7 +25,7 @@ def handle_read_all_instructors():
     return api_response(instructors, "Instructors fetched successfully.")
 
 
-@instructor_bp.route("/instructors/<int:instructor_id>", methods=["GET"])
+@instructor_bp.route("/api/instructors/<int:instructor_id>", methods=["GET"])
 @handle_exceptions_read()
 def handle_get_instructor_by_id(instructor_id):
     instructor = get_instructor_by_id(instructor_id)
@@ -34,7 +34,7 @@ def handle_get_instructor_by_id(instructor_id):
     return api_response(instructor, "Instructor fetched successfully.")
 
 
-@instructor_bp.route("/instructors", methods=["POST"])
+@instructor_bp.route("/api/instructors", methods=["POST"])
 @handle_exceptions_write()
 def handle_create_instructor():
     results, error_data, status_code = create_new_instructors(request.get_json())
@@ -51,7 +51,7 @@ def handle_create_instructor():
     return jsonify(response_data), status_code
 
 
-@instructor_bp.route("/instructors", methods=["PUT"])
+@instructor_bp.route("/api/instructors", methods=["PUT"])
 @handle_exceptions_write()
 def handle_update_instructors():
     results, error_data, status_code = update_instructors(request.get_json())
@@ -67,7 +67,7 @@ def handle_update_instructors():
     return jsonify(response_data), status_code
 
 
-@instructor_bp.route("/instructors", methods=["PATCH"])
+@instructor_bp.route("/api/instructors", methods=["PATCH"])
 @handle_exceptions_write()
 def handle_archive_instructors():
     payload = request.get_json()

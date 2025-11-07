@@ -25,7 +25,9 @@ def handle_read_all_course_schedules():
     return api_response(course_schedules, "Course schedules fetched successfully.")
 
 
-@course_schedule_bp.route("/api/course_schedules/<int:course_schedule_id>", methods=["GET"])
+@course_schedule_bp.route(
+    "/api/course_schedules/<int:course_schedule_id>", methods=["GET"]
+)
 @handle_exceptions_read()
 def handle_get_course_schedule_by_id(course_schedule_id):
     course_schedule = get_course_schedule_by_id(course_schedule_id)

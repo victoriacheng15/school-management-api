@@ -170,6 +170,41 @@ Here’s a summary of what I learned while building this Flask API project.
 - Python SQLite executemany Documentation  
 - Articles on Solving the N+1 Query Problem  
 
+## 🧩 Infrastructure as Code with Terraform
+
+**Context:** While building a cloud backend for the School Management API, I explored how to provision and manage Azure resources (PostgreSQL Flexible Server and Linux Web App) using Terraform instead of the Azure Portal.
+
+**What I Learned:**
+
+- Terraform uses **declarative configuration** to define desired cloud state — no manual clicking required.  
+- Resources like databases and web apps can be **codified, versioned, and reproduced** reliably.  
+- **Dependencies are implicit**: Terraform automatically knows the Web App needs the DB’s FQDN and waits for it to be ready.  
+- Azure’s **Flexible Server** requires careful handling of networking (public access vs. VNet) and SKU constraints (e.g., `B1` supports `always_on`, `F1` does not).  
+- **Firewall rules** (e.g., `0.0.0.0` for Azure services) are essential for inter-resource communication.  
+
+**Why It Matters:**
+
+- Eliminates **error-prone manual setup** and ensures **environment consistency** (dev, demo, prod).  
+- Enables **peer review** of infrastructure changes via Git PRs — just like application code.  
+- Supports **safe scaling** (e.g., changing `sku_name` from `B1` → `B2`) with clear `terraform plan` previews.  
+- Resources are **fully destroyable**, avoiding cost leaks from forgotten cloud assets.  
+
+**How I Applied It:**
+
+- Created a single-file Terraform config that provisions:  
+  - Resource Group  
+  - PostgreSQL Flexible Server (v16, public access, B-series SKU)  
+  - Firewall rules for local IP (`190.12.150.123`) and Azure services (`0.0.0.0`)  
+  - Linux Web App (Python 3.10) with DB credentials injected via `app_settings`  
+- Validated the setup by running `terraform plan` → `apply` and confirming resources appear in Azure Portal.  
+- Used `terraform destroy` to cleanly remove all resources after testing.  
+
+**Challenges / Limitations:**
+
+- Azure’s **Flexible Server networking rules** are strict: mixing public access with VNet causes errors.  
+- **SKU limitations** (e.g., `F1` doesn’t support `always_on` or HTTPS enforcement) require careful planning.  
+- **State drift** can occur if resources are modified manually in the portal — Terraform treats config as source of truth.  
+
 ---
 
 ## 🧠 Summary

@@ -2,11 +2,23 @@
 
 A backend and DevOps learning project that simulates a real-world school management system. It started as a simple SQLite prototype and evolved into a Dockerized Flask API connected to Azure Database for PostgreSQL, complete with automated CI/CD and test coverage reporting.
 
-## 📺 Demo
+## 📺 Demos
 
-Watch a Flask REST API in action, deployed on Azure Web App with Docker, using ACR for images, Azure PostgreSQL for data, and Nginx to hide the long Azure URL behind a simple endpoint. The demo covers reading, creating, updating, and archiving student records in the cloud.
+### Flask API in Production
+
+Watch a Flask REST API in action, deployed on Azure Web App with Docker, using ACR for images, Azure PostgreSQL for data, and Nginx to hide the long Azure URL behind a simple endpoint...
 
 👉 [Watch the Demo](https://youtu.be/rRiJONIPWvA)
+
+### Infrastructure as Code with Terraform
+
+See how Terraform provisions the same Azure backend (PostgreSQL + Web App) **declaratively**, replacing manual portal clicks with versioned, repeatable code. This demo covers `terraform plan`, `apply`, and real-time validation in the Azure Portal.
+
+> ⚠️ **Not used in production**  
+> The live School Management API is deployed via **GitHub Actions + Docker + ACR**, not Terraform.  
+> This setup is **ephemeral** — created for demo and destroyed afterward.
+
+👉 [Watch the Terraform Demo](https://youtu.be/0q7Mcr0GUuc)
 
 ---
 

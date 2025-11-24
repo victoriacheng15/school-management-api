@@ -1,5 +1,17 @@
 # Architecture
 
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Technology Stack](#technology-stack)
+- [Component Diagram](#component-diagram)
+- [Key Components](#key-components)
+- [Request Flow](#request-flow)
+- [Class Diagram (Generic)](#class-diagram-generic)
+- [Deployment Architecture](#deployment-architecture)
+- [Folder Structure](#folder-structure)
+
 ## Overview
 
 This project is a RESTful API built with Flask for managing a school database system. It supports typical operations like adding, updating, reading, and archiving entities such as students, instructors, departments, courses, and more.

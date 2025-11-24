@@ -1,5 +1,15 @@
 # DevOps Practices
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Workflow Architecture](#workflow-architecture)
+      - [Path-Based Triggering](#path-based-triggering)
+- [Active Workflows](#active-workflows)
+      - [Format, Test & Coverage (ciyml)](#1-format-test--coverage-ciyml)
+      - [Build and Push Docker Image to GHCR (ghcryml)](#2-build-and-push-docker-image-to-ghcr-ghcryml)
+      - [Markdownlint (markdownlintyml)](#3-markdownlint-markdownlintyml)
+
 This document outlines all DevOps workflows, CI/CD pipelines, and automation practices used in the school-management-api project.
 
 ## Overview

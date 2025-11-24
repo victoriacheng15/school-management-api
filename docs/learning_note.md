@@ -2,6 +2,17 @@
 
 Here’s a summary of what I learned while building this Flask API project.
 
+
+## Table of Contents
+
+- [Docker Multi-Stage Builds](#-docker-multi-stage-builds)
+- [Archiving Data](#-archiving-data)
+- [Managing SQLite Database Connections](#-managing-sqlite-database-connections)
+- [Python Decorators for Exception Handling](#-python-decorators-for-exception-handling)
+- [The N+1 Problem in Bulk Operations](#-the-n1-problem-in-bulk-operations)
+- [Infrastructure as Code with Terraform](#-infrastructure-as-code-with-terraform)
+- [Summary](#-summary)
+
 ---
 
 ## 🧩 Docker Multi-Stage Builds
@@ -168,7 +179,9 @@ Here’s a summary of what I learned while building this Flask API project.
 **References:**
 
 - Python SQLite executemany Documentation  
-- Articles on Solving the N+1 Query Problem  
+- Articles on Solving the N+1 Query Problem
+
+---
 
 ## 🧩 Infrastructure as Code with Terraform
 

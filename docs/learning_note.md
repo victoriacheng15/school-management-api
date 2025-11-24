@@ -2,7 +2,6 @@
 
 Here’s a summary of what I learned while building this Flask API project.
 
-
 ## Table of Contents
 
 - [Docker Multi-Stage Builds](#-docker-multi-stage-builds)

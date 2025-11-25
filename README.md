@@ -18,7 +18,7 @@ See how Terraform provisions the same Azure backend (PostgreSQL + Web App) **dec
 > The live School Management API is deployed via **GitHub Actions + Docker + ACR**, not Terraform.  
 > This setup is **ephemeral** — created for demo and destroyed afterward.
 
-👉 [Watch the Terraform Demo](https://youtu.be/0q7Mcr0GUuc)
+👉 [Watch the Terraform Demo](https://youtu.be/QWVdC-Mky0U)
 
 ---
 

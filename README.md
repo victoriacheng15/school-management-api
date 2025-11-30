@@ -15,7 +15,7 @@ Watch a Flask REST API in action, deployed on Azure Web App with Docker, using A
 See how Terraform provisions the same Azure backend (PostgreSQL + Web App) **declaratively**, replacing manual portal clicks with versioned, repeatable code. This demo covers `terraform plan`, `apply`, and real-time validation in the Azure Portal.
 
 > ⚠️ **Not used in production**  
-> The live School Management API is deployed via **GitHub Actions + Docker + ACR**, not Terraform.  
+> The live School Management API is deployed via **GitHub Actions + Docker + GHCR**, not Terraform.  
 > This setup is **ephemeral** — created for demo and destroyed afterward.
 
 👉 [Watch the Terraform Demo](https://youtu.be/QWVdC-Mky0U)
